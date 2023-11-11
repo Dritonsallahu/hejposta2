@@ -1,0 +1,46 @@
+{
+  "project_info": {
+    "project_number": "769570579511",
+    "project_id": "hejposta-3586c",
+    "storage_bucket": "hejposta-3586c.appspot.com"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:769570579511:android:b1fee9edfc3b3545040bb2",
+        "android_client_info": {
+          "package_name": "com.thanadev.hejposta2"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "769570579511-dgjc0rulo99sc6uok6vnd9okvjhh8n6g.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyCeNvKy5bjYn5dL3CxkjoBsvuHsqpYNAHc"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": [
+            {
+              "client_id": "769570579511-dgjc0rulo99sc6uok6vnd9okvjhh8n6g.apps.googleusercontent.com",
+              "client_type": 3
+            },
+            {
+              "client_id": "769570579511-obj00tatgslan22ije84ps61td3lkc57.apps.googleusercontent.com",
+              "client_type": 2,
+              "ios_info": {
+                "bundle_id": "com.thanadev.hejposta"
+              }
+            }
+          ]
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}
