@@ -1,19 +1,19 @@
 import 'package:flutter/material.dart';
-import 'package:flutter_swipe_action_cell/core/cell.dart';
 import 'package:hejposta/models/order_model.dart';
 import 'package:hejposta/my_code.dart';
 import 'package:hejposta/providers/general_provider.dart';
 import 'package:hejposta/settings/app_colors.dart';
 import 'package:hejposta/settings/app_styles.dart';
-import 'package:hejposta/shortcuts/modals.dart';
 import 'package:hejposta/shortcuts/order_form.dart';
 import 'package:hejposta/views/business/order_details.dart';
 import 'package:hejposta/views/postman/postman_drawer.dart';
 import 'package:provider/provider.dart';
 
+// ignore: must_be_immutable
 class DeliveringSpecificOrders extends StatefulWidget {
   List<OrderModel>? orders;
-  DeliveringSpecificOrders({Key? key, this.orders}) : super(key: key);
+  String? statusi;
+    DeliveringSpecificOrders({Key? key, this.orders, this.statusi}) : super(key: key);
 
   @override
   State<DeliveringSpecificOrders> createState() =>
@@ -22,9 +22,7 @@ class DeliveringSpecificOrders extends StatefulWidget {
 
 class _DeliveringSpecificOrdersState extends State<DeliveringSpecificOrders> {
   List<OrderModel>? ordersFilter = [];
-  PageController pageController = PageController(
-    initialPage: 0,
-  );
+  PageController pageController = PageController(initialPage: 0,);
   int selectedIndex = 0;
   GlobalKey key = GlobalKey();
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
@@ -40,17 +38,24 @@ class _DeliveringSpecificOrdersState extends State<DeliveringSpecificOrders> {
   @override
   void initState() {
     _scrollController = ScrollController();
-    _scrollController!.addListener(() {
-      if (_scrollController!.offset <= 70) {
-        setState(() {
-          _showAppbarColor = false;
-        });
-      } else {
-        setState(() {
-          _showAppbarColor = true;
-        });
+
+      _scrollController!.addListener(() {
+        try{
+        if (_scrollController!.offset <= 70) {
+          setState(() {
+            _showAppbarColor = false;
+          });
+        } else {
+          setState(() {
+            _showAppbarColor = true;
+          });
+        }
+      }catch(e){
+        print(e);
       }
-    });
+      });
+
+
 
     Future.delayed(const Duration(seconds: 1)).then((value) {
       setState(() {
@@ -71,8 +76,10 @@ class _DeliveringSpecificOrdersState extends State<DeliveringSpecificOrders> {
 
   filtro(emri) {
     setState(() {
-      widget.orders = [];
+      widget.orders!.clear();
     });
+
+
 
     for (int i = 0; i < ordersFilter!.length; i++) {
       if (ordersFilter![i]
@@ -141,7 +148,7 @@ class _DeliveringSpecificOrdersState extends State<DeliveringSpecificOrders> {
                     decoration: BoxDecoration(color: AppColors.appBarColor),
                   ),
                   SizedBox(
-                    height: getPhoneHeight(context) - 65,
+                    height: getPhoneHeight(context) - MediaQuery.of(context).viewPadding.top,
                     child: NestedScrollView(
                       key: key,
                       controller: _scrollController,
@@ -173,19 +180,18 @@ class _DeliveringSpecificOrdersState extends State<DeliveringSpecificOrders> {
                                       width: 70,
                                       child: Image.asset(
                                           "assets/logos/hej-logo.png")),
-                                  // Row(
-                                  //   children: [
-                                  //     SizedBox(
-                                  //       width: 70,
-                                  //       height: 26,
-                                  //       child:
-                                  //           Image.asset("assets/icons/3.png"),
-                                  //     ),
-                                  //     const SizedBox(
-                                  //       width: 10,
-                                  //     ),
-                                  //   ],
-                                  // )
+                                  Row(
+                                    children: const [
+                                      SizedBox(
+                                        width: 40,
+                                        height: 26,
+
+                                      ),
+                                      SizedBox(
+                                        width: 10,
+                                      ),
+                                    ],
+                                  )
                                 ],
                               ),
                             ),
@@ -239,7 +245,7 @@ class _DeliveringSpecificOrdersState extends State<DeliveringSpecificOrders> {
                                                   color: Colors.white)),
                                           child: Row(
                                             children: [
-                                              Container(
+                                              SizedBox(
                                                   width:
                                                       getPhoneWidth(context) -
                                                           60,
@@ -375,7 +381,7 @@ class _DeliveringSpecificOrdersState extends State<DeliveringSpecificOrders> {
                                     color: AppColors.bottomColorTwo),
                                 child: Center(
                                   child: Text(
-                                    "Per\nbarazim",
+                                   widget.statusi == "perbarazim" ?  "Per\nbarazim":"E barazuar",
                                     textAlign: TextAlign.center,
                                     style: AppStyles.getHeaderNameText(
                                         color: Colors.white, size: 15.0),

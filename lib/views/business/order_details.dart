@@ -6,9 +6,11 @@ import 'package:hejposta/my_code.dart';
 import 'package:hejposta/providers/general_provider.dart';
 import 'package:hejposta/settings/app_colors.dart';
 import 'package:hejposta/settings/app_styles.dart';
+import 'package:hejposta/views/order_comments.dart';
 import 'package:hejposta/views/postman/postman_drawer.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class OrderDetails extends StatefulWidget {
   final OrderModel? orderModel;
@@ -122,21 +124,64 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     : Icons.arrow_back_ios,
                                 color: Colors.white,
                               )),
-                          Text(
-                            "NR:${widget.orderModel!.orderNumber}",
-                            style: AppStyles.getHeaderNameText(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                size: 20.0),
+                          Padding(
+                            padding: const EdgeInsets.only(left:10),
+                            child: Text(
+                              "NR:${widget.orderModel!.orderNumber}",
+                              style: AppStyles.getHeaderNameText(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  size: 20.0),
+                            ),
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 13),
                             child: Row(
                               children: [
-                                SizedBox(
-                                  width: 70,
-                                  height: 26,
-                                  child: Image.asset("assets/icons/3.png"),
+                                GestureDetector(
+                                  onTap: () {
+                                    if (widget.orderModel!.status ==
+                                            "delivering" ||
+                                        widget.orderModel!.status ==
+                                            "delivered") {
+                                      Navigator.of(context)
+                                          .push(MaterialPageRoute(
+                                              builder: (_) => OrderComments(
+                                                    orderModel:
+                                                        widget.orderModel,
+                                                  )));
+                                    }
+                                  },
+                                  child: (widget.orderModel!.status ==
+                                              "delivering" ||
+                                          widget.orderModel!.status ==
+                                              "delivered")
+                                      ? Container(
+                                          width: 85,
+                                          decoration: BoxDecoration(
+                                              color: Colors.transparent,
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              border: Border.all(
+                                                  color: Colors.white)),
+                                          padding: const EdgeInsets.symmetric(
+                                              horizontal: 5, vertical: 5),
+                                          child: Row(
+                                            mainAxisAlignment:
+                                                MainAxisAlignment.end,
+                                            children: [
+                                              Text(
+                                                "Komento\nporosine",
+                                                style:
+                                                    AppStyles.getHeaderNameText(
+                                                        color: Colors.white,
+                                                        size: 15.0),
+                                              )
+                                            ],
+                                          ))
+                                      : const SizedBox(
+                                          width: 50,
+                                        ),
                                 ),
                                 const SizedBox(
                                   width: 10,
@@ -181,16 +226,299 @@ class _OrderDetailsState extends State<OrderDetails> {
                                     child: ListView(
                                       padding: const EdgeInsets.only(top: 0),
                                       children: [
-                                        Text(
-                                          "Emri i produktit:",
-                                          style: AppStyles.getHeaderNameText(
-                                              color: Colors.green, size: 13.0),
+                                        Text("Te dhenat e porosise"),
+                                        SizedBox(height: 5,),
+                                        Row(
+                                          children: [
+                                            SizedBox(
+                                              width:
+                                                  getPhoneWidth(context) / 2 -
+                                                      50,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    "Emri i produktit:",
+                                                    style: AppStyles
+                                                        .getHeaderNameText(
+                                                            color: Colors.green,
+                                                            size: 13.0),
+                                                  ),
+                                                  const SizedBox(
+                                                    height: 4,
+                                                  ),
+                                                  Text(
+                                                    "${widget.orderModel!.orderName}",
+                                                    style: AppStyles
+                                                        .getHeaderNameText(
+                                                            color:
+                                                                Colors.blueGrey,
+                                                            size: 15.0),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+
+                                            Row(
+                                              children: [
+                                                Column(
+                                                  crossAxisAlignment:
+                                                      CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      "Emri i derguesit:",
+                                                      style: AppStyles
+                                                          .getHeaderNameText(
+                                                              color: Colors.green,
+                                                              size: 13.0),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 4,
+                                                    ),
+                                                    Text(
+                                                      "${widget.orderModel!.sender!.username}",
+                                                      style: AppStyles
+                                                          .getHeaderNameText(
+                                                              color:
+                                                                  Colors.blueGrey,
+                                                              size: 15.0),
+                                                    ),
+                                                  ],
+                                                ),
+
+                                              ],
+                                            ),
+                                          ],
+                                        ),
+                                        const SizedBox(
+                                          height: 10,
+                                        ),
+                                        Row(
+                                          children: [
+                                            Container(
+                                              color:Colors.transparent,
+                                              child: SizedBox(
+                                                width:
+                                                getPhoneWidth(context) / 2 -
+                                                    50,
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      "Qmimi i porosise:",
+                                                      style: AppStyles
+                                                          .getHeaderNameText(
+                                                          color: Colors.green,
+                                                          size: 13.0),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 4,
+                                                    ),
+                                                    Text(
+                                                      "${widget.orderModel!.price}€",
+                                                      style: AppStyles
+                                                          .getHeaderNameText(
+                                                          color:
+                                                          Colors.blueGrey,
+                                                          size: 15.0),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                            SizedBox(
+                                              width:
+                                              getPhoneWidth(context) / 2 -
+                                                  50,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    "Sasia:",
+                                                    style: AppStyles
+                                                        .getHeaderNameText(
+                                                        color: Colors.green,
+                                                        size: 13.0),
+                                                  ),
+                                                  const SizedBox(
+                                                    height: 4,
+                                                  ),
+                                                  Text(
+                                                    "${widget.orderModel!.qty}",
+                                                    style: AppStyles
+                                                        .getHeaderNameText(
+                                                        color:
+                                                        Colors.blueGrey,
+                                                        size: 15.0),
+                                                  ),
+                                                  const SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+
+                                        Divider(),
+                                        Text("Te dhenat e pranuesit"),
+
+                                        const SizedBox(
+                                          height: 9,
+                                        ),
+                                        Row(
+                                          crossAxisAlignment:CrossAxisAlignment.start,
+                                          children: [
+                                            SizedBox(
+                                              width:
+                                                  getPhoneWidth(context) / 2 - 50,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                    CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    "Emri i pranuesit:",
+                                                    style:
+                                                        AppStyles.getHeaderNameText(
+                                                            color: Colors.green,
+                                                            size: 13.0),
+                                                  ),
+                                                  const SizedBox(
+                                                    height: 4,
+                                                  ),
+                                                  Text(
+                                                    "${widget.orderModel!.receiver!.fullName}",
+                                                    style:
+                                                        AppStyles.getHeaderNameText(
+                                                            color: Colors.blueGrey,
+                                                            size: 15.0),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+
+                                            GestureDetector(
+                                              onTap: () async {
+                                                final Uri launchUri = Uri(
+                                                  scheme: 'tel',
+                                                  path: widget.orderModel!
+                                                      .receiver!.phoneNumber,
+                                                );
+                                                print(launchUri);
+                                                await launchUrl(launchUri);
+                                              },
+                                              child: Container(
+                                                color: Colors.transparent,
+                                                child: Column(
+                                                  crossAxisAlignment:
+                                                  CrossAxisAlignment.start,
+                                                  children: [
+                                                    Text(
+                                                      "Nr tel. i pranuesit",
+                                                      style: AppStyles
+                                                          .getHeaderNameText(
+                                                          color: Colors.green,
+                                                          size: 13.0),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 4,
+                                                    ),
+                                                    Text(
+                                                      "${widget.orderModel!.receiver!.phoneNumber}",
+                                                      style: AppStyles
+                                                          .getHeaderNameText(
+                                                          color:
+                                                          Colors.blueGrey,
+                                                          size: 15.0),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                  ],
+                                                ),
+                                              ),
+                                            ),
+                                          ],
+                                        ),
+                                        Row(
+                                          children: [
+                                            SizedBox(
+                                              width:
+                                              getPhoneWidth(context) / 2 -
+                                                  50,
+                                              child: Column(
+                                                crossAxisAlignment:
+                                                CrossAxisAlignment.start,
+                                                children: [
+                                                  Text(
+                                                    "Shteti pranuesit:",
+                                                    style: AppStyles
+                                                        .getHeaderNameText(
+                                                        color: Colors.green,
+                                                        size: 13.0),
+                                                  ), 
+                                                  const SizedBox(
+                                                    height: 4,
+                                                  ),
+                                                  Text(
+                                                    "${widget.orderModel!.receiver!.state}",
+                                                    style: AppStyles
+                                                        .getHeaderNameText(
+                                                        color:
+                                                        Colors.blueGrey,
+                                                        size: 15.0),
+                                                  ),
+                                                  const SizedBox(
+                                                    height: 10,
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                            Column(
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                              children: [
+                                                Text(
+                                                  "Qyteti pranuesit",
+                                                  style: AppStyles
+                                                      .getHeaderNameText(
+                                                      color: Colors.green,
+                                                      size: 13.0),
+                                                ),
+                                                const SizedBox(
+                                                  height: 4,
+                                                ),
+                                                Text(
+                                                  "${widget.orderModel!.receiver!.city}",
+                                                  style: AppStyles
+                                                      .getHeaderNameText(
+                                                      color:
+                                                      Colors.blueGrey,
+                                                      size: 15.0),
+                                                ),
+                                                const SizedBox(
+                                                  height: 10,
+                                                ),
+                                              ],
+                                            ),
+                                          ],
                                         ),
                                         const SizedBox(
                                           height: 4,
                                         ),
                                         Text(
-                                          "${widget.orderModel!.orderName}",
+                                          "Adresa pranuesit",
+                                          style: AppStyles.getHeaderNameText(
+                                              color: Colors.green, size: 13.0),
+                                        ),
+                                        Text(
+                                          "${widget.orderModel!.receiver!.address}",
                                           style: AppStyles.getHeaderNameText(
                                               color: Colors.blueGrey,
                                               size: 15.0),
@@ -198,195 +526,99 @@ class _OrderDetailsState extends State<OrderDetails> {
                                         const SizedBox(
                                           height: 10,
                                         ),
-                                        Row(
-                                          children: [
-                                            SizedBox(
-                                              width:
-                                                  getPhoneWidth(context) / 2 -
-                                                      50,
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    "Nr tel. i derguesit",
-                                                    style: AppStyles
-                                                        .getHeaderNameText(
-                                                            color: Colors.green,
-                                                            size: 13.0),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 4,
-                                                  ),
-                                                  Text(
-                                                    "${widget.orderModel!.sender!.phoneNumber}",
-                                                    style: AppStyles
-                                                        .getHeaderNameText(
-                                                            color:
-                                                                Colors.blueGrey,
-                                                            size: 15.0),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  "Nr tel. i pranuesit",
-                                                  style: AppStyles
-                                                      .getHeaderNameText(
-                                                          color: Colors.green,
-                                                          size: 13.0),
-                                                ),
-                                                const SizedBox(
-                                                  height: 4,
-                                                ),
-                                                Text(
-                                                  "${widget.orderModel!.receiver!.phoneNumber}",
-                                                  style: AppStyles
-                                                      .getHeaderNameText(
-                                                          color:
-                                                              Colors.blueGrey,
-                                                          size: 15.0),
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                              ],
-                                            ),
-                                          ],
+
+                                        Divider(),
+
+                                        Text("Te dhenat e derguesit"),
+                                        const SizedBox(
+                                          height: 10,
                                         ),
                                         Row(
                                           children: [
-                                            SizedBox(
-                                              width:
-                                                  getPhoneWidth(context) / 2 -
-                                                      50,
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    "Qmimi porosise:",
-                                                    style: AppStyles
-                                                        .getHeaderNameText(
-                                                            color: Colors.green,
-                                                            size: 13.0),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 4,
-                                                  ),
-                                                  Text(
-                                                    "${widget.orderModel!.price}€",
-                                                    style: AppStyles
-                                                        .getHeaderNameText(
-                                                            color:
-                                                                Colors.blueGrey,
-                                                            size: 15.0),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                ],
+                                            GestureDetector(
+                                              onTap: () async {
+                                                final Uri launchUri = Uri(
+                                                  scheme: 'tel',
+                                                  path: widget.orderModel!
+                                                      .sender!.phoneNumber,
+                                                );
+                                                await launchUrl(launchUri);
+                                              },
+                                              child: Container(
+                                                color: Colors.transparent,
+                                                child: Row(
+                                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                                  children: [
+
+                                                    SizedBox(
+                                                      width:
+                                                      getPhoneWidth(context) / 2 - 50,
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                        CrossAxisAlignment.start,
+                                                        children: [
+                                                          Text(
+                                                            "Emri i derguesit:",
+                                                            style:
+                                                            AppStyles.getHeaderNameText(
+                                                                color: Colors.green,
+                                                                size: 13.0),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 4,
+                                                          ),
+                                                          Text(
+                                                            "${widget.orderModel!.sender!.businessName}",
+                                                            style:
+                                                            AppStyles.getHeaderNameText(
+                                                                color: Colors.blueGrey,
+                                                                size: 15.0),
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                    SizedBox(
+                                                      width:
+                                                          getPhoneWidth(context) /
+                                                                  2 -
+                                                              50,
+                                                      child: Column(
+                                                        crossAxisAlignment:
+                                                            CrossAxisAlignment
+                                                                .start,
+                                                        children: [
+                                                          Text(
+                                                            "Nr tel. i derguesit",
+                                                            style: AppStyles
+                                                                .getHeaderNameText(
+                                                                    color: Colors
+                                                                        .green,
+                                                                    size: 13.0),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 4,
+                                                          ),
+                                                          Text(
+                                                            "${widget.orderModel!.sender!.phoneNumber}",
+                                                            style: AppStyles
+                                                                .getHeaderNameText(
+                                                                    color: Colors
+                                                                        .blueGrey,
+                                                                    size: 15.0),
+                                                          ),
+                                                          const SizedBox(
+                                                            height: 10,
+                                                          ),
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ],
+                                                ),
                                               ),
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  "Qmimi postes:",
-                                                  style: AppStyles
-                                                      .getHeaderNameText(
-                                                          color: Colors.green,
-                                                          size: 13.0),
-                                                ),
-                                                const SizedBox(
-                                                  height: 4,
-                                                ),
-                                                Text(
-                                                  "${widget.orderModel!.offer!.price}€",
-                                                  style: AppStyles
-                                                      .getHeaderNameText(
-                                                          color:
-                                                              Colors.blueGrey,
-                                                          size: 15.0),
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                              ],
                                             ),
                                           ],
                                         ),
-                                        Row(
-                                          children: [
-                                            SizedBox(
-                                              width:
-                                                  getPhoneWidth(context) / 2 -
-                                                      50,
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    "Sasia:",
-                                                    style: AppStyles
-                                                        .getHeaderNameText(
-                                                            color: Colors.green,
-                                                            size: 13.0),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 4,
-                                                  ),
-                                                  Text(
-                                                    "${widget.orderModel!.qty}€",
-                                                    style: AppStyles
-                                                        .getHeaderNameText(
-                                                            color:
-                                                                Colors.blueGrey,
-                                                            size: 15.0),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  "Qmimi total",
-                                                  style: AppStyles
-                                                      .getHeaderNameText(
-                                                          color: Colors.green,
-                                                          size: 13.0),
-                                                ),
-                                                const SizedBox(
-                                                  height: 4,
-                                                ),
-                                                Text(
-                                                  "${widget.orderModel!.price * widget.orderModel!.qty}€",
-                                                  style: AppStyles
-                                                      .getHeaderNameText(
-                                                          color:
-                                                              Colors.blueGrey,
-                                                          size: 15.0), 
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
+
                                         Row(
                                           children: [
                                             SizedBox(
@@ -450,74 +682,13 @@ class _OrderDetailsState extends State<OrderDetails> {
                                             ),
                                           ],
                                         ),
-                                        Row(
-                                          children: [
-                                            SizedBox(
-                                              width:
-                                                  getPhoneWidth(context) / 2 -
-                                                      50,
-                                              child: Column(
-                                                crossAxisAlignment:
-                                                    CrossAxisAlignment.start,
-                                                children: [
-                                                  Text(
-                                                    "Shteti pranuesit:",
-                                                    style: AppStyles
-                                                        .getHeaderNameText(
-                                                            color: Colors.green,
-                                                            size: 13.0),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 4,
-                                                  ),
-                                                  Text(
-                                                    "${widget.orderModel!.receiver!.state}",
-                                                    style: AppStyles
-                                                        .getHeaderNameText(
-                                                            color:
-                                                                Colors.blueGrey,
-                                                            size: 15.0),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 10,
-                                                  ),
-                                                ],
-                                              ),
-                                            ),
-                                            Column(
-                                              crossAxisAlignment:
-                                                  CrossAxisAlignment.start,
-                                              children: [
-                                                Text(
-                                                  "Qyteti pranuesit",
-                                                  style: AppStyles
-                                                      .getHeaderNameText(
-                                                          color: Colors.green,
-                                                          size: 13.0),
-                                                ),
-                                                const SizedBox(
-                                                  height: 4,
-                                                ),
-                                                Text(
-                                                  "${widget.orderModel!.receiver!.city}",
-                                                  style: AppStyles
-                                                      .getHeaderNameText(
-                                                          color:
-                                                              Colors.blueGrey,
-                                                          size: 15.0),
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                              ],
-                                            ),
-                                          ],
-                                        ),
+
                                         Text(
                                           "Adresa derguesit",
                                           style: AppStyles.getHeaderNameText(
                                               color: Colors.green, size: 13.0),
                                         ),
+
                                         const SizedBox(
                                           height: 4,
                                         ),
@@ -528,25 +699,9 @@ class _OrderDetailsState extends State<OrderDetails> {
                                               size: 15.0),
                                         ),
                                         const SizedBox(
-                                          height: 10,
+                                          height: 16,
                                         ),
-                                        Text(
-                                          "Adresa pranuesit",
-                                          style: AppStyles.getHeaderNameText(
-                                              color: Colors.green, size: 13.0),
-                                        ),
-                                        const SizedBox(
-                                          height: 4,
-                                        ),
-                                        Text(
-                                          "${widget.orderModel!.receiver!.address}",
-                                          style: AppStyles.getHeaderNameText(
-                                              color: Colors.blueGrey,
-                                              size: 15.0),
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
+                                        
                                         Text(
                                           "Pershkrimi",
                                           style: AppStyles.getHeaderNameText(
@@ -590,7 +745,9 @@ class _OrderDetailsState extends State<OrderDetails> {
                                                     "Historiku nuk mund te shfaqet per kete porosi.\nJu lutem kontaktoni"
                                                     " administraten e postes per informacione shtese.")
                                                 : ListView.builder(
-                                          padding: const EdgeInsets.only(top: 25),
+                                                    padding:
+                                                        const EdgeInsets.only(
+                                                            top: 25),
                                                     itemBuilder:
                                                         (context, index) {
                                                       return Column(
@@ -636,17 +793,11 @@ class _OrderDetailsState extends State<OrderDetails> {
                                                                               color: AppColors.bottomColorTwo,
                                                                               size: 16.0),
                                                                         ),
-                                                                        Text(
-                                                                          parseDate(orderHistoryModel!.updates[index]
-                                                                              [
-                                                                              'updatedAt']!),
-                                                                          style: AppStyles.getHeaderNameText(
-                                                                              color: Colors.blueGrey[800],
-                                                                              size: 12.0),
-                                                                        ),
+
                                                                       ],
                                                                     ),
                                                                   ),
+
                                                                   const SizedBox(
                                                                     height: 5,
                                                                   ),
@@ -656,11 +807,26 @@ class _OrderDetailsState extends State<OrderDetails> {
                                                                           140,
                                                                       child:
                                                                           Text(
-                                                                        orderHistoryModel!.updates[index]['messageClient'].toString(),
+                                                                        orderHistoryModel!
+                                                                            .updates[index]['messageClient']
+                                                                            .toString(),
                                                                         style: AppStyles.getHeaderNameText(
-                                                                            color: Colors.blueGrey,
+                                                                            color:
+                                                                                Colors.blueGrey,
                                                                             size: 15.0),
                                                                       )),
+                                                                  const SizedBox(
+                                                                    height: 5,
+                                                                  ),
+                                                                  Text(
+                                                                    parseDate(orderHistoryModel!.updates[index]
+                                                                    [
+                                                                    'updatedAt']!),
+                                                                    style: AppStyles.getHeaderNameText(
+                                                                        color: Colors.blueGrey[800],
+                                                                        size: 12.0),
+                                                                  ),
+                                                                  Container(width: getPhoneWidth(context) - 130,child: Divider(color: Colors.grey, )),
                                                                 ],
                                                               )
                                                             ],
@@ -702,19 +868,20 @@ class _OrderDetailsState extends State<OrderDetails> {
   }
 
   replyTextBasedOnStatus(status) {
+    print(status);
     if (status == "pending") {
       return "Porosia ne pritje";
-    }
-    else if (status == "accepted") {
+    } else if (status == "accepted") {
       return "Porosia tek postieri";
-    }
-    else if (status == "in_warehouse") {
+    } else if (status == "in_warehouse") {
       return "Porosia ne depo";
-    }
-    else if (status == "delivering") {
+    } else if (status == "delivering") {
       return "Porosia ne dergese";
-    }
-    else if (status == "delivered") {
+    }else if (status == "returned") {
+      return "Porosia eshte kthyer";
+    }else if (status == "returning_to_warehouse") {
+      return "Porosia ne kthim per depo";
+    } else if (status == "delivered") {
       return "Porosia e dorezuar";
     } else {
       return "No data";
@@ -722,8 +889,8 @@ class _OrderDetailsState extends State<OrderDetails> {
   }
 
   parseDate(String date) {
-    var parsedDate =
-        DateFormat("yyyy-MM-dd HH:mm:ss").format(DateTime.parse(date));
+    var parsedDate = DateFormat("yyyy-MM-dd HH:mm:ss")
+        .format(DateTime.parse(date).add(Duration(hours: 2)));
     return parsedDate;
   }
 }

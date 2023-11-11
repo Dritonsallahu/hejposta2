@@ -2,10 +2,9 @@ import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hejposta/models/buyer_model.dart';
-import 'package:hejposta/models/city_model.dart';
 import 'package:hejposta/providers/buyer_provider.dart';
-import 'package:hejposta/providers/city_provider.dart';
 import 'package:hejposta/providers/user_provider.dart';
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 import 'package:hejposta/shortcuts/urls.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +24,6 @@ class BuyerController {
     _requestHeaders['user-id'] = user.getUser()!.clientId;
 
     var response = await http.get(url,headers: _requestHeaders);
-    print(response.body);
     final parsed = json.decode(response.body)['payload'];
     var buyersList =  parsed.map<BuyerModel>((json) => BuyerModel.fromJson(json)).toList();
 

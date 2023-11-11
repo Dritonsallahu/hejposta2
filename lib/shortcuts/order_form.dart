@@ -3,7 +3,6 @@ import 'package:hejposta/my_code.dart';
 import 'package:hejposta/settings/app_colors.dart';
 import 'package:hejposta/settings/app_styles.dart';
 import 'package:hejposta/views/postman/delivering_orders.dart';
-import 'package:hejposta/views/postman/delivering_specific_order.dart';
 import 'package:hejposta/views/postman/for_equalization.dart';
 import 'package:hejposta/views/postman/waiting_orders.dart';
 
@@ -51,9 +50,6 @@ rightSideOrder(context) {
 }
 
 
-rightSideDeliveringOrder(context) {
-  return Text("");
-}
 
 orderGroupNumbers(context,text,{String? npritje,String? ndergese,String? perBarazim}) {
   return Row(

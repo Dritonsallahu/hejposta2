@@ -34,13 +34,14 @@ class _PostmanProfileState extends State<PostmanProfile> {
   List<String> citiesList = [];
   List<String> areasList = [];
 
-  updateProfile() async {
+  Future<void> updateProfile() async {
     var postman = Provider.of<UserProvider>(context, listen: false);
     SharedPreferences preferences = await SharedPreferences.getInstance();
     if(postman.getUser()!.user.username == username.text &&
         postman.getUser()!.user.email == email.text &&
         oldPassword.text.isEmpty && newPassword.text.isEmpty
     ){
+      // ignore: use_build_context_synchronously
       showModalOne(
           context,
           Column(
@@ -63,6 +64,7 @@ class _PostmanProfileState extends State<PostmanProfile> {
                 children: [
                   Container(
                       height: 40,
+                      // ignore: use_build_context_synchronously
                       width: getPhoneWidth(context) / 2 - 80,
                       decoration: BoxDecoration(
                           color: Colors.blueGrey,
@@ -83,10 +85,12 @@ class _PostmanProfileState extends State<PostmanProfile> {
           150.0);
     }
     else{
+      // ignore: use_build_context_synchronously
       ProfileController().updateProfile(context, username.text,oldPassword.text,newPassword.text, email: email.text).then((value){
 
         if(value == "success"){
           preferences.setString("hejposta_2-user-email", email.text);
+          preferences.setString("hejposta_2-user-username", username.text);
           postman.changeEmail(email.text);
           showModalOne(
               context,
@@ -184,7 +188,6 @@ class _PostmanProfileState extends State<PostmanProfile> {
     ProfileController profileController = ProfileController();
     profileController.getProfile(context).then((value){
       setState(() {
-        print(value );
         for(int i=0;i<value['units'].length;i++){
           unitsList.add(value['units'][i]['unitName']);
         }
@@ -205,7 +208,12 @@ class _PostmanProfileState extends State<PostmanProfile> {
 
   getCitites(){}
 
+  deleteAccount(){
+    ProfileController profileController = ProfileController();
+    profileController.deleteAccount(context).whenComplete((){
 
+    });
+  }
 
   @override
   void initState() {
@@ -217,7 +225,7 @@ class _PostmanProfileState extends State<PostmanProfile> {
       bonusi.text = postman.getUser()!.onSuccessDeliveryBonus.toString();
       note.text = postman.getUser()!.note;
       phoneNumber.text = postman.getUser()!.phoneNumber;
-      email.text = postman.getUser()!.user.email;
+      email.text = postman.getUser()!.user.email ?? "";
     });
     getProfile();
     super.initState();
@@ -240,907 +248,985 @@ class _PostmanProfileState extends State<PostmanProfile> {
               decoration: BoxDecoration(color: AppColors.appBarColor),
             ),
             Expanded(
-              child: Container(
-                child: Stack(
-                  children: [
-                    Stack(
-                      children: [
-                        Positioned(
-                          width: getPhoneWidth(context),
-                          height: getPhoneHeight(context),
-                          child: Container(
-                            child: Image.asset("assets/images/map-icon.png",fit: BoxFit.cover,color: const Color(0xffdb6921),),
-                          ),
-                        ),
-                        Container(
-                          width: getPhoneWidth(context),
-                          height: getPhoneHeight(context),
-                          child: SingleChildScrollView(
-                            child: Column(
-                              mainAxisAlignment: MainAxisAlignment.start,
-                              children: [
-                                Container(
-                                  padding:
-                                  const EdgeInsets.only(left: 28, right: 20, top: 10),
-                                  child: Row(
-                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                    children: [
-                                      IconButton(
-                                          onPressed: () {
-                                            Navigator.pop(context);
-                                          },
-                                          icon: Icon(
-                                            checkIsAndroid(context)
-                                                ? Icons.arrow_back
-                                                : Icons.arrow_back_ios,
-                                            color: Colors.white,
-                                          )),
-                                      Text(
-                                        "Profili",
-                                        style: AppStyles.getHeaderNameText(
-                                            color: Colors.white,
-                                            fontWeight: FontWeight.w600,
-                                            size: 20.0),
-                                      ),
-                                      Padding(
-                                        padding: const EdgeInsets.symmetric(vertical: 13),
-                                        child: Row(
-                                          children: [
-                                            SizedBox(width: 30,),
-                                          ],
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SizedBox(height: 20,),
-                                Container(
-                                  width: getPhoneWidth(context),
-                                  margin: const EdgeInsets.symmetric(horizontal: 40),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                  ),
-                                  child: SizedBox(
-                                    width: getPhoneWidth(context)  ,
-                                    child: TextField(
-                                      controller: fullName,
-                                      readOnly: true,
-                                      decoration: InputDecoration(
-                                          hintText: "Emri dhe mbiemri",
-                                          hintStyle: AppStyles.inputTextModelOne,
-                                          border: InputBorder.none,
-                                          fillColor: Colors.white,
-                                          filled: true,
-                                          enabledBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          focusedBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          contentPadding: const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 15),
-                                          isDense: true),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: inputSpace,
-                                ),
-                                Container(
-                                  width: getPhoneWidth(context),
-                                  margin: const EdgeInsets.symmetric(horizontal: 40),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                  ),
-                                  child: SizedBox(
-                                    width: getPhoneWidth(context)  ,
-                                    child: TextField(
-                                      controller: username,
-                                      decoration: InputDecoration(
-                                          hintText: "Emri i perdoruesit",
-                                          hintStyle: AppStyles.inputTextModelOne,
-                                          border: InputBorder.none,
-                                          fillColor: Colors.white,
-                                          filled: true,
-                                          enabledBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          focusedBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          contentPadding: const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 15),
-                                          isDense: true),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: inputSpace,
-                                ),
-                                Container(
-                                  width: getPhoneWidth(context),
-                                  margin: const EdgeInsets.symmetric(horizontal: 40),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                  ),
-                                  child: GestureDetector(
-                                    onTap: (){
-                                      showModalOne(context, StatefulBuilder(
-                                          builder: (context, setter) {
-                                            return clientsList.isEmpty ? Center(child: Text("Nuk keni asnje biznes",style: AppStyles.getHeaderNameText(color: Colors.blueGrey,size: 16.0),),):ListView(
-                                              children: [
-                                                ListView.builder(
-                                                  physics: const ScrollPhysics(),
-                                                  shrinkWrap: true,
-                                                  itemBuilder: (context, index) {
-                                                    return Column(
-                                                      children: [
-                                                        GestureDetector(
-                                                          onTap: () {
-
-                                                          },
-                                                          child: Container(
-                                                            width: getPhoneWidth(
-                                                                context) -
-                                                                50,
-                                                            height: 60,
-                                                            padding: const EdgeInsets
-                                                                .symmetric(
-                                                                horizontal: 15),
-                                                            decoration: BoxDecoration(
-                                                                color: Colors
-                                                                    .transparent,
-                                                                borderRadius:
-                                                                BorderRadius
-                                                                    .circular(10),
-                                                                border: Border.all(
-                                                                    color: Colors
-                                                                        .grey[200]!)),
-                                                            child: Row(
-                                                              mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                              children: [
-                                                                Container(
-                                                                    width: getPhoneWidth(
-                                                                        context) -
-                                                                        133,
-                                                                    child: Text(
-                                                                      clientsList[index],
-                                                                      maxLines: 2,
-                                                                      overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                      style: AppStyles
-                                                                          .getHeaderNameText(
-                                                                          color: Colors
-                                                                              .blueGrey,
-                                                                          size:
-                                                                          16.0),
-                                                                    )),
-                                                                Container(
-                                                                  width: 25,
-                                                                  height: 25,
-                                                                  decoration: BoxDecoration(
-                                                                      borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                          100),
-                                                                      border: Border.all(
-                                                                          color: Colors
-                                                                              .blueGrey)),
-                                                                  child:  Container(
-                                                                    width: 25,
-                                                                    height: 25,
-                                                                    margin: const EdgeInsets
-                                                                        .all(2),
-                                                                    decoration: BoxDecoration(
-                                                                        borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            100),
-                                                                        color: Colors
-                                                                            .blueGrey),
-                                                                  ),
-                                                                )
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 5,
-                                                        ),
-                                                      ],
-                                                    );
-                                                  },
-                                                  itemCount: clientsList.length,
-                                                ),
-                                              ],
-                                            );
-                                          }), 415.0);
-                                    },
-                                    child: Container(
-                                        color: Colors.transparent,
-
-                                      width: getPhoneWidth(context)  ,
-                                      child: TextField(
-                                        controller: TextEditingController(text: "${clientsList.length} biznese"),
-                                        enabled: false,
-                                        decoration: InputDecoration(
-                                            hintText: "Bizneset",
-                                            hintStyle: AppStyles.inputTextModelOne,
-                                            border: InputBorder.none,
-                                            fillColor: Colors.white,
-                                            filled: true,
-                                            enabledBorder: const OutlineInputBorder(
-                                              borderSide:
-                                              BorderSide(color: Colors.white),
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(15),
-                                                topRight: Radius.circular(15),
-                                              ),
-                                            ),
-                                            disabledBorder:  const OutlineInputBorder(
-                                              borderSide:
-                                              BorderSide(color: Colors.white),
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(15),
-                                                topRight: Radius.circular(15),
-                                              ),
-                                            ),
-                                            focusedBorder: const OutlineInputBorder(
-                                              borderSide:
-                                              BorderSide(color: Colors.white),
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(15),
-                                                topRight: Radius.circular(15),
-                                              ),
-                                            ),
-                                            contentPadding: const EdgeInsets.symmetric(
-                                                horizontal: 20, vertical: 15),
-                                            isDense: true),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: inputSpace,
-                                ),
-                                Container(
-                                  width: getPhoneWidth(context),
-                                  margin: const EdgeInsets.symmetric(horizontal: 40),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                  ),
-                                  child: GestureDetector(
-                                    onTap: (){
-                                      showModalOne(context, StatefulBuilder(
-                                          builder: (context, setter) {
-                                            return unitsList.isEmpty ? Center(child: Text("Nuk keni asnje njesi",style: AppStyles.getHeaderNameText(color: Colors.blueGrey,size: 16.0),),):ListView(
-                                              children: [
-                                                ListView.builder(
-                                                  physics: const ScrollPhysics(),
-                                                  shrinkWrap: true,
-                                                  itemBuilder: (context, index) {
-                                                    return Column(
-                                                      children: [
-                                                        GestureDetector(
-                                                          onTap: () {
-
-                                                          },
-                                                          child: Container(
-                                                            width: getPhoneWidth(
-                                                                context) -
-                                                                50,
-                                                            height: 60,
-                                                            padding: const EdgeInsets
-                                                                .symmetric(
-                                                                horizontal: 15),
-                                                            decoration: BoxDecoration(
-                                                                color: Colors
-                                                                    .transparent,
-                                                                borderRadius:
-                                                                BorderRadius
-                                                                    .circular(10),
-                                                                border: Border.all(
-                                                                    color: Colors
-                                                                        .grey[200]!)),
-                                                            child: Row(
-                                                              mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                              children: [
-                                                                Container(
-                                                                    width: getPhoneWidth(
-                                                                        context) -
-                                                                        133,
-                                                                    child: Text(
-                                                                      unitsList[index],
-                                                                      maxLines: 2,
-                                                                      overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                      style: AppStyles
-                                                                          .getHeaderNameText(
-                                                                          color: Colors
-                                                                              .blueGrey,
-                                                                          size:
-                                                                          16.0),
-                                                                    )),
-                                                                Container(
-                                                                  width: 25,
-                                                                  height: 25,
-                                                                  decoration: BoxDecoration(
-                                                                      borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                          100),
-                                                                      border: Border.all(
-                                                                          color: Colors
-                                                                              .blueGrey)),
-                                                                  child:  Container(
-                                                                    width: 25,
-                                                                    height: 25,
-                                                                    margin: const EdgeInsets
-                                                                        .all(2),
-                                                                    decoration: BoxDecoration(
-                                                                        borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            100),
-                                                                        color: Colors
-                                                                            .blueGrey),
-                                                                  ),
-                                                                )
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 5,
-                                                        ),
-                                                      ],
-                                                    );
-                                                  },
-                                                  itemCount: unitsList.length,
-                                                ),
-
-                                              ],
-                                            );
-                                          }), 415.0);
-                                    },
-                                    child: Container(
-                                      color: Colors.transparent,
-                                      width: getPhoneWidth(context)  ,
-                                      child: TextField(
-                                        controller: TextEditingController(text: "${unitsList.length} njesi"),
-                                        enabled: false,
-                                        decoration: InputDecoration(
-                                            hintText: "Njesite",
-                                            hintStyle: AppStyles.inputTextModelOne,
-                                            border: InputBorder.none,
-                                            fillColor: Colors.white,
-                                            filled: true,
-                                            enabledBorder: const OutlineInputBorder(
-                                              borderSide:
-                                              BorderSide(color: Colors.white),
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(15),
-                                                topRight: Radius.circular(15),
-                                              ),
-                                            ),
-                                            disabledBorder:  const OutlineInputBorder(
-                                              borderSide:
-                                              BorderSide(color: Colors.white),
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(15),
-                                                topRight: Radius.circular(15),
-                                              ),
-                                            ),
-                                            focusedBorder: const OutlineInputBorder(
-                                              borderSide:
-                                              BorderSide(color: Colors.white),
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(15),
-                                                topRight: Radius.circular(15),
-                                              ),
-                                            ),
-                                            contentPadding: const EdgeInsets.symmetric(
-                                                horizontal: 20, vertical: 15),
-                                            isDense: true),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: inputSpace,
-                                ),
-                                Container(
-                                  width: getPhoneWidth(context),
-                                  margin: const EdgeInsets.symmetric(horizontal: 40),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                  ),
-                                  child: GestureDetector(
-                                    onTap: (){
-                                      showModalOne(context, StatefulBuilder(
-                                          builder: (context, setter) {
-                                            return citiesList.isEmpty ? Center(child: Text("Nuk keni asnje qytet",style: AppStyles.getHeaderNameText(color: Colors.blueGrey,size: 16.0),),):ListView(
-                                              children: [
-                                                ListView.builder(
-                                                  physics: const ScrollPhysics(),
-                                                  shrinkWrap: true,
-                                                  itemBuilder: (context, index) {
-                                                    return Column(
-                                                      children: [
-                                                        GestureDetector(
-                                                          onTap: () {
-
-                                                          },
-                                                          child: Container(
-                                                            width: getPhoneWidth(
-                                                                context) -
-                                                                50,
-                                                            height: 60,
-                                                            padding: const EdgeInsets
-                                                                .symmetric(
-                                                                horizontal: 15),
-                                                            decoration: BoxDecoration(
-                                                                color: Colors
-                                                                    .transparent,
-                                                                borderRadius:
-                                                                BorderRadius
-                                                                    .circular(10),
-                                                                border: Border.all(
-                                                                    color: Colors
-                                                                        .grey[200]!)),
-                                                            child: Row(
-                                                              mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                              children: [
-                                                                Container(
-                                                                    width: getPhoneWidth(
-                                                                        context) -
-                                                                        133,
-                                                                    child: Text(
-                                                                      citiesList[index],
-                                                                      maxLines: 2,
-                                                                      overflow:
-                                                                      TextOverflow
-                                                                          .ellipsis,
-                                                                      style: AppStyles
-                                                                          .getHeaderNameText(
-                                                                          color: Colors
-                                                                              .blueGrey,
-                                                                          size:
-                                                                          16.0),
-                                                                    )),
-                                                                Container(
-                                                                  width: 25,
-                                                                  height: 25,
-                                                                  decoration: BoxDecoration(
-                                                                      borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                          100),
-                                                                      border: Border.all(
-                                                                          color: Colors
-                                                                              .blueGrey)),
-                                                                  child:  Container(
-                                                                    width: 25,
-                                                                    height: 25,
-                                                                    margin: const EdgeInsets
-                                                                        .all(2),
-                                                                    decoration: BoxDecoration(
-                                                                        borderRadius:
-                                                                        BorderRadius.circular(
-                                                                            100),
-                                                                        color: Colors
-                                                                            .blueGrey),
-                                                                  ),
-                                                                )
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        ),
-                                                        const SizedBox(
-                                                          height: 5,
-                                                        ),
-                                                      ],
-                                                    );
-                                                  },
-                                                  itemCount: citiesList.length,
-                                                ),
-
-                                              ],
-                                            );
-                                          }), 415.0);
-                                    },
-                                    child: Container(
-                                      color: Colors.transparent,
-                                      width: getPhoneWidth(context)  ,
-                                      child: TextField(
-                                        controller: TextEditingController(text: "${citiesList.length} qytete"),
-                                        enabled: false,
-                                        decoration: InputDecoration(
-                                            hintText: "Qytetet",
-                                            hintStyle: AppStyles.inputTextModelOne,
-                                            border: InputBorder.none,
-                                            fillColor: Colors.white,
-                                            filled: true,
-                                            enabledBorder: const OutlineInputBorder(
-                                              borderSide:
-                                              BorderSide(color: Colors.white),
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(15),
-                                                topRight: Radius.circular(15),
-                                              ),
-                                            ),
-                                            disabledBorder:  const OutlineInputBorder(
-                                              borderSide:
-                                              BorderSide(color: Colors.white),
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(15),
-                                                topRight: Radius.circular(15),
-                                              ),
-                                            ),
-                                            focusedBorder: const OutlineInputBorder(
-                                              borderSide:
-                                              BorderSide(color: Colors.white),
-                                              borderRadius: BorderRadius.only(
-                                                topLeft: Radius.circular(15),
-                                                topRight: Radius.circular(15),
-                                              ),
-                                            ),
-                                            contentPadding: const EdgeInsets.symmetric(
-                                                horizontal: 20, vertical: 15),
-                                            isDense: true),
-                                      ),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: inputSpace,
-                                ),
-                                Container(
-                                  width: getPhoneWidth(context),
-                                  margin: const EdgeInsets.symmetric(horizontal: 40),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                  ),
-                                  child: SizedBox(
-                                    width: getPhoneWidth(context)  ,
-                                    child: TextField(
-                                      controller: salary,
-                                      readOnly: true,
-                                      decoration: InputDecoration(
-                                          hintText: "Pagesa",
-                                          hintStyle: AppStyles.inputTextModelOne,
-                                          border: InputBorder.none,
-                                          fillColor: Colors.white,
-                                          filled: true,
-                                          enabledBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          focusedBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          contentPadding: const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 15),
-                                          isDense: true),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: inputSpace,
-                                ),
-                                Container(
-                                  width: getPhoneWidth(context),
-                                  margin: const EdgeInsets.symmetric(horizontal: 40),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                  ),
-                                  child: SizedBox(
-                                    width: getPhoneWidth(context)  ,
-                                    child: TextField(
-                                      controller: bonusi,
-                                      readOnly: true,
-                                      decoration: InputDecoration(
-                                          hintText: "Bounsi per porosi",
-                                          hintStyle: AppStyles.inputTextModelOne,
-                                          border: InputBorder.none,
-                                          fillColor: Colors.white,
-                                          filled: true,
-                                          enabledBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          focusedBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          contentPadding: const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 15),
-                                          isDense: true),
-                                    ),
-                                  ),
-                                ),
-
-                                SizedBox(
-                                  height: inputSpace,
-                                ),
-                                Container(
-                                  width: getPhoneWidth(context),
-                                  margin: const EdgeInsets.symmetric(horizontal: 40),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                  ),
-                                  child: SizedBox(
-                                    width: getPhoneWidth(context)  ,
-                                    child: TextField(
-                                      controller: email,
-                                      decoration: InputDecoration(
-                                          hintText: "Adresa elektronike",
-                                          hintStyle: AppStyles.inputTextModelOne,
-                                          border: InputBorder.none,
-                                          fillColor: Colors.white,
-                                          filled: true,
-                                          enabledBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          focusedBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          contentPadding: const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 15),
-                                          isDense: true),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: inputSpace,
-                                ),
-                                Container(
-                                  width: getPhoneWidth(context),
-                                  margin: const EdgeInsets.symmetric(horizontal: 40),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                  ),
-                                  child: SizedBox(
-                                    width: getPhoneWidth(context)  ,
-                                    child: TextField(
-                                      controller: oldPassword,
-                                      decoration: InputDecoration(
-                                          hintText: "Fjalekalimi i vjeter",
-                                          hintStyle: AppStyles.inputTextModelOne,
-                                          border: InputBorder.none,
-                                          fillColor: Colors.white,
-                                          filled: true,
-                                          enabledBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          focusedBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          contentPadding: const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 15),
-                                          isDense: true),
-                                    ),
-                                  ),
-                                ),
-                                SizedBox(
-                                  height: inputSpace,
-                                ),
-                                Container(
-                                  width: getPhoneWidth(context),
-                                  margin: const EdgeInsets.symmetric(horizontal: 40),
-                                  decoration: const BoxDecoration(
-                                    color: Colors.white,
-                                    borderRadius: BorderRadius.only(
-                                      topLeft: Radius.circular(15),
-                                      topRight: Radius.circular(15),
-                                    ),
-                                  ),
-                                  child: SizedBox(
-                                    width: getPhoneWidth(context)  ,
-                                    child: TextField(
-                                      controller: newPassword,
-                                      decoration: InputDecoration(
-                                          hintText: "Fjalekalimi i i ri",
-                                          hintStyle: AppStyles.inputTextModelOne,
-                                          border: InputBorder.none,
-                                          fillColor: Colors.white,
-                                          filled: true,
-                                          enabledBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          focusedBorder: const OutlineInputBorder(
-                                            borderSide:
-                                            BorderSide(color: Colors.white),
-                                            borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(15),
-                                              topRight: Radius.circular(15),
-                                            ),
-                                          ),
-                                          contentPadding: const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 15),
-                                          isDense: true),
-                                    ),
-                                  ),
-                                ),
-
-                                Row(
-                                  mainAxisAlignment: MainAxisAlignment.center,
-                                  children: [
-                                    SizedBox(
-                                      width: getPhoneWidth(context) - 170,
-                                      child: Divider(
-                                        height: 10,
-                                        thickness: 1.5,
-                                        color: AppColors.lineColor,
-                                      ),
-                                    ),
-                                    const SizedBox(
-                                      width: 15,
-                                    ),
-                                    GestureDetector(
-                                      onTap: (){
-                                        Navigator.pop(context);
-                                      },
-                                      child: Container(
-                                        height: 50,
-                                        color: Colors.transparent,
-                                        child: Row(
-                                          children: [
-                                            Text(
-                                              "Kthehu pas",
-                                              style: AppStyles.lineFont,
-                                            ),
-                                          ],
-                                        ),
-                                      ),
-                                    )
-                                  ],
-                                )
-                              ],
-                            ),
-                          ),
-                        ),
-
-
-                      ],
-                    ),
-                    AnimatedPositioned(
-                        bottom: 0,
-                        duration: const Duration(milliseconds: 600),
-                        curve: Curves.linearToEaseOut,
+              child: Stack(
+                children: [
+                  Stack(
+                    children: [
+                      Positioned(
                         width: getPhoneWidth(context),
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          children: [
-                            GestureDetector(
-                              onTap: (){
-                                updateProfile();
-                              },
-                              child: Container(
-                                width: 150,
-                                height: 45,
-                                decoration: BoxDecoration(
-                                  color: AppColors.inputColor,
-                                  borderRadius: const BorderRadius.only(
+                        height: getPhoneHeight(context),
+                        child: Image.asset("assets/images/map-icon.png",fit: BoxFit.cover,color: const Color(0xffdb6921),),
+                      ),
+                      SizedBox(
+                        width: getPhoneWidth(context),
+                        height: getPhoneHeight(context),
+                        child: SingleChildScrollView(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.start,
+                            children: [
+                              Container(
+                                padding:
+                                const EdgeInsets.only(left: 28, right: 20, top: 10),
+                                child: Row(
+                                  mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                  children: [
+                                    IconButton(
+                                        onPressed: () {
+                                          Navigator.pop(context);
+                                        },
+                                        icon: Icon(
+                                          checkIsAndroid(context)
+                                              ? Icons.arrow_back
+                                              : Icons.arrow_back_ios,
+                                          color: Colors.white,
+                                        )),
+                                    Text(
+                                      "Profili",
+                                      style: AppStyles.getHeaderNameText(
+                                          color: Colors.white,
+                                          fontWeight: FontWeight.w600,
+                                          size: 20.0),
+                                    ),
+                                    Padding(
+                                      padding: const EdgeInsets.symmetric(vertical: 13),
+                                      child: Row(
+                                        children: const [
+                                          SizedBox(width: 30,),
+                                        ],
+                                      ),
+                                    ),
+                                  ],
+                                ),
+                              ),
+                              const SizedBox(height: 20,),
+                              Container(
+                                width: getPhoneWidth(context),
+                                margin: const EdgeInsets.symmetric(horizontal: 40),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.only(
                                     topLeft: Radius.circular(15),
                                     topRight: Radius.circular(15),
                                   ),
                                 ),
-                                child: Center(
-                                    child: Text(
-                                      "Perditeso",
-                                      style: AppStyles.fontModelTow,
-                                    )),
+                                child: SizedBox(
+                                  width: getPhoneWidth(context)  ,
+                                  child: TextField(
+                                    controller: fullName,
+                                    readOnly: true,
+                                    decoration: InputDecoration(
+                                        hintText: "Emri dhe mbiemri",
+                                        hintStyle: AppStyles.inputTextModelOne,
+                                        border: InputBorder.none,
+                                        fillColor: Colors.white,
+                                        filled: true,
+                                        enabledBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        focusedBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 15),
+                                        isDense: true),
+                                  ),
+                                ),
                               ),
-                            )
-                          ],
-                        ))
-                  ],
-                ),
+                              SizedBox(
+                                height: inputSpace,
+                              ),
+                              Container(
+                                width: getPhoneWidth(context),
+                                margin: const EdgeInsets.symmetric(horizontal: 40),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  ),
+                                ),
+                                child: SizedBox(
+                                  width: getPhoneWidth(context)  ,
+                                  child: TextField(
+                                    controller: username,
+                                    decoration: InputDecoration(
+                                        hintText: "Emri i perdoruesit",
+                                        hintStyle: AppStyles.inputTextModelOne,
+                                        border: InputBorder.none,
+                                        fillColor: Colors.white,
+                                        filled: true,
+                                        enabledBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        focusedBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 15),
+                                        isDense: true),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: inputSpace,
+                              ),
+                              Container(
+                                width: getPhoneWidth(context),
+                                margin: const EdgeInsets.symmetric(horizontal: 40),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  ),
+                                ),
+                                child: GestureDetector(
+                                  onTap: (){
+                                    showModalOne(context, StatefulBuilder(
+                                        builder: (context, setter) {
+                                          return clientsList.isEmpty ? Center(child: Text("Nuk keni asnje biznes",style: AppStyles.getHeaderNameText(color: Colors.blueGrey,size: 16.0),),):ListView(
+                                            children: [
+                                              ListView.builder(
+                                                physics: const ScrollPhysics(),
+                                                shrinkWrap: true,
+                                                itemBuilder: (context, index) {
+                                                  return Column(
+                                                    children: [
+                                                      GestureDetector(
+                                                        onTap: () {
+
+                                                        },
+                                                        child: Container(
+                                                          width: getPhoneWidth(
+                                                              context) -
+                                                              50,
+                                                          height: 60,
+                                                          padding: const EdgeInsets
+                                                              .symmetric(
+                                                              horizontal: 15),
+                                                          decoration: BoxDecoration(
+                                                              color: Colors
+                                                                  .transparent,
+                                                              borderRadius:
+                                                              BorderRadius
+                                                                  .circular(10),
+                                                              border: Border.all(
+                                                                  color: Colors
+                                                                      .grey[200]!)),
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                            children: [
+                                                              SizedBox(
+                                                                  width: getPhoneWidth(
+                                                                      context) -
+                                                                      133,
+                                                                  child: Text(
+                                                                    clientsList[index],
+                                                                    maxLines: 2,
+                                                                    overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                    style: AppStyles
+                                                                        .getHeaderNameText(
+                                                                        color: Colors
+                                                                            .blueGrey,
+                                                                        size:
+                                                                        16.0),
+                                                                  )),
+                                                              Container(
+                                                                width: 25,
+                                                                height: 25,
+                                                                decoration: BoxDecoration(
+                                                                    borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                        100),
+                                                                    border: Border.all(
+                                                                        color: Colors
+                                                                            .blueGrey)),
+                                                                child:  Container(
+                                                                  width: 25,
+                                                                  height: 25,
+                                                                  margin: const EdgeInsets
+                                                                      .all(2),
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius:
+                                                                      BorderRadius.circular(
+                                                                          100),
+                                                                      color: Colors
+                                                                          .blueGrey),
+                                                                ),
+                                                              )
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 5,
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                                itemCount: clientsList.length,
+                                              ),
+                                            ],
+                                          );
+                                        }), 415.0);
+                                  },
+                                  child: Container(
+                                      color: Colors.transparent,
+
+                                    width: getPhoneWidth(context)  ,
+                                    child: TextField(
+                                      controller: TextEditingController(text: "${clientsList.length} biznese"),
+                                      enabled: false,
+                                      decoration: InputDecoration(
+                                          hintText: "Bizneset",
+                                          hintStyle: AppStyles.inputTextModelOne,
+                                          border: InputBorder.none,
+                                          fillColor: Colors.white,
+                                          filled: true,
+                                          enabledBorder: const OutlineInputBorder(
+                                            borderSide:
+                                            BorderSide(color: Colors.white),
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(15),
+                                              topRight: Radius.circular(15),
+                                            ),
+                                          ),
+                                          disabledBorder:  const OutlineInputBorder(
+                                            borderSide:
+                                            BorderSide(color: Colors.white),
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(15),
+                                              topRight: Radius.circular(15),
+                                            ),
+                                          ),
+                                          focusedBorder: const OutlineInputBorder(
+                                            borderSide:
+                                            BorderSide(color: Colors.white),
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(15),
+                                              topRight: Radius.circular(15),
+                                            ),
+                                          ),
+                                          contentPadding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 15),
+                                          isDense: true),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: inputSpace,
+                              ),
+                              Container(
+                                width: getPhoneWidth(context),
+                                margin: const EdgeInsets.symmetric(horizontal: 40),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  ),
+                                ),
+                                child: GestureDetector(
+                                  onTap: (){
+                                    showModalOne(context, StatefulBuilder(
+                                        builder: (context, setter) {
+                                          return unitsList.isEmpty ? Center(child: Text("Nuk keni asnje njesi",style: AppStyles.getHeaderNameText(color: Colors.blueGrey,size: 16.0),),):ListView(
+                                            children: [
+                                              ListView.builder(
+                                                physics: const ScrollPhysics(),
+                                                shrinkWrap: true,
+                                                itemBuilder: (context, index) {
+                                                  return Column(
+                                                    children: [
+                                                      GestureDetector(
+                                                        onTap: () {
+
+                                                        },
+                                                        child: Container(
+                                                          width: getPhoneWidth(
+                                                              context) -
+                                                              50,
+                                                          height: 60,
+                                                          padding: const EdgeInsets
+                                                              .symmetric(
+                                                              horizontal: 15),
+                                                          decoration: BoxDecoration(
+                                                              color: Colors
+                                                                  .transparent,
+                                                              borderRadius:
+                                                              BorderRadius
+                                                                  .circular(10),
+                                                              border: Border.all(
+                                                                  color: Colors
+                                                                      .grey[200]!)),
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                            children: [
+                                                              SizedBox(
+                                                                  width: getPhoneWidth(
+                                                                      context) -
+                                                                      133,
+                                                                  child: Text(
+                                                                    unitsList[index],
+                                                                    maxLines: 2,
+                                                                    overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                    style: AppStyles
+                                                                        .getHeaderNameText(
+                                                                        color: Colors
+                                                                            .blueGrey,
+                                                                        size:
+                                                                        16.0),
+                                                                  )),
+                                                              Container(
+                                                                width: 25,
+                                                                height: 25,
+                                                                decoration: BoxDecoration(
+                                                                    borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                        100),
+                                                                    border: Border.all(
+                                                                        color: Colors
+                                                                            .blueGrey)),
+                                                                child:  Container(
+                                                                  width: 25,
+                                                                  height: 25,
+                                                                  margin: const EdgeInsets
+                                                                      .all(2),
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius:
+                                                                      BorderRadius.circular(
+                                                                          100),
+                                                                      color: Colors
+                                                                          .blueGrey),
+                                                                ),
+                                                              )
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 5,
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                                itemCount: unitsList.length,
+                                              ),
+
+                                            ],
+                                          );
+                                        }), 415.0);
+                                  },
+                                  child: Container(
+                                    color: Colors.transparent,
+                                    width: getPhoneWidth(context)  ,
+                                    child: TextField(
+                                      controller: TextEditingController(text: "${unitsList.length} njesi"),
+                                      enabled: false,
+                                      decoration: InputDecoration(
+                                          hintText: "Njesite",
+                                          hintStyle: AppStyles.inputTextModelOne,
+                                          border: InputBorder.none,
+                                          fillColor: Colors.white,
+                                          filled: true,
+                                          enabledBorder: const OutlineInputBorder(
+                                            borderSide:
+                                            BorderSide(color: Colors.white),
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(15),
+                                              topRight: Radius.circular(15),
+                                            ),
+                                          ),
+                                          disabledBorder:  const OutlineInputBorder(
+                                            borderSide:
+                                            BorderSide(color: Colors.white),
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(15),
+                                              topRight: Radius.circular(15),
+                                            ),
+                                          ),
+                                          focusedBorder: const OutlineInputBorder(
+                                            borderSide:
+                                            BorderSide(color: Colors.white),
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(15),
+                                              topRight: Radius.circular(15),
+                                            ),
+                                          ),
+                                          contentPadding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 15),
+                                          isDense: true),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: inputSpace,
+                              ),
+                              Container(
+                                width: getPhoneWidth(context),
+                                margin: const EdgeInsets.symmetric(horizontal: 40),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  ),
+                                ),
+                                child: GestureDetector(
+                                  onTap: (){
+                                    showModalOne(context, StatefulBuilder(
+                                        builder: (context, setter) {
+                                          return citiesList.isEmpty ? Center(child: Text("Nuk keni asnje qytet",style: AppStyles.getHeaderNameText(color: Colors.blueGrey,size: 16.0),),):ListView(
+                                            children: [
+                                              ListView.builder(
+                                                physics: const ScrollPhysics(),
+                                                shrinkWrap: true,
+                                                itemBuilder: (context, index) {
+                                                  return Column(
+                                                    children: [
+                                                      GestureDetector(
+                                                        onTap: () {
+
+                                                        },
+                                                        child: Container(
+                                                          width: getPhoneWidth(
+                                                              context) -
+                                                              50,
+                                                          height: 60,
+                                                          padding: const EdgeInsets
+                                                              .symmetric(
+                                                              horizontal: 15),
+                                                          decoration: BoxDecoration(
+                                                              color: Colors
+                                                                  .transparent,
+                                                              borderRadius:
+                                                              BorderRadius
+                                                                  .circular(10),
+                                                              border: Border.all(
+                                                                  color: Colors
+                                                                      .grey[200]!)),
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                            MainAxisAlignment
+                                                                .spaceBetween,
+                                                            children: [
+                                                              SizedBox(
+                                                                  width: getPhoneWidth(
+                                                                      context) -
+                                                                      133,
+                                                                  child: Text(
+                                                                    citiesList[index],
+                                                                    maxLines: 2,
+                                                                    overflow:
+                                                                    TextOverflow
+                                                                        .ellipsis,
+                                                                    style: AppStyles
+                                                                        .getHeaderNameText(
+                                                                        color: Colors
+                                                                            .blueGrey,
+                                                                        size:
+                                                                        16.0),
+                                                                  )),
+                                                              Container(
+                                                                width: 25,
+                                                                height: 25,
+                                                                decoration: BoxDecoration(
+                                                                    borderRadius:
+                                                                    BorderRadius
+                                                                        .circular(
+                                                                        100),
+                                                                    border: Border.all(
+                                                                        color: Colors
+                                                                            .blueGrey)),
+                                                                child:  Container(
+                                                                  width: 25,
+                                                                  height: 25,
+                                                                  margin: const EdgeInsets
+                                                                      .all(2),
+                                                                  decoration: BoxDecoration(
+                                                                      borderRadius:
+                                                                      BorderRadius.circular(
+                                                                          100),
+                                                                      color: Colors
+                                                                          .blueGrey),
+                                                                ),
+                                                              )
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 5,
+                                                      ),
+                                                    ],
+                                                  );
+                                                },
+                                                itemCount: citiesList.length,
+                                              ),
+
+                                            ],
+                                          );
+                                        }), 415.0);
+                                  },
+                                  child: Container(
+                                    color: Colors.transparent,
+                                    width: getPhoneWidth(context)  ,
+                                    child: TextField(
+                                      controller: TextEditingController(text: "${citiesList.length} qytete"),
+                                      enabled: false,
+                                      decoration: InputDecoration(
+                                          hintText: "Qytetet",
+                                          hintStyle: AppStyles.inputTextModelOne,
+                                          border: InputBorder.none,
+                                          fillColor: Colors.white,
+                                          filled: true,
+                                          enabledBorder: const OutlineInputBorder(
+                                            borderSide:
+                                            BorderSide(color: Colors.white),
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(15),
+                                              topRight: Radius.circular(15),
+                                            ),
+                                          ),
+                                          disabledBorder:  const OutlineInputBorder(
+                                            borderSide:
+                                            BorderSide(color: Colors.white),
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(15),
+                                              topRight: Radius.circular(15),
+                                            ),
+                                          ),
+                                          focusedBorder: const OutlineInputBorder(
+                                            borderSide:
+                                            BorderSide(color: Colors.white),
+                                            borderRadius: BorderRadius.only(
+                                              topLeft: Radius.circular(15),
+                                              topRight: Radius.circular(15),
+                                            ),
+                                          ),
+                                          contentPadding: const EdgeInsets.symmetric(
+                                              horizontal: 20, vertical: 15),
+                                          isDense: true),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: inputSpace,
+                              ),
+                              Container(
+                                width: getPhoneWidth(context),
+                                margin: const EdgeInsets.symmetric(horizontal: 40),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  ),
+                                ),
+                                child: SizedBox(
+                                  width: getPhoneWidth(context)  ,
+                                  child: TextField(
+                                    controller: salary,
+                                    readOnly: true,
+                                    decoration: InputDecoration(
+                                        hintText: "Pagesa",
+                                        hintStyle: AppStyles.inputTextModelOne,
+                                        border: InputBorder.none,
+                                        fillColor: Colors.white,
+                                        filled: true,
+                                        enabledBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        focusedBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 15),
+                                        isDense: true),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: inputSpace,
+                              ),
+                              Container(
+                                width: getPhoneWidth(context),
+                                margin: const EdgeInsets.symmetric(horizontal: 40),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  ),
+                                ),
+                                child: SizedBox(
+                                  width: getPhoneWidth(context)  ,
+                                  child: TextField(
+                                    controller: bonusi,
+                                    readOnly: true,
+                                    decoration: InputDecoration(
+                                        hintText: "Bounsi per porosi",
+                                        hintStyle: AppStyles.inputTextModelOne,
+                                        border: InputBorder.none,
+                                        fillColor: Colors.white,
+                                        filled: true,
+                                        enabledBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        focusedBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 15),
+                                        isDense: true),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: inputSpace,
+                              ),
+                              Container(
+                                width: getPhoneWidth(context),
+                                margin: const EdgeInsets.symmetric(horizontal: 40),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  ),
+                                ),
+                                child: SizedBox(
+                                  width: getPhoneWidth(context)  ,
+                                  child: TextField(
+                                    controller: email,
+                                    decoration: InputDecoration(
+                                        hintText: "Adresa elektronike",
+                                        hintStyle: AppStyles.inputTextModelOne,
+                                        border: InputBorder.none,
+                                        fillColor: Colors.white,
+                                        filled: true,
+                                        enabledBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        focusedBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 15),
+                                        isDense: true),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: inputSpace,
+                              ),
+                              Container(
+                                width: getPhoneWidth(context),
+                                margin: const EdgeInsets.symmetric(horizontal: 40),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  ),
+                                ),
+                                child: SizedBox(
+                                  width: getPhoneWidth(context)  ,
+                                  child: TextField(
+                                    controller: oldPassword,
+                                    decoration: InputDecoration(
+                                        hintText: "Fjalekalimi i vjeter",
+                                        hintStyle: AppStyles.inputTextModelOne,
+                                        border: InputBorder.none,
+                                        fillColor: Colors.white,
+                                        filled: true,
+                                        enabledBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        focusedBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 15),
+                                        isDense: true),
+                                  ),
+                                ),
+                              ),
+                              SizedBox(
+                                height: inputSpace,
+                              ),
+                              Container(
+                                width: getPhoneWidth(context),
+                                margin: const EdgeInsets.symmetric(horizontal: 40),
+                                decoration: const BoxDecoration(
+                                  color: Colors.white,
+                                  borderRadius: BorderRadius.only(
+                                    topLeft: Radius.circular(15),
+                                    topRight: Radius.circular(15),
+                                  ),
+                                ),
+                                child: SizedBox(
+                                  width: getPhoneWidth(context)  ,
+                                  child: TextField(
+                                    controller: newPassword,
+                                    decoration: InputDecoration(
+                                        hintText: "Fjalekalimi i i ri",
+                                        hintStyle: AppStyles.inputTextModelOne,
+                                        border: InputBorder.none,
+                                        fillColor: Colors.white,
+                                        filled: true,
+                                        enabledBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        focusedBorder: const OutlineInputBorder(
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                          borderRadius: BorderRadius.only(
+                                            topLeft: Radius.circular(15),
+                                            topRight: Radius.circular(15),
+                                          ),
+                                        ),
+                                        contentPadding: const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 15),
+                                        isDense: true),
+                                  ),
+                                ),
+                              ),
+
+                              Row(
+                                mainAxisAlignment: MainAxisAlignment.center,
+                                children: [
+                                  SizedBox(
+                                    width: getPhoneWidth(context) - 170,
+                                    child: Divider(
+                                      height: 10,
+                                      thickness: 1.5,
+                                      color: AppColors.lineColor,
+                                    ),
+                                  ),
+                                  const SizedBox(
+                                    width: 15,
+                                  ),
+                                  GestureDetector(
+                                    onTap: (){
+                                      Navigator.pop(context);
+                                    },
+                                    child: Container(
+                                      height: 50,
+                                      color: Colors.transparent,
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            "Kthehu pas",
+                                            style: AppStyles.lineFont,
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                  )
+                                ],
+                              ),
+                              GestureDetector(
+                                onTap: (){
+                                  showModalOne(
+                                      context,
+                                      Column(
+                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Column(
+                                            children: [
+                                              Text(
+                                                "Deshironi ta fshini llogarine ?",
+                                                style: AppStyles.getHeaderNameText(
+                                                    color: Colors.blueGrey[800], size: 20),
+                                              ),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              Container(
+                                                  height: 40,
+                                                  width: getPhoneWidth(context) / 2 - 80,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.blueGrey,
+                                                      borderRadius: BorderRadius.circular(100)),
+                                                  child: TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: Text(
+                                                        "Jo",
+                                                        style: AppStyles.getHeaderNameText(
+                                                            color: Colors.white, size: 17),
+                                                      ))),
+                                              Container(
+                                                  height: 40,
+                                                  width: getPhoneWidth(context) / 2 - 80,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.blueGrey,
+                                                      borderRadius: BorderRadius.circular(100)),
+                                                  child: TextButton(
+                                                      onPressed: () {
+                                                        deleteAccount();
+                                                      },
+                                                      child: Text(
+                                                        "Po",
+                                                        style: AppStyles.getHeaderNameText(
+                                                            color: Colors.white, size: 17),
+                                                      ))),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                      150.0);
+                                },
+                                child: Container(
+                                  color: Colors.transparent,
+                                  child: Row(
+                                    mainAxisAlignment: MainAxisAlignment.center,
+                                    children: [
+
+                                      Container(
+                                        height: 50,
+                                        width: getPhoneWidth(context) - 80,
+                                        decoration: BoxDecoration(
+                                          borderRadius: BorderRadius.circular(15),
+                                          color: Colors.white,
+                                        ),
+                                        child: Center(
+                                          child: Text(
+                                            "Fshije llogarine",
+                                            style: AppStyles.getHeaderNameText(color:Colors.blueGrey,size: 15.0),
+                                          ),
+                                        ),
+                                      )
+                                    ],
+                                  ),
+                                ),
+                              ),
+                              SizedBox(height: 70,),
+                            ],
+                          ),
+                        ),
+                      ),
+
+
+                    ],
+                  ),
+                  AnimatedPositioned(
+                      bottom: 0,
+                      duration: const Duration(milliseconds: 600),
+                      curve: Curves.linearToEaseOut,
+                      width: getPhoneWidth(context),
+                      child: Row(
+                        mainAxisAlignment: MainAxisAlignment.center,
+                        children: [
+                          GestureDetector(
+                            onTap: (){
+                              updateProfile();
+                            },
+                            child: Container(
+                              width: 150,
+                              height: 45,
+                              decoration: BoxDecoration(
+                                color: AppColors.inputColor,
+                                borderRadius: const BorderRadius.only(
+                                  topLeft: Radius.circular(15),
+                                  topRight: Radius.circular(15),
+                                ),
+                              ),
+                              child: Center(
+                                  child: Text(
+                                    "Perditeso",
+                                    style: AppStyles.fontModelTow,
+                                  )),
+                            ),
+                          )
+                        ],
+                      ))
+                ],
               ),
             ),
             Container(

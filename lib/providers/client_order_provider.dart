@@ -8,7 +8,7 @@ class ClientOrderProvider extends ChangeNotifier {
   bool fetchingPendingOrders = false;
 
   Iterable<OrderModel>? getOrders(status){
-    if(status == "all"){
+    if(status == "all") {
       return _orders;
     }
     else {
@@ -16,6 +16,22 @@ class ClientOrderProvider extends ChangeNotifier {
         return element.status == status;
       });
     }
+  }
+
+  Iterable<OrderModel>? getOrdersByState(state,status,DateTime? from,to){
+
+        var a =_orders.where((element){
+
+
+          var hasState = element.receiver!.state == state || state == "Te gjitha";
+          if(element.status == "delivered_to_client" && status == "rejected"){
+            return   hasState;
+          }
+          return element.status == status && hasState;
+        });
+
+        return a;
+
   }
 
 
@@ -38,8 +54,23 @@ class ClientOrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  editOrder(OrderModel? order) {
+    for(int i=0;i<_orders.length;i++){
+     if(_orders[i].id == order!.id){
+       _orders[i] = order!;
+     }
+    }
+    notifyListeners();
+  }
+
   deleteOrder(orderNumber) {
     _orders.removeWhere((element) => element.orderNumber == orderNumber);
+    notifyListeners();
+  }
+
+  deleteOrderById(id) {
+    print(id);
+    _orders.removeWhere((element) => element.id == id);
     notifyListeners();
   }
 
@@ -66,7 +97,7 @@ class ClientOrderProvider extends ChangeNotifier {
           _orders.add(_ordersFilter[i]);
       }
       else if (_ordersFilter[i]
-          .sender!.businessName!
+          .receiver!.fullName!
           .toUpperCase()
           .contains(emri.toUpperCase())) {
 

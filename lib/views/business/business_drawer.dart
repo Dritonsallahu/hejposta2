@@ -3,13 +3,15 @@ import 'package:hejposta/local_storage/current_user_storage.dart';
 import 'package:hejposta/my_code.dart';
 import 'package:hejposta/providers/general_provider.dart';
 import 'package:hejposta/settings/app_styles.dart';
+import 'package:hejposta/shortcuts/modals.dart';
 import 'package:hejposta/views/business/business_finances.dart';
+import 'package:hejposta/views/business/business_orders.dart';
 import 'package:hejposta/views/business/business_products.dart';
 import 'package:hejposta/views/business/business_profile.dart';
 import 'package:hejposta/views/business/business_rules.dart';
-import 'package:hejposta/views/business/business_statistics.dart';
 import 'package:hejposta/views/business/my_challange.dart';
-import 'package:hejposta/views/postman/messages.dart';
+import 'package:hejposta/views/business/online_requests.dart';
+import 'package:hejposta/views/business/order_list.dart';
 import 'package:provider/provider.dart';
 
 class BusinessDrawer extends StatefulWidget {
@@ -100,7 +102,7 @@ class _BusinessDrawerState extends State<BusinessDrawer> {
                   GestureDetector(
                     onTap: () {
                       Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => const BusinessStatistics()));
+                          builder: (_) =>   OrderList()));
                     },
                     child: Container(
                       padding: const EdgeInsets.only(left: 10),
@@ -115,7 +117,7 @@ class _BusinessDrawerState extends State<BusinessDrawer> {
                             width: 10,
                           ),
                           Text(
-                            "Statistikat",
+                            "Porosite",
                             style: AppStyles.getHeaderNameText(
                                 color: Colors.white,
                                 size: 18.0,
@@ -160,37 +162,11 @@ class _BusinessDrawerState extends State<BusinessDrawer> {
               ),
               Row(
                 children: [
-                  GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(
-                          MaterialPageRoute(builder: (_) => const Messages()));
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.only(left: 10),
-                      color: Colors.transparent,
-                      width: getPhoneWidth(context) / 2 - 22,
-                      child: Row(
-                        children: [
-                          SizedBox(
-                              width: 45,
-                              child: Image.asset("assets/icons/1.png")),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            "Mesazhet",
-                            style: AppStyles.getHeaderNameText(
-                                color: Colors.white,
-                                size: 18.0,
-                                fontWeight: FontWeight.w600),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
+
                   GestureDetector(
                     onTap: () {
                       // Navigator.of(context).push(MaterialPageRoute(builder: (_) => const Messages()));
+                      showMessageModal(context, "Katalogu i porosive do te behet ne versionet e radhes.", 15.0);
                     },
                     child: Container(
                       padding: const EdgeInsets.only(left: 10),
@@ -206,6 +182,100 @@ class _BusinessDrawerState extends State<BusinessDrawer> {
                           ),
                           Text(
                             "Katalogu im",
+                            style: AppStyles.getHeaderNameText(
+                                color: Colors.white,
+                                size: 18.0,
+                                fontWeight: FontWeight.w600),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const BusinessRules()));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.only(left: 10),
+                      color: Colors.transparent,
+                      width: getPhoneWidth(context) / 2 - 22,
+                      child: Row(
+                        children: [
+                          SizedBox(
+                              width: 45,
+                              child: Image.asset("assets/icons/1.png")),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            "Regullorja",
+                            style: AppStyles.getHeaderNameText(
+                                color: Colors.white,
+                                size: 18.0,
+                                fontWeight: FontWeight.w600),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                ],
+              ),
+              const SizedBox(
+                height: 25,
+              ),
+              Row(
+                children: [
+
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(builder: (_) => const OnlineRequests()));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.only(left: 10),
+                      color: Colors.transparent,
+                      width: getPhoneWidth(context) / 2 - 22,
+                      child: Row(
+                        children: [
+                          SizedBox(
+                              width: 45,
+                              child: Image.asset("assets/icons/1.png")),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          SizedBox(
+                            width: getPhoneWidth(context) / 2 - 95,
+                            child: Text(
+                              "Kerkesat online",
+                              style: AppStyles.getHeaderNameText(
+                                  color: Colors.white,
+                                  size: 18.0,
+                                  fontWeight: FontWeight.w600),
+                            ),
+                          )
+                        ],
+                      ),
+                    ),
+                  ),
+                  GestureDetector(
+                    onTap: () {
+                      Navigator.of(context).push(MaterialPageRoute(
+                          builder: (_) => const BusinessRules()));
+                    },
+                    child: Container(
+                      padding: const EdgeInsets.only(left: 10),
+                      color: Colors.transparent,
+                      width: getPhoneWidth(context) / 2 - 22,
+                      child: Row(
+                        children: [
+                          SizedBox(
+                              width: 45,
+                              child: Image.asset("assets/icons/1.png")),
+                          const SizedBox(
+                            width: 10,
+                          ),
+                          Text(
+                            "Regullorja",
                             style: AppStyles.getHeaderNameText(
                                 color: Colors.white,
                                 size: 18.0,
@@ -251,43 +321,8 @@ class _BusinessDrawerState extends State<BusinessDrawer> {
                     ),
                   ),
                   GestureDetector(
-                    onTap: () {
-                      Navigator.of(context).push(MaterialPageRoute(
-                          builder: (_) => const BusinessRules()));
-                    },
-                    child: Container(
-                      padding: const EdgeInsets.only(left: 10),
-                      color: Colors.transparent,
-                      width: getPhoneWidth(context) / 2 - 22,
-                      child: Row(
-                        children: [
-                          SizedBox(
-                              width: 45,
-                              child: Image.asset("assets/icons/1.png")),
-                          const SizedBox(
-                            width: 10,
-                          ),
-                          Text(
-                            "Regullorja",
-                            style: AppStyles.getHeaderNameText(
-                                color: Colors.white,
-                                size: 18.0,
-                                fontWeight: FontWeight.w600),
-                          )
-                        ],
-                      ),
-                    ),
-                  ),
-                ],
-              ),
-              const SizedBox(
-                height: 25,
-              ),
-              Row(
-                children: [
-                  GestureDetector(
                     onTap: (){
-                      Navigator.of(context).push(MaterialPageRoute(builder: (_) => BusinessProfile()));
+                      Navigator.of(context).push(MaterialPageRoute(builder: (_) => const BusinessProfile()));
                     },
                     child: Container(
                       padding: const EdgeInsets.only(left: 10),
@@ -312,6 +347,14 @@ class _BusinessDrawerState extends State<BusinessDrawer> {
                       ),
                     ),
                   ),
+                ],
+              ),
+              const SizedBox(
+                height: 25,
+              ),
+              Row(
+                children: [
+
                   GestureDetector(
                     onTap: () {
                       var drawer = Provider.of<GeneralProvider>(context, listen: false);

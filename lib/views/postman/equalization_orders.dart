@@ -297,71 +297,71 @@ class _EqualizationSpecificOrdersState extends State<EqualizationSpecificOrders>
             SwipeActionCell(
               key: ObjectKey(index),
               backgroundColor: Colors.transparent,
-              trailingActions: [
-                SwipeAction(
-                    backgroundRadius: 20,
-                    forceAlignmentToBoundary: false,
-                    widthSpace: 120,
-                    closeOnTap: true,
-                    onTap: (CompletionHandler handler) async {
-                      setState(() {});
-                    },
-                    content: Container(
-                        height: 120,
-                        decoration: BoxDecoration(
-                            borderRadius: const BorderRadius.only(
-                                topRight: Radius.circular(20),
-                                bottomRight: Radius.circular(20)),
-                            color: AppColors.bottomColorTwo),
-                        child: Center(
-                            child: Text(
-                              "E dorezuar",
-                              style: AppStyles.getHeaderNameText(
-                                  color: Colors.white, size: 15.0),
-                            ))),
-                    color: Colors.transparent),
-                SwipeAction(
-                    backgroundRadius: 20,
-                    forceAlignmentToBoundary: false,
-                    widthSpace: 120,
-                    closeOnTap: true,
-                    onTap: (CompletionHandler handler) async {
-                      setState(() {});
-                    },
-                    content: Container(
-                        height: 120,
-                        decoration:
-                        BoxDecoration(color: AppColors.bottomColorOne),
-                        child: Center(
-                            child: Text(
-                              "E kthyer",
-                              style: AppStyles.getHeaderNameText(
-                                  color: Colors.white, size: 15.0),
-                            ))),
-                    color: Colors.transparent),
-                SwipeAction(
-                    backgroundRadius: 20,
-                    forceAlignmentToBoundary: false,
-                    widthSpace: 100,
-                    closeOnTap: true,
-                    performsFirstActionWithFullSwipe: true,
-                    onTap: (CompletionHandler handler) async {
-                      setState(() {});
-                    },
-                    content: Container(
-                        height: 120,
-                        decoration: const BoxDecoration(
-                            borderRadius: BorderRadius.only(
-                                topLeft: Radius.circular(20),
-                                bottomLeft: Radius.circular(20)),
-                            color: Colors.red),
-                        child: Center(
-                            child: Text(
-                              "E refuzuar",
-                              style: AppStyles.getHeaderNameText(
-                                  color: Colors.white, size: 15.0),
-                            ))),
-                    color: Colors.transparent),
+              trailingActions: const [
+                // SwipeAction(
+                //     backgroundRadius: 20,
+                //     forceAlignmentToBoundary: false,
+                //     widthSpace: 120,
+                //     closeOnTap: true,
+                //     onTap: (CompletionHandler handler) async {
+                //       setState(() {});
+                //     },
+                //     content: Container(
+                //         height: 120,
+                //         decoration: BoxDecoration(
+                //             borderRadius: const BorderRadius.only(
+                //                 topRight: Radius.circular(20),
+                //                 bottomRight: Radius.circular(20)),
+                //             color: AppColors.bottomColorTwo),
+                //         child: Center(
+                //             child: Text(
+                //               "E dorezuar",
+                //               style: AppStyles.getHeaderNameText(
+                //                   color: Colors.white, size: 15.0),
+                //             ))),
+                //     color: Colors.transparent),
+                // SwipeAction(
+                //     backgroundRadius: 20,
+                //     forceAlignmentToBoundary: false,
+                //     widthSpace: 120,
+                //     closeOnTap: true,
+                //     onTap: (CompletionHandler handler) async {
+                //       setState(() {});
+                //     },
+                //     content: Container(
+                //         height: 120,
+                //         decoration:
+                //         BoxDecoration(color: AppColors.bottomColorOne),
+                //         child: Center(
+                //             child: Text(
+                //               "E kthyer",
+                //               style: AppStyles.getHeaderNameText(
+                //                   color: Colors.white, size: 15.0),
+                //             ))),
+                //     color: Colors.transparent),
+                // SwipeAction(
+                //     backgroundRadius: 20,
+                //     forceAlignmentToBoundary: false,
+                //     widthSpace: 100,
+                //     closeOnTap: true,
+                //     performsFirstActionWithFullSwipe: true,
+                //     onTap: (CompletionHandler handler) async {
+                //       setState(() {});
+                //     },
+                //     content: Container(
+                //         height: 120,
+                //         decoration: const BoxDecoration(
+                //             borderRadius: BorderRadius.only(
+                //                 topLeft: Radius.circular(20),
+                //                 bottomLeft: Radius.circular(20)),
+                //             color: Colors.red),
+                //         child: Center(
+                //             child: Text(
+                //               "E refuzuar",
+                //               style: AppStyles.getHeaderNameText(
+                //                   color: Colors.white, size: 15.0),
+                //             ))),
+                //     color: Colors.transparent),
               ],
               child: Container(
                 padding: const EdgeInsets.only(

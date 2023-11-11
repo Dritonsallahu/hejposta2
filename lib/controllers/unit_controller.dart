@@ -1,15 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hejposta/models/city_model.dart';
-import 'package:hejposta/models/offer_model.dart';
-import 'package:hejposta/models/order_model.dart';
 import 'package:hejposta/models/unit_model.dart';
-import 'package:hejposta/providers/city_provider.dart';
-import 'package:hejposta/providers/client_order_provider.dart';
-import 'package:hejposta/providers/offer_provider.dart';
 import 'package:hejposta/providers/unit_provider.dart';
 import 'package:hejposta/providers/user_provider.dart';
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 import 'package:hejposta/shortcuts/urls.dart';
 import 'package:provider/provider.dart';

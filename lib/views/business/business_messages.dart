@@ -1,19 +1,20 @@
 import 'package:flutter/material.dart';
 import 'package:hejposta/my_code.dart';
 import 'package:hejposta/providers/general_provider.dart';
+import 'package:hejposta/providers/server_provider.dart';
 import 'package:hejposta/settings/app_colors.dart';
 import 'package:hejposta/settings/app_styles.dart';
 import 'package:hejposta/views/postman/postman_drawer.dart';
 import 'package:provider/provider.dart';
 
-class Messages extends StatefulWidget {
-  const Messages({Key? key}) : super(key: key);
+class BusinessMessages extends StatefulWidget {
+  const BusinessMessages({Key? key}) : super(key: key);
 
   @override
-  State<Messages> createState() => _MessagesState();
+  State<BusinessMessages> createState() => _BusinessMessagesState();
 }
 
-class _MessagesState extends State<Messages> {
+class _BusinessMessagesState extends State<BusinessMessages> {
   PageController pageController = PageController(initialPage: 0);
   int selectedIndex = 0;
   GlobalKey key = GlobalKey();
@@ -32,7 +33,8 @@ class _MessagesState extends State<Messages> {
 
   @override
   Widget build(BuildContext context) {
-    var generalProvider = Provider.of<GeneralProvider>(context, listen: true);
+    var generalProvider = Provider.of<GeneralProvider>(context);
+    var serverProvider = Provider.of<ServerProvider>(context);
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: AppColors.bottomColorTwo,
@@ -85,17 +87,29 @@ class _MessagesState extends State<Messages> {
                                     : Icons.arrow_back_ios,
                                 color: Colors.white,
                               )),
-                          Text(
-                            "Mesazhet",
-                            style: AppStyles.getHeaderNameText(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                size: 20.0),
+                          Column(
+                            mainAxisAlignment: MainAxisAlignment.center,
+                            children: [
+                              Text(
+                                "Mesazhet",
+                                style: AppStyles.getHeaderNameText(
+                                    color: Colors.white,
+                                    fontWeight: FontWeight.w600,
+                                    size: 20.0),
+                              ),
+                              serverProvider.socketConnectionType == SocketConnectionType.connected ? const SizedBox() : Text(
+                                serverProvider.socketConnectionType == SocketConnectionType.connecting ? "Duke u lidhur":serverProvider.socketConnectionType == SocketConnectionType.failed ? "Lidhja deshtoi" : "Nuk jeni te lidhur",
+                                style: AppStyles.getHeaderNameText(
+                                    color: Colors.blueGrey[700],
+                                    fontWeight: FontWeight.w500,
+                                    size: 13.0),
+                              ),
+                            ],
                           ),
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 13),
                             child: Row(
-                              children: [
+                              children: const [
                                 SizedBox(
                                   width: 50,
                                   height: 26,
@@ -111,19 +125,18 @@ class _MessagesState extends State<Messages> {
                     const SizedBox(
                       height: 13,
                     ),
-                    1==1 ? SizedBox(height: getPhoneHeight(context) - 250,child: Column(
+                    1==2 ? SizedBox(height: getPhoneHeight(context) - 250,child: Column(
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text("(Se shpejti)",style: AppStyles.getHeaderNameText(color: Colors.white,size: 17),),
-                        SizedBox(height: 10,),
+                        const SizedBox(height: 10,),
                         Text("(Soon)",style: AppStyles.getHeaderNameText(color: Colors.white,size: 17),),
                       ],
                     ),):ListView.builder(padding: const EdgeInsets.only(bottom: 10),
                       shrinkWrap: true,
                       physics: const ScrollPhysics(),
                       itemBuilder: (context, index) => Column(
-                        children: [
-
+                        children: [ 
                           SizedBox(
                             width: getPhoneWidth(context),
                             child: Padding(
@@ -140,7 +153,7 @@ class _MessagesState extends State<Messages> {
                                   const SizedBox(
                                     width: 10,
                                   ),
-                                  Container(
+                                  SizedBox(
                                     width: getPhoneWidth(context) - 136,
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,

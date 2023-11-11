@@ -22,11 +22,55 @@ showModalOne(context, child, height, {color}) {
       backgroundColor: Colors.transparent);
 }
 
+showMessageModal(context, text, size,{double? height}){
+  showModalOne(
+      context,
+      Column(
+        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+        children: [
+          Column(
+            children: [
+              Text(
+                text,
+                style: AppStyles.getHeaderNameText(
+                    color: Colors.blueGrey[800], size: size ?? 16),textAlign: TextAlign.center,
+              ),
+              const SizedBox(
+                height: 10,
+              ),
+            ],
+          ),
+          Row(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              Container(
+                  height: 40,
+                  // ignore: use_build_context_synchronously
+                  width: getPhoneWidth(context) / 2 - 80,
+                  decoration: BoxDecoration(
+                      color: Colors.blueGrey,
+                      borderRadius: BorderRadius.circular(100)),
+                  child: TextButton(
+                      onPressed: () {
+                        Navigator.pop(context);
+                      },
+                      child: Text(
+                        "Largo",
+                        style: AppStyles.getHeaderNameText(
+                            color: Colors.white, size: 17),
+                      ))),
+            ],
+          )
+        ],
+      ),
+      height ?? 160.0);
+}
+
 serverRespondErrorModal(context) {
   showDialog(
       context: context,
       builder: (context) {
-        return Container(
+        return SizedBox(
           height: 200,
           child: AlertDialog(
             shape:
@@ -41,7 +85,7 @@ serverRespondErrorModal(context) {
             content: Row(
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                Container(
+                SizedBox(
                     width: getPhoneWidth(context) - 140,
                     child: Text(
                       "Kontaktoni administraten e postes per informata shtese",

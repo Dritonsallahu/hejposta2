@@ -5,6 +5,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hejposta/models/goal_model.dart';
 import 'package:hejposta/providers/user_provider.dart';
 import 'package:hejposta/shortcuts/modals.dart';
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 import 'package:hejposta/shortcuts/urls.dart';
 import 'package:provider/provider.dart';
@@ -31,7 +32,6 @@ class GoalsController {
         return goalsList;
       }
       else {
-        print(bodyRes);
         return "failed";
       }
     }catch(e){
@@ -58,17 +58,60 @@ class GoalsController {
     try{
       var response = await http.post(url,headers: _requestHeaders,body: jsonEncode(mapBody));
       var bodyRes = json.decode(response.body);
-      developer.log("Message returned: ${bodyRes}");
-      print(bodyRes);
+      developer.log("Message returned: $bodyRes");
+      if(bodyRes['message'] == "success"){
+        return "success";
+      }
+      else if(bodyRes['message'] == "exist"){
+        return "exist";
+      }
+      else {
+        return "failed";
+      }
+    }catch(e){
+      serverRespondErrorModal(context);
+    }
+  }
+
+  Future<dynamic> deleteGoal(context,id) async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    AndroidOptions getAndroidOptions() => const AndroidOptions( encryptedSharedPreferences: true);
+    final storage = FlutterSecureStorage(aOptions: getAndroidOptions(),);
+    var token = await storage.read(key: "hejposta_2-token");
+    var url = Uri.parse("$challengeProfileUrl/$id");
+    _requestHeaders['Authorization'] = "Bearer $token";
+
+    try{
+      var response = await http.delete(url,headers: _requestHeaders);
+      var bodyRes = json.decode(response.body);
       if(bodyRes['message'] == "success"){
         return "success";
       }
       else {
-        print(bodyRes);
         return "failed";
       }
     }catch(e){
-      print(e);
+      serverRespondErrorModal(context);
+    }
+  }
+
+  Future<dynamic> completeGoal(context,id) async {
+    await Future.delayed(const Duration(milliseconds: 100));
+    AndroidOptions getAndroidOptions() => const AndroidOptions( encryptedSharedPreferences: true);
+    final storage = FlutterSecureStorage(aOptions: getAndroidOptions(),);
+    var token = await storage.read(key: "hejposta_2-token");
+    var url = Uri.parse("$challengeProfileUrl/$id");
+    _requestHeaders['Authorization'] = "Bearer $token";
+    try{
+      var response = await http.put(url,headers: _requestHeaders);
+      var bodyRes = json.decode(response.body);
+      if(bodyRes['message'] == "success"){
+        return "success";
+      }
+      else {
+        return "failed";
+      }
+    }catch(e){
       serverRespondErrorModal(context);
     }
   }

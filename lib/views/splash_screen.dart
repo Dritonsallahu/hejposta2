@@ -2,7 +2,6 @@ import 'package:flutter/material.dart';
 import 'package:hejposta/local_storage/current_user_storage.dart';
 import 'package:hejposta/my_code.dart';
 import 'package:hejposta/settings/app_colors.dart';
-import 'package:hejposta/views/authentication.dart';
 
 class SplashScreen extends StatefulWidget {
   const SplashScreen({Key? key}) : super(key: key);
@@ -26,6 +25,7 @@ class _SplashScreenState extends State<SplashScreen> {
       }).then((value) async  {
         await Future.delayed(const Duration(seconds: 2));
           CurrentUserStorage currentUserStorage = CurrentUserStorage();
+        if (!mounted) return;
           currentUserStorage.getUser(context);
       });
     });

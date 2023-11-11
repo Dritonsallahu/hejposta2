@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_swipe_action_cell/core/cell.dart';
 import 'package:hejposta/controllers/goals_controller.dart';
 import 'package:hejposta/models/goal_model.dart';
 import 'package:hejposta/my_code.dart';
@@ -23,26 +24,24 @@ class _MyChallengeState extends State<MyChallenge> {
   bool fetching = false;
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
 
-  getGoals(){
+  getGoals() {
     setState(() {
       fetching = true;
     });
     GoalsController goalsController = GoalsController();
     goalsController.getGoals(context).then((value) {
-      if(value == "failed"){
+      if (value == "failed") {
         showModalOne(
             context,
             Column(
-              mainAxisAlignment:
-              MainAxisAlignment.spaceBetween,
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
                 Column(
                   children: [
                     Text(
                       "Ka ndodhur nje problem!",
                       style: AppStyles.getHeaderNameText(
-                          color: Colors.blueGrey[800],
-                          size: 17),
+                          color: Colors.blueGrey[800], size: 17),
                     ),
                     const SizedBox(
                       height: 10,
@@ -50,27 +49,81 @@ class _MyChallengeState extends State<MyChallenge> {
                   ],
                 ),
                 Row(
-                  mainAxisAlignment:
-                  MainAxisAlignment.center,
+                  mainAxisAlignment: MainAxisAlignment.center,
                   children: [
                     Container(
                         height: 40,
-                        width:
-                        getPhoneWidth(context) / 2 - 80,
+                        width: getPhoneWidth(context) / 2 - 80,
                         decoration: BoxDecoration(
                             color: Colors.blueGrey,
-                            borderRadius:
-                            BorderRadius.circular(100)),
+                            borderRadius: BorderRadius.circular(100)),
                         child: TextButton(
                             onPressed: () {
                               Navigator.pop(context);
                             },
                             child: Text(
                               "Largo",
-                              style: AppStyles
-                                  .getHeaderNameText(
-                                  color: Colors.white,
-                                  size: 17),
+                              style: AppStyles.getHeaderNameText(
+                                  color: Colors.white, size: 17),
+                            ))),
+                  ],
+                )
+              ],
+            ),
+            150.0);
+      } else {
+        setState(() {
+          _goals = value;
+        });
+      }
+    }).whenComplete(() {
+      setState(() {
+        fetching = false;
+      });
+    });
+  }
+
+  deleteGoal(id){
+    GoalsController goalsController = GoalsController();
+    goalsController.deleteGoal(context,id).then((value) {
+      if(value == "success"){
+        getGoals();
+      }
+      else if(value == "failed"){
+        showModalOne(
+            context,
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      "Fshirja e sfides deshtoi!",
+                      style: AppStyles.getHeaderNameText(
+                          color: Colors.blueGrey[800], size: 17),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                        height: 40,
+                        width: getPhoneWidth(context) / 2 - 80,
+                        decoration: BoxDecoration(
+                            color: Colors.blueGrey,
+                            borderRadius: BorderRadius.circular(100)),
+                        child: TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              "Largo",
+                              style: AppStyles.getHeaderNameText(
+                                  color: Colors.white, size: 17),
                             ))),
                   ],
                 )
@@ -78,19 +131,61 @@ class _MyChallengeState extends State<MyChallenge> {
             ),
             150.0);
       }
-      else{
-        setState(() {
-          _goals = value;
-        });
-      }
-    }).whenComplete((){
-      setState(() {
-        fetching = false;
-      });
     });
   }
 
-  @override 
+  completeGoal(id){
+    GoalsController goalsController = GoalsController();
+    goalsController.completeGoal(context,id).then((value) {
+      if(value == "success"){
+        getGoals();
+      }
+      else if(value == "failed"){
+        showModalOne(
+            context,
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      "Ka ndodhur nje problem!",
+                      style: AppStyles.getHeaderNameText(
+                          color: Colors.blueGrey[800], size: 17),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                        height: 40,
+                        width: getPhoneWidth(context) / 2 - 80,
+                        decoration: BoxDecoration(
+                            color: Colors.blueGrey,
+                            borderRadius: BorderRadius.circular(100)),
+                        child: TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              "Largo",
+                              style: AppStyles.getHeaderNameText(
+                                  color: Colors.white, size: 17),
+                            ))),
+                  ],
+                )
+              ],
+            ),
+            150.0);
+      }
+    });
+  }
+
+  @override
   void initState() {
     getGoals();
     super.initState();
@@ -121,15 +216,15 @@ class _MyChallengeState extends State<MyChallenge> {
             children: [
               Positioned(
                   child: SizedBox(
-                    width: getPhoneWidth(context),
-                    height: getPhoneHeight(context) - 65,
-                    child: Image.asset(
-                      "assets/icons/map-icon.png",
-                      color: AppColors.mapColorFirst,
-                      filterQuality: FilterQuality.high,
-                      fit: BoxFit.cover,
-                    ),
-                  )),
+                width: getPhoneWidth(context),
+                height: getPhoneHeight(context) - 65,
+                child: Image.asset(
+                  "assets/icons/map-icon.png",
+                  color: AppColors.mapColorFirst,
+                  filterQuality: FilterQuality.high,
+                  fit: BoxFit.cover,
+                ),
+              )),
               SizedBox(
                 width: getPhoneWidth(context),
                 height: getPhoneHeight(context) - 66,
@@ -138,7 +233,7 @@ class _MyChallengeState extends State<MyChallenge> {
                   children: [
                     Container(
                       padding:
-                      const EdgeInsets.only(left: 28, right: 20, top: 10),
+                          const EdgeInsets.only(left: 28, right: 20, top: 10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -171,66 +266,182 @@ class _MyChallengeState extends State<MyChallenge> {
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 25),
                       child: GestureDetector(
-                        onTap: (){
-                          Navigator.of(context).push(MaterialPageRoute(builder: (_) => const NewChallage()));
+                        onTap: () {
+                          Navigator.of(context).push(MaterialPageRoute(
+                              builder: (_) => const NewChallage())).then((value) {
+                                getGoals();
+                          });
                         },
                         child: Container(
                           width: getPhoneWidth(context),
                           height: 45,
                           decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.vertical(top: Radius.circular(15)),
-                              color: Colors.white
-                          ),
+                              borderRadius: BorderRadius.vertical(
+                                  top: Radius.circular(15)),
+                              color: Colors.white),
                           child: Center(
-                            child: Text("Regjistro sfiden",style: AppStyles.getHeaderNameText(color: Colors.blueGrey[800],size: 15),),
+                            child: Text(
+                              "Regjistro sfiden",
+                              style: AppStyles.getHeaderNameText(
+                                  color: Colors.blueGrey[800], size: 15),
+                            ),
                           ),
                         ),
                       ),
                     ),
-                    const SizedBox(height: 10,),
-                     fetching ? Center(child: const CircularProgressIndicator(color: Colors.white,strokeWidth: 1.4,)): _goals.isEmpty ? Center(child:   Text("Nuk keni regjistruar sfide",style: AppStyles.getHeaderNameText(color: Colors.white,size: 15.0),)):Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: ListView.builder(padding: EdgeInsets.zero,physics: const ScrollPhysics(),shrinkWrap: true,
-                        itemBuilder: (context, index){
-                        return Padding(
-                          padding: const EdgeInsets.symmetric(vertical: 10),
-                          child: Container(
-                            padding: const EdgeInsets.symmetric(horizontal: 20,vertical: 10),
-                            decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(10),
-                              color: Colors.white
-                            ),
-                            child: Row(
-                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                              children: [
-                                 SizedBox(
-                                   width: getPhoneWidth(context)/2 - 40,
-                                   child: Column(
-                                     crossAxisAlignment: CrossAxisAlignment.start,
-                                     children: [
-                                       Text("Prej: ${_goals[index].startDate.toString().substring(0,10)}",style: AppStyles.getHeaderNameText(color: Colors.blueGrey[800],size: 17.0),),
-                                       const SizedBox(height: 15,),
-                                       Text("Prej: ${_goals[index].startDate.toString().substring(0,10)}",style: AppStyles.getHeaderNameText(color: Colors.blueGrey[800],size: 17.0),),
-                                     ],
-                                   ),
-                                 ),
-                                SizedBox(
-                                  width: getPhoneWidth(context)/2 - 50,
-                                  child: Column(
-                                    crossAxisAlignment: CrossAxisAlignment.start,
-                                    children: [
-                                      Text("Target: ${_goals[index].orderNumber}",style: AppStyles.getHeaderNameText(color: Colors.blueGrey[800],size: 17.0),),
-                                      const SizedBox(height: 15,),
-                                      Text("Perfunduar: ${_goals[index].numberCompleted}",style: AppStyles.getHeaderNameText(color: Colors.blueGrey[800],size: 17.0),)
-                                    ],
-                                  ),
-                                )
-                              ],
-                            ),
-                          ),
-                        );
-                      },itemCount: _goals.length,),
-                    )
+                    const SizedBox(
+                      height: 10,
+                    ),
+                    fetching
+                        ? const Center(
+                            child: CircularProgressIndicator(
+                            color: Colors.white,
+                            strokeWidth: 1.4,
+                          ))
+                        : _goals.isEmpty
+                            ? Center(
+                                child: Text(
+                                "Nuk keni regjistruar sfide",
+                                style: AppStyles.getHeaderNameText(
+                                    color: Colors.white, size: 15.0),
+                              ))
+                            : Padding(
+                                padding:
+                                    const EdgeInsets.symmetric(horizontal: 25),
+                                child: ListView.builder(
+                                  padding: EdgeInsets.zero,
+                                  physics: const ScrollPhysics(),
+                                  shrinkWrap: true,
+                                  itemBuilder: (context, index) {
+                                    return Padding(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 10),
+                                      child: ClipRRect(
+                                        borderRadius: BorderRadius.circular(10) ,
+                                        child: SwipeActionCell(
+                                          backgroundColor: Colors.white,
+                                          key: UniqueKey(),
+                                          trailingActions: [
+                                            SwipeAction(
+                                                onTap: (s) {
+                                                  deleteGoal(_goals[index].id);
+                                                },widthSpace: 90,
+                                                content: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                                                  child: Text(
+                                                    "Fshije",
+                                                    style:
+                                                        AppStyles.getHeaderNameText(
+                                                            color: Colors.white,
+                                                            size: 15.0),
+                                                  ),
+                                                )),
+                                            SwipeAction(
+                                                onTap: (s) {
+                                                  completeGoal(_goals[index].id);
+                                                },color: Colors.green,widthSpace: 100,
+                                                content: Padding(
+                                                  padding: const EdgeInsets.symmetric(horizontal: 15),
+                                                  child: Text(
+                                                    "Perfundo",
+                                                    style:
+                                                        AppStyles.getHeaderNameText(
+                                                            color: Colors.white,
+                                                            size: 15.0),
+                                                  ),
+                                                )),
+                                          ],
+                                          child: Container(
+                                            padding: const EdgeInsets.symmetric(
+                                                horizontal: 20, vertical: 10),
+                                            decoration: BoxDecoration(
+                                                borderRadius:
+                                                    BorderRadius.circular(10),
+                                                color: Colors.white),
+                                            child: Row(
+                                              mainAxisAlignment:
+                                                  MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                SizedBox(
+                                                  width:
+                                                      getPhoneWidth(context) / 2 -
+                                                          40,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.start,
+                                                    children: [
+                                                      Text(
+                                                        "Prej: ${_goals[index].startDate.toString().substring(0, 10)}",
+                                                        style: AppStyles
+                                                            .getHeaderNameText(
+                                                                color: Colors
+                                                                        .blueGrey[
+                                                                    800],
+                                                                size: 17.0),
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 15,
+                                                      ),
+                                                      Text(
+                                                        "Deri: ${_goals[index].endDate.toString().substring(0, 10)}",
+                                                        style: AppStyles
+                                                            .getHeaderNameText(
+                                                                color: Colors
+                                                                        .blueGrey[
+                                                                    800],
+                                                                size: 17.0),
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                SizedBox(
+                                                  width:
+                                                      getPhoneWidth(context) / 2 -
+                                                          50,
+                                                  child: Column(
+                                                    crossAxisAlignment:
+                                                        CrossAxisAlignment.start,
+                                                    children: [
+                                                      Row(
+                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                        children: [
+                                                          Text(
+                                                            "Target: ${_goals[index].orderNumber}",
+                                                            style: AppStyles
+                                                                .getHeaderNameText(
+                                                                    color: Colors
+                                                                            .blueGrey[
+                                                                        800],
+                                                                    size: 17.0),
+                                                          ),
+                                                          const Icon(Icons.arrow_back,size: 23,color: Colors.blueGrey,)
+                                                        ],
+                                                      ),
+                                                      const SizedBox(
+                                                        height: 15,
+                                                      ),
+                                                      Text(
+                                                        "Perfunduar: ${_goals[index].numberCompleted}",
+                                                        style: AppStyles
+                                                            .getHeaderNameText(
+                                                                color: Colors
+                                                                        .blueGrey[
+                                                                    800],
+                                                                size: 17.0),
+                                                      )
+                                                    ],
+                                                  ),
+                                                )
+                                              ],
+                                            ),
+                                          ),
+                                        ),
+                                      ),
+                                    );
+                                  },
+                                  itemCount: _goals.length,
+                                ),
+                              )
                   ],
                 ),
               ),

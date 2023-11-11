@@ -1,13 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hejposta/models/city_model.dart';
-import 'package:hejposta/models/equalization_model.dart';
 import 'package:hejposta/models/order_model.dart';
-import 'package:hejposta/providers/city_provider.dart';
-import 'package:hejposta/providers/client_order_provider.dart';
 import 'package:hejposta/providers/equalization_provider.dart';
 import 'package:hejposta/providers/user_provider.dart';
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 import 'package:hejposta/shortcuts/urls.dart';
 import 'package:provider/provider.dart';
@@ -30,7 +27,6 @@ class EqualizationController {
     final parsed = json.decode(response.body)['payload'];
     print(parsed);
     var equalizations =  parsed.map<OrderModel>((json) => OrderModel.fromJson(json)).toList();
-
     equalization.addEqualizations(equalizations);
   }
 
@@ -47,7 +43,6 @@ class EqualizationController {
 
     var response = await http.get(url,headers: _requestHeaders);
     final parsed = json.decode(response.body)['payload'];
-    print(parsed);
     var equalizations =  parsed.map<OrderModel>((json) => OrderModel.fromJson(json)).toList();
 
     equalization.addEqualizations(equalizations);
@@ -62,16 +57,21 @@ class EqualizationController {
     _requestHeaders['Authorization'] = "Bearer $token";
     _requestHeaders['user-id'] = user.getUser()!.postmanId;
     _requestHeaders['equal-number'] = equalCode;
-    print(equalCode);
 
     var response = await http.put(url,headers: _requestHeaders);
     var res = jsonDecode(response.body);
 
     if(response.statusCode == 200){
-      return res;
+      if(res['message'] == "success"){
+        return "Klienti u barazua me sukses";
+      }
+      else{
+        return res['message'];
+      }
+
     }
     else{
-      return "failed";
+      return "Barazimi i klientit deshtoi!";
     }
   }
 

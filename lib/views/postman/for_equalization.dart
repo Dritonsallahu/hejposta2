@@ -3,7 +3,6 @@ import 'package:flutter_barcode_scanner/flutter_barcode_scanner.dart';
 import 'package:flutter_swipe_action_cell/core/cell.dart';
 import 'package:flutter_swipe_action_cell/core/controller.dart';
 import 'package:hejposta/controllers/equalization_controller.dart';
-import 'package:hejposta/controllers/postman_orders_controller.dart';
 import 'package:hejposta/models/order_model.dart';
 import 'package:hejposta/my_code.dart';
 import 'package:hejposta/providers/equalization_provider.dart';
@@ -18,6 +17,7 @@ import 'package:hejposta/views/postman/postman_drawer.dart';
 import 'package:provider/provider.dart';
 
 class ForEqualization extends StatefulWidget {
+
   const ForEqualization({Key? key}) : super(key: key);
 
   @override
@@ -89,7 +89,7 @@ class _ForEqualizationState extends State<ForEqualization> {
     equalizationController
         .performEqualization(context, shifraBarazimit)
         .then((value) {
-      if (value['message'] == "success") {
+
         showModalOne(
             context,
             Column(
@@ -98,7 +98,7 @@ class _ForEqualizationState extends State<ForEqualization> {
                 Column(
                   children: [
                     Text(
-                      "Klienti u barazua me sukses",
+                      value,
                       style: AppStyles.getHeaderNameText(
                           color: Colors.blueGrey[800], size: 20),
                     ),
@@ -130,91 +130,11 @@ class _ForEqualizationState extends State<ForEqualization> {
               ],
             ),
             150.0);
-      }
-      else if (value['message'] == "failed") {
-        showModalOne(
-            context,
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      "Barazimi me klient deshtoi, kontaktoni administratën për sqarime shtesë! ",
-                      textAlign: TextAlign.center,
-                      style: AppStyles.getHeaderNameText(
-                          color: Colors.blueGrey[800], size: 20),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                        height: 40,
-                        width: getPhoneWidth(context) / 2 - 80,
-                        decoration: BoxDecoration(
-                            color: Colors.blueGrey,
-                            borderRadius: BorderRadius.circular(100)),
-                        child: TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text(
-                              "Largo",
-                              style: AppStyles.getHeaderNameText(
-                                  color: Colors.white, size: 17),
-                            ))),
-                  ],
-                )
-              ],
-            ),
-            170.0);
-      } else {
-        showModalOne(
-            context,
-            Column(
-              mainAxisAlignment: MainAxisAlignment.spaceBetween,
-              children: [
-                Column(
-                  children: [
-                    Text(
-                      "Barazimi me klient deshtoi, kontaktoni administratën për sqarime shtesë! ",
-                      style: AppStyles.getHeaderNameText(
-                          color: Colors.blueGrey[800], size: 20),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                  ],
-                ),
-                Row(
-                  mainAxisAlignment: MainAxisAlignment.center,
-                  children: [
-                    Container(
-                        height: 40,
-                        width: getPhoneWidth(context) / 2 - 80,
-                        decoration: BoxDecoration(
-                            color: Colors.blueGrey,
-                            borderRadius: BorderRadius.circular(100)),
-                        child: TextButton(
-                            onPressed: () {
-                              Navigator.pop(context);
-                            },
-                            child: Text(
-                              "Largo",
-                              style: AppStyles.getHeaderNameText(
-                                  color: Colors.white, size: 17),
-                            ))),
-                  ],
-                )
-              ],
-            ),
-            150.0);
-      }
+
+
+    }).whenComplete(() {
+      getEqualizingOrders();
+      getEqualizedOrders();
     });
   }
 
@@ -222,54 +142,44 @@ class _ForEqualizationState extends State<ForEqualization> {
     showModalOne(
         context,
         Column(
-          mainAxisAlignment:
-          MainAxisAlignment.spaceBetween,
+          mainAxisAlignment: MainAxisAlignment.spaceBetween,
           children: [
             Column(
               children: [
                 Text(
                   "Konfirmo barazimin e porosise",
                   style: AppStyles.getHeaderNameText(
-                      color: Colors.blueGrey[800],
-                      size: 20),
+                      color: Colors.blueGrey[800], size: 20),
                 ),
                 const SizedBox(
                   height: 10,
                 ),
-
               ],
             ),
             Row(
-              mainAxisAlignment:
-              MainAxisAlignment.spaceEvenly,
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
               children: [
                 Container(
                     height: 40,
-                    width:
-                    getPhoneWidth(context) / 2 - 80,
+                    width: getPhoneWidth(context) / 2 - 80,
                     decoration: BoxDecoration(
                         color: Colors.blueGrey,
-                        borderRadius:
-                        BorderRadius.circular(100)),
+                        borderRadius: BorderRadius.circular(100)),
                     child: TextButton(
                         onPressed: () {
                           Navigator.pop(context);
                         },
                         child: Text(
                           "Jo",
-                          style: AppStyles
-                              .getHeaderNameText(
-                              color: Colors.white,
-                              size: 17),
+                          style: AppStyles.getHeaderNameText(
+                              color: Colors.white, size: 17),
                         ))),
                 Container(
                     height: 40,
-                    width:
-                    getPhoneWidth(context) / 2 - 80,
+                    width: getPhoneWidth(context) / 2 - 80,
                     decoration: BoxDecoration(
                         color: Colors.blueGrey,
-                        borderRadius:
-                        BorderRadius.circular(100)),
+                        borderRadius: BorderRadius.circular(100)),
                     child: TextButton(
                         onPressed: () {
                           Navigator.pop(context);
@@ -277,10 +187,8 @@ class _ForEqualizationState extends State<ForEqualization> {
                         },
                         child: Text(
                           "Po",
-                          style: AppStyles
-                              .getHeaderNameText(
-                              color: Colors.white,
-                              size: 17),
+                          style: AppStyles.getHeaderNameText(
+                              color: Colors.white, size: 17),
                         ))),
               ],
             )
@@ -288,6 +196,7 @@ class _ForEqualizationState extends State<ForEqualization> {
         ),
         150.0);
   }
+
   @override
   void dispose() {
     _scrollController!.dispose();
@@ -317,12 +226,12 @@ class _ForEqualizationState extends State<ForEqualization> {
               duration: const Duration(
                 seconds: 20,
               ),
-
               child: SizedBox(
                 height: getPhoneHeight(context),
                 child: Image.asset(
                   "assets/icons/map-icon.png",
-                  color: AppColors.mapColorSecond,fit: BoxFit.cover,
+                  color: AppColors.mapColorSecond,
+                  fit: BoxFit.cover,
                   filterQuality: FilterQuality.high,
                 ),
               )),
@@ -421,7 +330,7 @@ class _ForEqualizationState extends State<ForEqualization> {
                                     primary: false,
                                     expandedHeight: 0,
                                     foregroundColor: Colors.red,
-                                    toolbarHeight: _showAppbarColor ? 65 : 85,
+                                    toolbarHeight: _showAppbarColor ? 65 : 90,
                                     shadowColor: AppColors.bottomColorOne,
                                     surfaceTintColor: Colors.red,
                                     scrolledUnderElevation: 0,
@@ -449,10 +358,11 @@ class _ForEqualizationState extends State<ForEqualization> {
                                                               "delivering")
                                                           .length
                                                           .toString(),
-                                                      perBarazim: equalizingOrders
-                                                          .getEqualizations()
-                                                          .length
-                                                          .toString())),
+                                                      perBarazim:
+                                                          equalizingOrders
+                                                              .getEqualizations()
+                                                              .length
+                                                              .toString())),
                                           Container(
                                             width: getPhoneWidth(context) - 20,
                                             decoration: BoxDecoration(
@@ -475,13 +385,16 @@ class _ForEqualizationState extends State<ForEqualization> {
                                                                 3 -
                                                             20,
                                                         child: TextField(
-                                                          onChanged: (value){
-                                                            if(deliveringStep == 0){
-                                                              equalizingOrders.filter(value);
-                                                            }
-                                                            else{
-                                                              print("Sdfs");
-                                                              equalizedOrders.filter(value);
+                                                          onChanged: (value) {
+                                                            if (deliveringStep ==
+                                                                0) {
+                                                              equalizingOrders
+                                                                  .filter(
+                                                                      value);
+                                                            } else {
+                                                              equalizedOrders
+                                                                  .filter(
+                                                                      value);
                                                             }
                                                           },
                                                           decoration: InputDecoration(
@@ -524,14 +437,16 @@ class _ForEqualizationState extends State<ForEqualization> {
                                                                     context) /
                                                                 3 -
                                                             20,
-                                                        height: 33,
+                                                        height: 40,
                                                         padding:
                                                             const EdgeInsets
                                                                     .symmetric(
                                                                 horizontal: 10),
                                                         child: Center(
                                                           child: Text(
-                                                            "Per barazim",
+                                                            "Per barazim\n(${equalizingOrders.getEqualizations().length.toString()})",
+                                                            textAlign: TextAlign
+                                                                .center,
                                                             style: AppStyles
                                                                 .getHeaderNameText(
                                                                     color: deliveringStep ==
@@ -566,7 +481,7 @@ class _ForEqualizationState extends State<ForEqualization> {
                                                                     context) /
                                                                 3 -
                                                             20,
-                                                        height: 33,
+                                                        height: 40,
                                                         padding:
                                                             const EdgeInsets
                                                                     .symmetric(
@@ -580,7 +495,9 @@ class _ForEqualizationState extends State<ForEqualization> {
                                                         )),
                                                         child: Center(
                                                           child: Text(
-                                                            "Te barazuara",
+                                                            "Te barazuara\n(${equalizedOrders.getEqualizations().length.toString()})",
+                                                            textAlign: TextAlign
+                                                                .center,
                                                             style: AppStyles
                                                                 .getHeaderNameText(
                                                                     color: deliveringStep ==
@@ -632,10 +549,9 @@ class _ForEqualizationState extends State<ForEqualization> {
     );
   }
 
-
   perBarazim(EqualizationProvier equalizeOrders) => Stack(
-    children: [
-      RefreshIndicator(
+        children: [
+          RefreshIndicator(
             onRefresh: () async {
               getEqualizingOrders();
             },
@@ -676,491 +592,581 @@ class _ForEqualizationState extends State<ForEqualization> {
                           List<OrderModel> orders =
                               equalizeOrders.getEqualizations()[senderId]!;
                           String business = orders.first.sender!.businessName!;
+                          String businessId = orders.first.sender!.id!;
                           String senderAddress = orders.first.sender!.address!;
-                          String phoneNumber = orders.first.sender!.phoneNumber!;
-                          return Padding(
-                            padding: const EdgeInsets.only(bottom: 7),
-                            child: Column(
-                              crossAxisAlignment: CrossAxisAlignment.start,
-                              children: [
-                                SizedBox(
-                                  width: getPhoneWidth(context),
-                                  child: Row(
-                                    crossAxisAlignment: CrossAxisAlignment.end,
-                                    children: [
-                                      Padding(
-                                        padding: const EdgeInsets.only(
-                                            left: 25, bottom: 3),
-                                        child: SizedBox(
-                                          width: getPhoneWidth(context) / 2 - 60,
-                                          child: Text(
-                                            business,
-                                            overflow: TextOverflow.ellipsis,
-                                            style: AppStyles.getHeaderNameText(
-                                                color: Colors.white,
-                                                size: 17.0,
-                                                fontWeight: FontWeight.w600),
-                                          ),
-                                        ),
-                                      ),
-                                      SizedBox(
-                                        height: 17,
-                                        width: 178,
-                                        child: Image.asset(
-                                          "assets/images/line.png",
-                                          color: Colors.white,
-                                          fit: BoxFit.cover,
-                                        ),
-                                      ),
-                                    ],
-                                  ),
-                                ),
-                                SwipeActionCell(
-                                  key: ObjectKey(index),
-                                  backgroundColor: Colors.transparent,
-                                  trailingActions: [
-                                    SwipeAction(
-                                        backgroundRadius: 20,
-                                        forceAlignmentToBoundary: false,
-                                        widthSpace: 120,
-                                        closeOnTap: true,
-                                        onTap: (CompletionHandler handler) async {
-                                          showModalOne(
-                                              context,
-                                              Column(
-                                                mainAxisAlignment:
-                                                    MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  Column(
-                                                    children: [
-                                                      Text(
-                                                        "Konfirmo barazimin me biznes",
-                                                        style: AppStyles
-                                                            .getHeaderNameText(
-                                                                color: Colors
-                                                                    .blueGrey[800],
-                                                                size: 20),
-                                                      ),
-                                                      const SizedBox(
-                                                        height: 10,
-                                                      ),
-                                                      Text(
-                                                        "Emri biznesit: ${business}",
-                                                        style: AppStyles
-                                                            .getHeaderNameText(
-                                                                color: Colors
-                                                                    .blueGrey[600],
-                                                                size: 17),
-                                                      ),
-                                                    ],
-                                                  ),
-                                                  Row(
-                                                    mainAxisAlignment:
-                                                        MainAxisAlignment
-                                                            .spaceEvenly,
-                                                    children: [
-                                                      Container(
-                                                          height: 40,
-                                                          width: getPhoneWidth(
-                                                                      context) /
-                                                                  2 -
-                                                              80,
-                                                          decoration: BoxDecoration(
-                                                              color:
-                                                                  Colors.blueGrey,
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          100)),
-                                                          child: TextButton(
-                                                              onPressed: () {
-                                                                Navigator.pop(
-                                                                    context);
-                                                              },
-                                                              child: Text(
-                                                                "Jo",
-                                                                style: AppStyles
-                                                                    .getHeaderNameText(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        size: 17),
-                                                              ))),
-                                                      Container(
-                                                          height: 40,
-                                                          width: getPhoneWidth(
-                                                                      context) /
-                                                                  2 -
-                                                              80,
-                                                          decoration: BoxDecoration(
-                                                              color:
-                                                                  Colors.blueGrey,
-                                                              borderRadius:
-                                                                  BorderRadius
-                                                                      .circular(
-                                                                          100)),
-                                                          child: TextButton(
-                                                              onPressed: () {
-                                                                Navigator.pop(
-                                                                    context);
-                                                                barazo(orders.first
-                                                                    .equalCodeWithClient);
-                                                                swipeActionController
-                                                                    .closeAllOpenCell();
-                                                              },
-                                                              child: Text(
-                                                                "Po",
-                                                                style: AppStyles
-                                                                    .getHeaderNameText(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        size: 17),
-                                                              ))),
-                                                    ],
-                                                  )
-                                                ],
-                                              ),
-                                              150.0);
-                                        },
-                                        content: Container(
-                                            height: 120,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    const BorderRadius.only(
-                                                        topLeft:
-                                                            Radius.circular(20),
-                                                        bottomLeft:
-                                                            Radius.circular(20)),
-                                                color: AppColors.bottomColorTwo),
-                                            child: Center(
-                                                child: Text(
-                                              "Barazohu me\nklientin",
-                                              textAlign: TextAlign.center,
+                          String phoneNumber =
+                              orders.first.sender!.phoneNumber!;
+                          return Column(
+                            children: [
+                              index != 0
+                                  ? const SizedBox()
+                                  : Padding(
+                                      padding: const EdgeInsets.only(bottom: 5),
+                                      child: Container(
+                                          height: 50,
+                                          width: getPhoneWidth(context) - 50,
+                                          decoration: BoxDecoration(
+                                              borderRadius:
+                                                  BorderRadius.circular(10),
+                                              color: AppColors.bottomColorTwo),
+                                          child: Center(
+                                            child: Text(
+                                              "Totali per barazim: ${equalizeOrders.getEqualizationsTotalPrice()}€",
                                               style: AppStyles.getHeaderNameText(
-                                                  color: Colors.white, size: 15.0),
-                                            ))),
-                                        color: Colors.transparent),
-                                  ],
-                                  child: Container(
-                                    padding: const EdgeInsets.only(
-                                      left: 21,
-                                      right: 21,
+                                                  color: Colors.white,
+                                                  size: 17.0),
+                                            ),
+                                          )),
                                     ),
-                                    child: Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        leftSideOrder(
-                                            context,
-                                            GestureDetector(
-                                              onTap: () {
-                                                Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                        builder: (_) =>
-                                                            DeliveringSpecificOrders(
-                                                              orders: orders,
-                                                            )));
-                                              },
-                                              child: Container(
-                                                padding: const EdgeInsets.symmetric(
-                                                    horizontal: 15),
-                                                decoration: BoxDecoration(
-                                                    color: Colors.transparent,
-                                                    borderRadius:
-                                                        const BorderRadius.only(
-                                                            topLeft:
-                                                                Radius.circular(17),
-                                                            bottomLeft:
-                                                                Radius.circular(
-                                                                    17)),
-                                                    border: Border.all(
-                                                        color: AppColors
-                                                            .bottomColorOne)),
-                                                child: Column(
-                                                  mainAxisAlignment:
-                                                      MainAxisAlignment.center,
-                                                  crossAxisAlignment:
-                                                      CrossAxisAlignment.start,
-                                                  children: [
-                                                    Text(
-                                                      "Adresa: $senderAddress",
-                                                      style: AppStyles
-                                                          .getHeaderNameText(
-                                                              color: AppColors
-                                                                  .orderDescColor,
-                                                              size: 16.0),
-                                                    ),
-                                                    Text(
-                                                      "Tel: $phoneNumber",
-                                                      style: AppStyles
-                                                          .getHeaderNameText(
-                                                              color: AppColors
-                                                                  .orderDescColor,
-                                                              size: 16.0),
-                                                    ),
-                                                  ],
-                                                ),
+                              Padding(
+                                padding: const EdgeInsets.only(bottom: 7),
+                                child: Column(
+                                  crossAxisAlignment: CrossAxisAlignment.start,
+                                  children: [
+                                    SizedBox(
+                                      width: getPhoneWidth(context),
+                                      child: Row(
+                                        crossAxisAlignment:
+                                            CrossAxisAlignment.end,
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 25, bottom: 3),
+                                            child: SizedBox(
+                                              width:
+                                                  getPhoneWidth(context) / 2 -
+                                                      60,
+                                              child: Text(
+                                                business,
+                                                overflow: TextOverflow.ellipsis,
+                                                style:
+                                                    AppStyles.getHeaderNameText(
+                                                        color: Colors.white,
+                                                        size: 17.0,
+                                                        fontWeight:
+                                                            FontWeight.w600),
                                               ),
                                             ),
-                                            height: 90),
-                                        Stack(
+                                          ),
+                                          SizedBox(
+                                            height: 17,
+                                            width: 178,
+                                            child: Image.asset(
+                                              "assets/images/line.png",
+                                              color: Colors.white,
+                                              fit: BoxFit.cover,
+                                            ),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    SwipeActionCell(
+                                      key: ObjectKey(index),
+                                      backgroundColor: Colors.transparent,
+                                      // trailingActions: [
+                                      //   SwipeAction(
+                                      //       backgroundRadius: 20,
+                                      //       forceAlignmentToBoundary: false,
+                                      //       widthSpace: 120,
+                                      //       closeOnTap: true,
+                                      //       onTap: (CompletionHandler handler) async {
+                                      //         showModalOne(
+                                      //             context,
+                                      //             Column(
+                                      //               mainAxisAlignment:
+                                      //                   MainAxisAlignment.spaceBetween,
+                                      //               children: [
+                                      //                 Column(
+                                      //                   children: [
+                                      //                     Text(
+                                      //                       "Konfirmo barazimin me biznes",
+                                      //                       style: AppStyles
+                                      //                           .getHeaderNameText(
+                                      //                               color: Colors
+                                      //                                   .blueGrey[800],
+                                      //                               size: 20),
+                                      //                     ),
+                                      //                     const SizedBox(
+                                      //                       height: 10,
+                                      //                     ),
+                                      //                     Text(
+                                      //                       "Emri biznesit: $business",
+                                      //                       style: AppStyles
+                                      //                           .getHeaderNameText(
+                                      //                               color: Colors
+                                      //                                   .blueGrey[600],
+                                      //                               size: 17),
+                                      //                     ),
+                                      //                   ],
+                                      //                 ),
+                                      //                 Row(
+                                      //                   mainAxisAlignment:
+                                      //                       MainAxisAlignment
+                                      //                           .spaceEvenly,
+                                      //                   children: [
+                                      //                     Container(
+                                      //                         height: 40,
+                                      //                         width: getPhoneWidth(
+                                      //                                     context) /
+                                      //                                 2 -
+                                      //                             80,
+                                      //                         decoration: BoxDecoration(
+                                      //                             color:
+                                      //                                 Colors.blueGrey,
+                                      //                             borderRadius:
+                                      //                                 BorderRadius
+                                      //                                     .circular(
+                                      //                                         100)),
+                                      //                         child: TextButton(
+                                      //                             onPressed: () {
+                                      //                               Navigator.pop(
+                                      //                                   context);
+                                      //                             },
+                                      //                             child: Text(
+                                      //                               "Jo",
+                                      //                               style: AppStyles
+                                      //                                   .getHeaderNameText(
+                                      //                                       color: Colors
+                                      //                                           .white,
+                                      //                                       size: 17),
+                                      //                             ))),
+                                      //                     Container(
+                                      //                         height: 40,
+                                      //                         width: getPhoneWidth(
+                                      //                                     context) /
+                                      //                                 2 -
+                                      //                             80,
+                                      //                         decoration: BoxDecoration(
+                                      //                             color:
+                                      //                                 Colors.blueGrey,
+                                      //                             borderRadius:
+                                      //                                 BorderRadius
+                                      //                                     .circular(
+                                      //                                         100)),
+                                      //                         child: TextButton(
+                                      //                             onPressed: () {
+                                      //                               Navigator.pop(
+                                      //                                   context);
+                                      //                               barazo(orders.first
+                                      //                                   .equalCodeWithClient);
+                                      //                               swipeActionController
+                                      //                                   .closeAllOpenCell();
+                                      //                             },
+                                      //                             child: Text(
+                                      //                               "Po",
+                                      //                               style: AppStyles
+                                      //                                   .getHeaderNameText(
+                                      //                                       color: Colors
+                                      //                                           .white,
+                                      //                                       size: 17),
+                                      //                             ))),
+                                      //                   ],
+                                      //                 )
+                                      //               ],
+                                      //             ),
+                                      //             150.0);
+                                      //       },
+                                      //       content: Container(
+                                      //           height: 120,
+                                      //           decoration: BoxDecoration(
+                                      //               borderRadius:
+                                      //                   const BorderRadius.only(
+                                      //                       topLeft:
+                                      //                           Radius.circular(20),
+                                      //                       bottomLeft:
+                                      //                           Radius.circular(20)),
+                                      //               color: AppColors.bottomColorTwo),
+                                      //           child: Center(
+                                      //               child: Text(
+                                      //             "Barazohu me\nklientin",
+                                      //             textAlign: TextAlign.center,
+                                      //             style: AppStyles.getHeaderNameText(
+                                      //                 color: Colors.white, size: 15.0),
+                                      //           ))),
+                                      //       color: Colors.transparent),
+                                      // ],
+                                      child: Container(
+                                        padding: const EdgeInsets.only(
+                                          left: 21,
+                                          right: 21,
+                                        ),
+                                        child: Row(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
                                           children: [
-                                            GestureDetector(
-                                              onTap: () {
-                                                Navigator.of(context).push(
-                                                    MaterialPageRoute(
-                                                        builder: (_) =>
-                                                            DeliveringSpecificOrders(
-                                                              orders: orders,
-                                                            )));
-                                              },
-                                              child: Container(
-                                                width:
-                                                    getPhoneWidth(context) * 0.3 -
-                                                        25,
-                                                height: 90,
-                                                decoration: BoxDecoration(
-                                                    borderRadius:
-                                                        const BorderRadius.only(
-                                                            topRight:
-                                                                Radius.circular(20),
-                                                            bottomRight:
-                                                                Radius.circular(
-                                                                    20)),
-                                                    color:
-                                                        AppColors.bottomColorTwo),
-                                                child: Center(
-                                                  child: Text(
-                                                    "${orders.length}\nporosi",
-                                                    textAlign: TextAlign.center,
-                                                    style:
-                                                        AppStyles.getHeaderNameText(
-                                                            color: Colors.white,
-                                                            size: 15.0),
+                                            leftSideOrder(
+                                                context,
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.of(context).push(
+                                                        MaterialPageRoute(
+                                                            builder: (_) =>
+                                                                DeliveringSpecificOrders(
+                                                                  orders:
+                                                                      orders,statusi: "perbarazim",
+                                                                )));
+                                                  },
+                                                  child: Container(
+                                                    padding: const EdgeInsets
+                                                            .symmetric(
+                                                        horizontal: 15),
+                                                    decoration: BoxDecoration(
+                                                        color: Colors
+                                                            .transparent,
+                                                        borderRadius:
+                                                            const BorderRadius
+                                                                    .only(
+                                                                topLeft: Radius
+                                                                    .circular(
+                                                                        17),
+                                                                bottomLeft: Radius
+                                                                    .circular(
+                                                                        17)),
+                                                        border: Border.all(
+                                                            color: AppColors
+                                                                .bottomColorOne)),
+                                                    child: Column(
+                                                      mainAxisAlignment:
+                                                          MainAxisAlignment
+                                                              .center,
+                                                      crossAxisAlignment:
+                                                          CrossAxisAlignment
+                                                              .start,
+                                                      children: [
+                                                        Text(
+                                                          "Adresa: $senderAddress",
+                                                          style: AppStyles
+                                                              .getHeaderNameText(
+                                                                  color: AppColors
+                                                                      .orderDescColor,
+                                                                  size: 16.0),
+                                                        ),
+                                                        Text(
+                                                          "Tel: $phoneNumber",
+                                                          style: AppStyles
+                                                              .getHeaderNameText(
+                                                                  color: AppColors
+                                                                      .orderDescColor,
+                                                                  size: 16.0),
+                                                        ),
+                                                        Text(
+                                                          "Cmimi: ${equalizeOrders.getClientEqualizationsTotalPrice(businessId)}€",
+                                                          style: AppStyles
+                                                              .getHeaderNameText(
+                                                                  color: AppColors
+                                                                      .orderDescColor,
+                                                                  size: 16.0),
+                                                        ),
+                                                      ],
+                                                    ),
                                                   ),
                                                 ),
-                                              ),
+                                                height: 90),
+                                            Stack(
+                                              children: [
+                                                GestureDetector(
+                                                  onTap: () {
+                                                    Navigator.of(context).push(
+                                                        MaterialPageRoute(
+                                                            builder: (_) =>
+                                                                DeliveringSpecificOrders(
+                                                                  orders:
+                                                                      orders,statusi: "perbarazim",
+                                                                )));
+                                                  },
+                                                  child: Container(
+                                                    width:
+                                                        getPhoneWidth(context) *
+                                                                0.3 -
+                                                            25,
+                                                    height: 90,
+                                                    decoration: BoxDecoration(
+                                                        borderRadius:
+                                                            const BorderRadius
+                                                                    .only(
+                                                                topRight: Radius
+                                                                    .circular(
+                                                                        20),
+                                                                bottomRight: Radius
+                                                                    .circular(
+                                                                        20)),
+                                                        color: AppColors
+                                                            .bottomColorTwo),
+                                                    child: Center(
+                                                      child: Text(
+                                                        "${orders.length}\nporosi",
+                                                        textAlign:
+                                                            TextAlign.center,
+                                                        style: AppStyles
+                                                            .getHeaderNameText(
+                                                                color: Colors
+                                                                    .white,
+                                                                size: 15.0),
+                                                      ),
+                                                    ),
+                                                  ),
+                                                ),
+                                                Positioned(
+                                                    right: -2,
+                                                    top: 10,
+                                                    child: GestureDetector(
+                                                        onTap: () {
+                                                          Navigator.of(context).push(
+                                                              MaterialPageRoute(
+                                                                  builder: (_) =>
+                                                                      DeliveringSpecificOrders(
+                                                                        orders:
+                                                                            orders,statusi: "perbarazim",
+                                                                      )));
+                                                        },
+                                                        child: SizedBox(
+                                                            height: 60,
+                                                            child: Image.asset(
+                                                              "assets/icons/8.png",
+                                                              color: Colors
+                                                                  .white
+                                                                  .withOpacity(
+                                                                      0.7),
+                                                            )))),
+                                              ],
                                             ),
-                                            Positioned(
-                                                right: -2,
-                                                top: 10,
-                                                child: GestureDetector(
-                                                    onTap: () {
-                                                      Navigator.of(context).push(
-                                                          MaterialPageRoute(
-                                                              builder: (_) =>
-                                                                    DeliveringSpecificOrders(orders: orders,)));
-                                                    },
-                                                    child: SizedBox(
-                                                        height: 60,
-                                                        child: Image.asset(
-                                                          "assets/icons/8.png",
-                                                          color: Colors.white
-                                                              .withOpacity(0.7),
-                                                        )))),
                                           ],
                                         ),
-                                      ],
-                                    ),
-                                  ),
-                                )
-                              ],
-                            ),
+                                      ),
+                                    )
+                                  ],
+                                ),
+                              ),
+                            ],
                           );
                         },
                         itemCount: equalizeOrders.getEqualizations().length,
                       ),
           ),
-      Positioned(bottom: 30,right: 30,child: GestureDetector(
-        onTap: () async {
-          String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-              "#ff6666",
-              "Largo",
-              true,
-              ScanMode.QR).then((value) {
-            return value;
-          });
-          if(barcodeScanRes.isNotEmpty){
-            scanoPorosine(barcodeScanRes);
-          }
-          else{
-
-          }
-        },
-        child: Container(
-          decoration: BoxDecoration(
-            borderRadius: BorderRadius.circular(100),
-            color: Colors.grey[200],
-          ),
-          width: 65,height: 65,child: Icon(Icons.qr_code_2,size: 30,),
-        ),
-      ))
-    ],
-  );
-  teBarazuara(EqualizedOrdersProvier equalizedOrders) => RefreshIndicator(
-    onRefresh: () async {
-      getEqualizedOrders();
-    },
-    child: equalizedOrders.isFetchingPendingOrders()
-        ? ListView(
-      children: const [
-        Center(
-            child: CircularProgressIndicator(
-              color: Colors.white,
-              strokeWidth: 1.4,
-            )),
-      ],
-    )
-        : equalizedOrders.getEqualizations().isEmpty
-        ? RefreshIndicator(
-      onRefresh: () async {
-        getEqualizedOrders();
-      },
-      child: ListView(
-        padding: const EdgeInsets.all(0),
-        children: [
-          Center(
-              child: Text(
-                "Nuk keni asnje porosi",
-                style: AppStyles.getHeaderNameText(
-                    color: Colors.white, size: 17),
-              )),
+          Positioned(
+              bottom: 30,
+              right: 30,
+              child: GestureDetector(
+                onTap: () async {
+                  String barcodeScanRes =
+                      await FlutterBarcodeScanner.scanBarcode(
+                              "#ff6666", "Largo", true, ScanMode.QR)
+                          .then((value) {
+                    return value;
+                  });
+                  if (barcodeScanRes.isNotEmpty) {
+                    scanoPorosine(barcodeScanRes);
+                  } else {}
+                },
+                child: Container(
+                  decoration: BoxDecoration(
+                    borderRadius: BorderRadius.circular(100),
+                    color: Colors.grey[200],
+                  ),
+                  width: 65,
+                  height: 65,
+                  child: const Icon(
+                    Icons.qr_code_2,
+                    size: 30,
+                  ),
+                ),
+              ))
         ],
-      ),
-    )
-        : ListView.builder(
-          padding: const EdgeInsets.all(0),
-          itemBuilder: (context, index) {
-            String senderId = equalizedOrders
-                .getEqualizations()
-                .keys
-                .elementAt(index);
-            List<OrderModel> orders =
-            equalizedOrders.getEqualizations()[senderId]!;
-            String business = orders.first.sender!.businessName!;
-            String senderAddress = orders.first.sender!.address!;
-            String phoneNumber = orders.first.sender!.phoneNumber!;
-            String city = orders.first.sender!.city!;
-            return Padding(
-              padding: const EdgeInsets.only(bottom: 7),
-              child: Column(
-                crossAxisAlignment: CrossAxisAlignment.start,
-                children: [
-                  SizedBox(
-                    width: getPhoneWidth(context),
-                    child: Row(
-                      crossAxisAlignment: CrossAxisAlignment.end,
+      );
+  teBarazuara(EqualizedOrdersProvier equalizedOrders) => RefreshIndicator(
+        onRefresh: () async {
+          getEqualizedOrders();
+        },
+        child: equalizedOrders.isFetchingPendingOrders()
+            ? ListView(
+                children: const [
+                  Center(
+                      child: CircularProgressIndicator(
+                    color: Colors.white,
+                    strokeWidth: 1.4,
+                  )),
+                ],
+              )
+            : equalizedOrders.getEqualizations().isEmpty
+                ? RefreshIndicator(
+                    onRefresh: () async {
+                      getEqualizedOrders();
+                    },
+                    child: ListView(
+                      padding: const EdgeInsets.all(0),
                       children: [
-                        Padding(
-                          padding: const EdgeInsets.only(left: 25, bottom: 3),
-                          child: SizedBox(
-                            width: getPhoneWidth(context) / 2 - 60,
+                        Center(
                             child: Text(
-                              business,
-                              overflow: TextOverflow.ellipsis,
-                              style: AppStyles.getHeaderNameText(
-                                  color: Colors.white,
-                                  size: 17.0,
-                                  fontWeight: FontWeight.w600),
-                            ),
-                          ),
-                        ),
-                        SizedBox(
-                          height: 17,
-                          width: 178,
-                          child: Image.asset(
-                            "assets/images/line.png",
-                            color: Colors.white,
-                            fit: BoxFit.cover,
-                          ),
-                        ),
+                          "Nuk keni asnje porosi",
+                          style: AppStyles.getHeaderNameText(
+                              color: Colors.white, size: 17),
+                        )),
                       ],
                     ),
-                  ),
-                  Container(
-                    padding: const EdgeInsets.only(
-                      left: 21,
-                      right: 21,
-                    ),
-                    child: Row(
-                      mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                      children: [
-                        leftSideOrder(
-                          context,
-                          GestureDetector(
-                            onTap: () {
-                              Navigator.of(context).push(MaterialPageRoute(
-                                  builder: (_) =>
-                                        DeliveringSpecificOrders(orders: orders,)));
-                            },
-                            child: Container(
-                              padding: const EdgeInsets.symmetric(horizontal: 15),
-                              decoration: BoxDecoration(
-                                  color: Colors.transparent,
-                                  borderRadius: const BorderRadius.only(
-                                      topLeft: Radius.circular(17),
-                                      bottomLeft: Radius.circular(17)),
-                                  border: Border.all(
-                                      color: AppColors.bottomColorOne)),
-                              child: Column(
-                                mainAxisAlignment: MainAxisAlignment.center,
-                                crossAxisAlignment: CrossAxisAlignment.start,
+                  )
+                : ListView.builder(
+                    padding: const EdgeInsets.all(0),
+                    itemBuilder: (context, index) {
+                      String senderId = equalizedOrders
+                          .getEqualizations()
+                          .keys
+                          .elementAt(index);
+                      List<OrderModel> orders =
+                          equalizedOrders.getEqualizations()[senderId]!;
+                      String business = orders.first.sender!.businessName!;
+                      String senderAddress = orders.first.sender!.address!;
+                      String phoneNumber = orders.first.sender!.phoneNumber!;
+                      String city = orders.first.sender!.city!;
+                      return Padding(
+                        padding: const EdgeInsets.only(bottom: 7),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            SizedBox(
+                              width: getPhoneWidth(context),
+                              child: Row(
+                                crossAxisAlignment: CrossAxisAlignment.end,
                                 children: [
-                                  Text(
-                                    "Adress: ${senderAddress}",
-                                    style: AppStyles.getHeaderNameText(
-                                        color: AppColors.orderDescColor,
-                                        size: 16.0),
+                                  Padding(
+                                    padding: const EdgeInsets.only(
+                                        left: 25, bottom: 3),
+                                    child: SizedBox(
+                                      width: getPhoneWidth(context) / 2 - 60,
+                                      child: Text(
+                                        business,
+                                        overflow: TextOverflow.ellipsis,
+                                        style: AppStyles.getHeaderNameText(
+                                            color: Colors.white,
+                                            size: 17.0,
+                                            fontWeight: FontWeight.w600),
+                                      ),
+                                    ),
                                   ),
-                                  Text(
-                                    "Tel: ${phoneNumber}",
-                                    style: AppStyles.getHeaderNameText(
-                                        color: AppColors.orderDescColor,
-                                        size: 16.0),
-                                  ),
-                                  Text(
-                                    "Qyteti: ${city}",
-                                    style: AppStyles.getHeaderNameText(
-                                        color: AppColors.orderDescColor,
-                                        size: 16.0),
+                                  SizedBox(
+                                    height: 17,
+                                    width: 178,
+                                    child: Image.asset(
+                                      "assets/images/line.png",
+                                      color: Colors.white,
+                                      fit: BoxFit.cover,
+                                    ),
                                   ),
                                 ],
                               ),
                             ),
-                          ),
-                        ),
-                        Stack(
-                          children: [
                             Container(
-                              width: getPhoneWidth(context) * 0.3 - 25,
-                              height: 80,
-                              decoration: BoxDecoration(
-                                  borderRadius: const BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      bottomRight: Radius.circular(20)),
-                                  color: AppColors.bottomColorTwo),
-                              child: Center(
-                                child: Text(
-                                  "${orders.length}\nporosi",
-                                  textAlign: TextAlign.center,
-                                  style: AppStyles.getHeaderNameText(color: Colors.white, size: 15.0),
-                                ),
+                              padding: const EdgeInsets.only(
+                                left: 21,
+                                right: 21,
                               ),
-                            ),
-                            Positioned(
-                                right: -2,
-                                top: 10,
-                                child:
-                                SizedBox(height: 60, child: Image.asset("assets/icons/8.png",color: Colors.white.withOpacity(0.7),))),
+                              child: Row(
+                                mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                children: [
+                                  leftSideOrder(
+                                    context,
+                                    GestureDetector(
+                                      onTap: () {
+                                        Navigator.of(context).push(
+                                            MaterialPageRoute(
+                                                builder: (_) =>
+                                                    DeliveringSpecificOrders(
+                                                      orders: orders,statusi: "barazuar",
+                                                    )));
+                                      },
+                                      child: Container(
+                                        padding: const EdgeInsets.symmetric(
+                                            horizontal: 15),
+                                        decoration: BoxDecoration(
+                                            color: Colors.transparent,
+                                            borderRadius:
+                                                const BorderRadius.only(
+                                                    topLeft:
+                                                        Radius.circular(17),
+                                                    bottomLeft:
+                                                        Radius.circular(17)),
+                                            border: Border.all(
+                                                color:
+                                                    AppColors.bottomColorOne)),
+                                        child: Column(
+                                          mainAxisAlignment:
+                                              MainAxisAlignment.center,
+                                          crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                          children: [
+                                            Text(
+                                              "Adress: $senderAddress",
+                                              style:
+                                                  AppStyles.getHeaderNameText(
+                                                      color: AppColors
+                                                          .orderDescColor,
+                                                      size: 16.0),
+                                            ),
+                                            Text(
+                                              "Tel: $phoneNumber",
+                                              style:
+                                                  AppStyles.getHeaderNameText(
+                                                      color: AppColors
+                                                          .orderDescColor,
+                                                      size: 16.0),
+                                            ),
+                                            Text(
+                                              "Qyteti: $city",
+                                              style:
+                                                  AppStyles.getHeaderNameText(
+                                                      color: AppColors
+                                                          .orderDescColor,
+                                                      size: 16.0),
+                                            ),
+                                          ],
+                                        ),
+                                      ),
+                                    ),
+                                  ),
+                                  Stack(
+                                    children: [
+                                      Container(
+                                        width:
+                                            getPhoneWidth(context) * 0.3 - 25,
+                                        height: 80,
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                                const BorderRadius.only(
+                                                    topRight:
+                                                        Radius.circular(20),
+                                                    bottomRight:
+                                                        Radius.circular(20)),
+                                            color: AppColors.bottomColorTwo),
+                                        child: Center(
+                                          child: Text(
+                                            "${orders.length}\nporosi",
+                                            textAlign: TextAlign.center,
+                                            style: AppStyles.getHeaderNameText(
+                                                color: Colors.white,
+                                                size: 15.0),
+                                          ),
+                                        ),
+                                      ),
+                                      Positioned(
+                                          right: -2,
+                                          top: 10,
+                                          child: SizedBox(
+                                              height: 60,
+                                              child: Image.asset(
+                                                "assets/icons/8.png",
+                                                color: Colors.white
+                                                    .withOpacity(0.7),
+                                              ))),
+                                    ],
+                                  )
+                                ],
+                              ),
+                            )
                           ],
-                        )
-                      ],
-                    ),
-                  )
-                ],
-              ),
-            );
-          },
-          itemCount: equalizedOrders.getEqualizations().length,
-        ),
-  );
+                        ),
+                      );
+                    },
+                    itemCount: equalizedOrders.getEqualizations().length,
+                  ),
+      );
 }

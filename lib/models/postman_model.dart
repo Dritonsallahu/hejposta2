@@ -1,5 +1,4 @@
-import 'package:hejposta/models/city_model.dart';
-import 'package:hejposta/models/client_model.dart';
+
 import 'package:hejposta/models/user_model.dart';
 
 class PostmanModel {
@@ -10,7 +9,7 @@ class PostmanModel {
   List<dynamic>? cities;
   List<dynamic>? units;
   int? salary;
-  double? onSuccessDeliveryBonus;
+  dynamic? onSuccessDeliveryBonus;
   String? note;
   String? phoneNumber;
   dynamic areas = [];
@@ -35,11 +34,13 @@ class PostmanModel {
 
   factory PostmanModel.fromJson(Map<String, dynamic> fromJson) {
     var postman = fromJson['user']['postman'];
+
     List<Areas> areas = [];
     for(int i=0;i<postman['areas'].length;i++){
       var a = Areas(name: postman['areas'][i]['name'],cityName: postman['areas'][i]['cityName']);
       areas.add(a);
     }
+      print(postman['onSuccessDeliveryBonus']);
     return PostmanModel(
       postmanId: postman['_id'],
       fullName: postman['fullName'],
@@ -59,15 +60,22 @@ class PostmanModel {
 }
 
 class Areas{
+  String? id;
   String? name;
   String? cityName;
 
-  Areas({this.name,this.cityName});
+  Areas({this.id,this.name,this.cityName});
 
   factory Areas.fromJson(Map<String, dynamic> json){
     return Areas(
+      id: json['_id'],
       name: json['name'],
       cityName: json['cityName'],
     );
+  }
+
+  String toStringModel() {
+
+    return "${id!}- ${name!} - ${cityName!}";
   }
 }

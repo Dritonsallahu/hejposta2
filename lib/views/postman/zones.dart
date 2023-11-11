@@ -2,13 +2,13 @@ import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hejposta/controllers/city_controller.dart';
 import 'package:hejposta/controllers/zones_controller.dart';
-import 'package:hejposta/models/postman_model.dart';
 import 'package:hejposta/my_code.dart';
 import 'package:hejposta/providers/city_provider.dart';
 import 'package:hejposta/providers/general_provider.dart';
 import 'package:hejposta/providers/user_provider.dart';
 import 'package:hejposta/settings/app_colors.dart';
 import 'package:hejposta/settings/app_styles.dart';
+import 'package:hejposta/shortcuts/modals.dart';
 import 'package:hejposta/views/postman/postman_drawer.dart';
 import 'package:provider/provider.dart';
 
@@ -35,9 +35,27 @@ TextEditingController cityName = TextEditingController();
     super.initState();
   }
 
+  bool loading = false;
   addZone(){
+    setState(() {
+      loading = true;
+    });
     ZonesController zonesController = ZonesController();
-    zonesController.addZone(context, name.text, cityName.text);
+    zonesController.addZone(context, name.text, cityName.text).then((value){
+      if(value == "success"){
+        setState(() {
+          name.text = "";
+        });
+      }
+      else{
+        showMessageModal(context, "Shtimi i zones deshtoi!\nProvoni perseri.", 17.0);
+      }
+    }).whenComplete((){
+      getPostmanZones();
+      setState(() {
+        loading = false;
+      });
+    });
   }
 
   getQytetet(){
@@ -48,12 +66,17 @@ TextEditingController cityName = TextEditingController();
     ZonesController zonesController = ZonesController();
     zonesController.getZones(context);
   }
+
+  deleteZone(id){
+    ZonesController zonesController = ZonesController();
+    zonesController.deleteZone(context, id);
+  }
+
   @override
   Widget build(BuildContext context) {
     var qytetet = Provider.of<CityProvier>(context);
     var generalProvider = Provider.of<GeneralProvider>(context, listen: true);
     var user = Provider.of<UserProvider>(context, listen: true);
-    print(user.getUser()!.areas);
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: AppColors.bottomColorTwo,
@@ -230,12 +253,14 @@ TextEditingController cityName = TextEditingController();
                         ),
                       ),
                     ),
-                    SizedBox(height: 20,),
+                    const SizedBox(height: 20,),
                     Padding(
                       padding: const EdgeInsets.symmetric(horizontal: 25),
                       child: GestureDetector(
                         onTap: () {
-                          addZone();
+                          if(!loading){
+                            addZone();
+                          }
                         },
                         child: Container(
                           width: getPhoneWidth(context),
@@ -250,7 +275,7 @@ TextEditingController cityName = TextEditingController();
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.center,
                             children: [
-                              Text(
+                              loading ? CircularProgressIndicator(strokeWidth: 1.5,color: Colors.blueGrey,) :Text(
                                 "Ruaje",
                                 style: AppStyles.getHeaderNameText(
                                     color: Colors.grey[900], size: 16.0),
@@ -280,7 +305,7 @@ TextEditingController cityName = TextEditingController();
                                           border: const Border(
                                               bottom: BorderSide(
                                                   color: Colors.blueGrey))),
-                                      width: getPhoneWidth(context) / 2 - 27,
+                                      width: getPhoneWidth(context) / 3 +10,
                                       child: Row(
                                         children: [
                                           Text(
@@ -299,11 +324,30 @@ TextEditingController cityName = TextEditingController();
                                           border: const Border(
                                               bottom: BorderSide(
                                                   color: Colors.blueGrey))),
-                                      width: getPhoneWidth(context) / 2 - 17,
+                                      width: getPhoneWidth(context) / 3 ,
                                       child: Row(
                                         children: [
                                           Text(
                                             "Qyteti",
+                                            style: AppStyles.getHeaderNameText(
+                                                color: Colors.blueGrey, size: 15.0),
+                                          ),
+                                        ],
+                                      ),
+                                    ),
+                                    Container(
+                                      padding: const EdgeInsets.symmetric(
+                                          vertical: 8, horizontal: 8),
+                                      decoration: BoxDecoration(
+                                          color: Colors.white.withOpacity(0.8),
+                                          border: const Border(
+                                              bottom: BorderSide(
+                                                  color: Colors.blueGrey))),
+                                      width: getPhoneWidth(context) / 3 - 17,
+                                      child: Row(
+                                        children: [
+                                          Text(
+                                            "Opsione",
                                             style: AppStyles.getHeaderNameText(
                                                 color: Colors.blueGrey, size: 15.0),
                                           ),
@@ -315,27 +359,116 @@ TextEditingController cityName = TextEditingController();
                               ],
                             ),
                           ),
-                          user.getUser()!.areas == null ? SizedBox(): Table(
+                          user.getUser()!.areas == null ? const SizedBox(): Table(
                             children: List.generate(user.getUser()!.areas.length, (index) {
                               return TableRow(
                                   decoration: BoxDecoration(
                                       color: Colors.white.withOpacity(0.8)),
                                   children: [
-                                    Padding(
-                                      padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        user.getUser()!.areas![index].name.toString(),
-                                        style: AppStyles.getHeaderNameText(
-                                            color: Colors.blueGrey, size: 15.0),
+                                    SizedBox(
+                                      width: getPhoneWidth(context) /3 +10,
+                                      height: 55,
+                                      child: Center(
+                                        child: Text(
+                                          user.getUser()!.areas![index].name.toString(),
+                                          style: AppStyles.getHeaderNameText(
+                                              color: Colors.blueGrey, size: 15.0),
+                                        ),
+                                      ),
+                                    ),
+                                    SizedBox(
+                                      height: 55,
+                                      child: Center(
+                                        child: Text(
+                                          user.getUser()!.areas![index].cityName.toString(),
+                                          style: AppStyles.getHeaderNameText(
+                                              color: Colors.blueGrey, size: 15.0),
+                                        ),
                                       ),
                                     ),
                                     Padding(
                                       padding: const EdgeInsets.all(8.0),
-                                      child: Text(
-                                        user.getUser()!.areas![index].cityName.toString(),
-                                        style: AppStyles.getHeaderNameText(
-                                            color: Colors.blueGrey, size: 15.0),
-                                      ),
+                                      child: TextButton(onPressed: (){
+                                        showModalOne(
+                                            context,
+                                            Column(
+                                              mainAxisAlignment:
+                                              MainAxisAlignment.spaceBetween,
+                                              children: [
+                                                Column(
+                                                  children: [
+                                                    Text(
+                                                      "Deshironi ta fshini zonen ?",
+                                                      style: AppStyles
+                                                          .getHeaderNameText(
+                                                          color: Colors
+                                                              .blueGrey[800],
+                                                          size: 17),
+                                                    ),
+                                                    const SizedBox(
+                                                      height: 10,
+                                                    ),
+                                                  ],
+                                                ),
+                                                Row(
+                                                  mainAxisAlignment:
+                                                  MainAxisAlignment.spaceEvenly,
+                                                  children: [
+                                                    Container(
+                                                        height: 40,
+                                                        width:
+                                                        getPhoneWidth(context) /
+                                                            2 -
+                                                            80,
+                                                        decoration: BoxDecoration(
+                                                            color: Colors.blueGrey,
+                                                            borderRadius:
+                                                            BorderRadius
+                                                                .circular(100)),
+                                                        child: TextButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  context);
+                                                            },
+                                                            child: Text(
+                                                              "Jo",
+                                                              style: AppStyles
+                                                                  .getHeaderNameText(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  size: 17),
+                                                            ))),
+                                                    Container(
+                                                        height: 40,
+                                                        width:
+                                                        getPhoneWidth(context) /
+                                                            2 -
+                                                            80,
+                                                        decoration: BoxDecoration(
+                                                            color: Colors.blueGrey,
+                                                            borderRadius:
+                                                            BorderRadius
+                                                                .circular(100)),
+                                                        child: TextButton(
+                                                            onPressed: () {
+                                                              Navigator.pop(
+                                                                  context);
+                                                              deleteZone(user.getUser()!.areas![index].id);
+                                                            },
+                                                            child: Text(
+                                                              "Po",
+                                                              style: AppStyles
+                                                                  .getHeaderNameText(
+                                                                  color: Colors
+                                                                      .white,
+                                                                  size: 17),
+                                                            ))),
+                                                  ],
+                                                )
+                                              ],
+                                            ),
+                                            150.0);
+                                      },child: Text("Fshije"),),
                                     ),
                                   ]
                                   );

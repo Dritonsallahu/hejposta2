@@ -428,3 +428,31 @@ checkUserStatus(response, context) {
 
 
 }
+checkTime(DateTime time){
+  var diferenca = DateTime.now().difference(time);
+    if(diferenca.inSeconds <=59){
+      return "para ${diferenca.inSeconds} sek";
+    }
+    else if(diferenca.inMinutes <= 59){
+      return "para ${diferenca.inMinutes} min";
+    }
+    else if(diferenca.inHours <= 23 && diferenca.inMinutes <=59){
+      return "para ${diferenca.inHours} ore";
+    }
+    else if(diferenca.inDays <= 31){
+      return "para ${diferenca.inDays} dite";
+    }
+    else if(diferenca.inDays > 31 && diferenca.inDays < 60){
+      return "para 1 muaji";
+    }
+    else if(diferenca.inDays > 60 && diferenca.inDays < 90){
+      return "para 2 muaji";
+    }
+    else if(diferenca.inDays > 90 && diferenca.inDays < 120){
+      return "para 3 muajve";
+    }
+    else {
+      return "me shum se 4 muaj";
+    }
+
+}

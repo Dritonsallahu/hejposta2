@@ -1,4 +1,5 @@
 class ReceiverModel {
+  String? id;
   String? fullName;
   String? address;
   String? city;
@@ -6,6 +7,7 @@ class ReceiverModel {
   String? phoneNumber;
 
   ReceiverModel({
+    this.id,
     this.fullName,
     this.address,
     this.city,
@@ -14,7 +16,9 @@ class ReceiverModel {
   });
 
   factory ReceiverModel.fromJson(Map<String, dynamic> fromJson){
+
     return ReceiverModel(
+        id: fromJson['buyer'],
         fullName: fromJson['fullName'],
         address: fromJson['address'],
         city: fromJson['city'],

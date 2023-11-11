@@ -22,6 +22,26 @@ class ProductProvider extends ChangeNotifier{
     notifyListeners();
   }
 
+  updateProduct(ProductModel product){
+   for(int i=0;i<_products.length;i++){
+     if(_products[i].id == product.id){
+       _products[i] = product;
+     }
+   }
+   for(int i=0;i<_productsFilter.length;i++){
+     if(_productsFilter[i].id == product.id){
+       _productsFilter[i] = product;
+     }
+   }
+    notifyListeners();
+  }
+
+  deleteProduct(ProductModel product){
+  _products.remove(product);
+  _productsFilter.remove(product);
+    notifyListeners();
+  }
+
   removeProduct(){
     _products.clear();
     _productsFilter.clear();

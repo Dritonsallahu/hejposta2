@@ -21,7 +21,7 @@ class GoalModel {
 
   factory GoalModel.fromJson(Map<String, dynamic> fromJson) {
     return GoalModel(
-        id: fromJson['id'],
+        id: fromJson['_id'],
         client: fromJson['client'],
         startDate: fromJson['startDate'],
         endDate: fromJson['endDate'],

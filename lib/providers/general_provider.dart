@@ -9,7 +9,6 @@ class GeneralProvider extends ChangeNotifier {
   isColorGreen() => isCurrentColorGreen;
 
   changeDrawerStatus(bool status){
-    print("drawer is off: $status");
     isDrawerOpen = status;
     notifyListeners();
   }

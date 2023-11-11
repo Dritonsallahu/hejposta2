@@ -48,8 +48,13 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
 
   bool search = false;
   bool requesting = false;
+  bool loadedOrder = false;
+  bool deliveredOrder = false;
+  bool rejectedOrder = false;
+  bool returnedOrder = false;
   bool hasReason = false;
   int reasonType = -1;
+  String zone = "";
   List<String> reasons = [
     "Produkti eshte i demtuar",
     "Produkti eshte i hapur",
@@ -102,11 +107,16 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
     });
     PostmanOrdersController postmanOrdersController = PostmanOrdersController();
     postmanOrdersController.dergoTeKlientiPorosine(context, id).then((value) {
-      print(value == "success");
-      print(value);
       if (value == "success") {
-      }
-      else if (value == "NotFound") {
+        setState(() {
+          deliveredOrder = true;
+        });
+        Future.delayed(const Duration(milliseconds: 900)).then((d){
+          setState(() {
+            deliveredOrder = false;
+          });
+        });
+      } else if (value == "NotFound") {
         showModalOne(
             context,
             Column(
@@ -115,7 +125,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                 Column(
                   children: [
                     Text(
-                      "Nuk ekziston kjo porosi ne pritje",
+                      "Nuk ekziston kjo porosi per dergese",
                       style: AppStyles.getHeaderNameText(
                           color: Colors.blueGrey[800], size: 20),
                     ),
@@ -189,8 +199,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
               ],
             ),
             150.0);
-      }
-      else {
+      } else {
         showModalOne(
             context,
             Column(
@@ -199,7 +208,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                 Column(
                   children: [
                     Text(
-                      "Pranimi i porosise deshtoi",
+                      value,textAlign: TextAlign.center,
                       style: AppStyles.getHeaderNameText(
                           color: Colors.blueGrey[800], size: 20),
                     ),
@@ -232,7 +241,6 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
             ),
             150.0);
       }
-
     }).whenComplete(() {
       setState(() {
         requesting = false;
@@ -250,9 +258,16 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
             context, id, reasons[reasonType], _comment.text)
         .then((value) {
       if (value == "success") {
-        Navigator.pop(context);
+        setState(() {
+          rejectedOrder = true;
+        });
+        Future.delayed(const Duration(milliseconds: 900)).then((d){
+          setState(() {
+            rejectedOrder = false;
+          });
+        });
       } else if (value == "NotFound") {
-        Navigator.pop(context);
+
         showModalOne(
             context,
             Column(
@@ -334,7 +349,8 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
               ],
             ),
             150.0);
-      } else {
+      }
+      else {
         showModalOne(
             context,
             Column(
@@ -343,7 +359,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                 Column(
                   children: [
                     Text(
-                      "Refuzimi i porosise deshtoi",
+                      value,textAlign: TextAlign.center,
                       style: AppStyles.getHeaderNameText(
                           color: Colors.blueGrey[800], size: 20),
                     ),
@@ -396,6 +412,14 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
             context, id, reasons[reasonType], _comment.text)
         .then((value) {
       if (value == "success") {
+        setState(() {
+          returnedOrder = true;
+        });
+        Future.delayed(const Duration(milliseconds: 900)).then((d){
+          setState(() {
+            returnedOrder = false;
+          });
+        });
       } else if (value == "NotFound") {
         showModalOne(
             context,
@@ -487,7 +511,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                 Column(
                   children: [
                     Text(
-                      "Refuzimi i porosise deshtoi",
+                      value,
                       style: AppStyles.getHeaderNameText(
                           color: Colors.blueGrey[800], size: 20),
                     ),
@@ -530,75 +554,222 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
     });
   }
 
-  scanOrder(orderNumber,type) {
-    showModalOne(
-        context,
-        Column(
-          mainAxisAlignment:
-          MainAxisAlignment.spaceBetween,
-          children: [
+  loadOrder(id) {
+    setState(() {
+      requesting = true;
+    });
+    PostmanOrdersController postmanOrdersController = PostmanOrdersController();
+    postmanOrdersController
+        .ngarkoPorosinePerDergese(
+            context, id, zone)
+        .then((value) {
+      if (value == "success") {
+        setState(() {
+          loadedOrder = true;
+        });
+        Future.delayed(const Duration(milliseconds: 900)).then((d){
+          setState(() {
+            loadedOrder = false;
+          });
+        });
+      } else if (value == "NotFound") {
+        showModalOne(
+            context,
             Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Text(
-                  "Konfirmo ${type == "deliver" ? "pranimin":type == "reject" ? "anulimin":"rikthimin"} e porosise",
-                  style: AppStyles.getHeaderNameText(
-                      color: Colors.blueGrey[800],
-                      size: 20),
+                Column(
+                  children: [
+                    Text(
+                      "Kjo porosi nuk ekziston!",
+                      style: AppStyles.getHeaderNameText(
+                          color: Colors.blueGrey[800], size: 20),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
                 ),
-                const SizedBox(
-                  height: 10,
-                ),
-                Text(
-                  "Numri porosise: ${orderNumber}",
-                  style: AppStyles.getHeaderNameText(
-                      color: Colors.blueGrey[600],
-                      size: 17),
-                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                        height: 40,
+                        width: getPhoneWidth(context) / 2 - 80,
+                        decoration: BoxDecoration(
+                            color: Colors.blueGrey,
+                            borderRadius: BorderRadius.circular(100)),
+                        child: TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              "Largo",
+                              style: AppStyles.getHeaderNameText(
+                                  color: Colors.white, size: 17),
+                            ))),
+                  ],
+                )
               ],
             ),
-            Row(
-              mainAxisAlignment:
-              MainAxisAlignment.spaceEvenly,
+            150.0);
+      } else if (value == "NotValid") {
+        showModalOne(
+            context,
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
               children: [
-                Container(
-                    height: 40,
-                    width:
-                    getPhoneWidth(context) / 2 - 80,
-                    decoration: BoxDecoration(
-                        color: Colors.blueGrey,
-                        borderRadius:
-                        BorderRadius.circular(100)),
-                    child: TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                        },
-                        child: Text(
-                          "Jo",
-                          style: AppStyles
-                              .getHeaderNameText(
-                              color: Colors.white,
-                              size: 17),
-                        ))),
-                Container(
-                    height: 40,
-                    width:
-                    getPhoneWidth(context) / 2 - 80,
-                    decoration: BoxDecoration(
-                        color: Colors.blueGrey,
-                        borderRadius:
-                        BorderRadius.circular(100)),
-                    child: TextButton(
-                        onPressed: () {
-                          Navigator.pop(context);
-                          if(type == "deliver"){
-                            deliverOrder(orderNumber);
+                Column(
+                  children: [
+                    Text(
+                      "Shifra e porosise eshte jo valide!",
+                      style: AppStyles.getHeaderNameText(
+                          color: Colors.blueGrey[800], size: 20),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                        height: 40,
+                        width: getPhoneWidth(context) / 2 - 80,
+                        decoration: BoxDecoration(
+                            color: Colors.blueGrey,
+                            borderRadius: BorderRadius.circular(100)),
+                        child: TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              "Largo",
+                              style: AppStyles.getHeaderNameText(
+                                  color: Colors.white, size: 17),
+                            ))),
+                  ],
+                )
+              ],
+            ),
+            150.0);
+      } else {
+        showModalOne(
+            context,
+            Column(
+              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      value,
+                      style: AppStyles.getHeaderNameText(
+                          color: Colors.blueGrey[800], size: 20),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment: MainAxisAlignment.center,
+                  children: [
+                    Container(
+                        height: 40,
+                        width: getPhoneWidth(context) / 2 - 80,
+                        decoration: BoxDecoration(
+                            color: Colors.blueGrey,
+                            borderRadius: BorderRadius.circular(100)),
+                        child: TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              "Largo",
+                              style: AppStyles.getHeaderNameText(
+                                  color: Colors.white, size: 17),
+                            ))),
+                  ],
+                )
+              ],
+            ),
+            150.0);
+      }
+    }).whenComplete(() {
+      setState(() {
+        requesting = false;
+        hasReason = false;
+        reasonType = -1;
+        _comment.text = "";
+      });
+    });
+  }
 
-                          }
-                          else if(type == "reject"){
-                            showModalOne(context, StatefulBuilder(
-                                builder: (context, setter) {
-                                  _setState = setter;
-                                  return ListView(
+  scanOrder(orderNumber, type) {
+    // var user = Provider.of<UserProvider>(context,listen: false);
+    if(orderNumber != "-1"){
+      showModalOne(
+          context,
+          Column(
+            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+            children: [
+              Column(
+                children: [
+                  Text(
+                    "Konfirmo ${type == "deliver" ? "pranimin" : type == "reject" ? "anulimin" : type == "load" ?  "ngarkesen": "rikthimin"} e porosise",
+                    style: AppStyles.getHeaderNameText(
+                        color: Colors.blueGrey[800], size: 20),
+                  ),
+                  const SizedBox(
+                    height: 10,
+                  ),
+                  Text(
+                    "Numri porosise: $orderNumber",
+                    style: AppStyles.getHeaderNameText(
+                        color: Colors.blueGrey[600], size: 17),
+                  ),
+                ],
+              ),
+              Row(
+                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+                children: [
+                  Container(
+                      height: 40,
+                      width: getPhoneWidth(context) / 2 - 80,
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          borderRadius: BorderRadius.circular(100)),
+                      child: TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                          },
+                          child: Text(
+                            "Jo",
+                            style: AppStyles.getHeaderNameText(
+                                color: Colors.white, size: 17),
+                          ))),
+                  Container(
+                      height: 40,
+                      width: getPhoneWidth(context) / 2 - 80,
+                      decoration: BoxDecoration(
+                          color: Colors.blueGrey,
+                          borderRadius: BorderRadius.circular(100)),
+                      child: TextButton(
+                          onPressed: () {
+                            Navigator.pop(context);
+                            if (type == "deliver") {
+                              Navigator.of(context).pop();
+                              deliverOrder(orderNumber);
+                            }
+                            else if (type == "reject") {
+                              Navigator.of(context).pop();
+                              showModalOne(context, StatefulBuilder(builder: (context, setter) {
+                                _setState = setter;
+                                return Padding(
+                                  padding: EdgeInsets.only(
+                                      bottom: MediaQuery.of(context).viewInsets.bottom),
+                                  child: ListView(
                                     children: [
                                       ListView.builder(
                                         physics: const ScrollPhysics(),
@@ -614,43 +785,38 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                                   });
                                                 },
                                                 child: Container(
-                                                  width: getPhoneWidth(
-                                                      context) -
-                                                      50,
+                                                  width:
+                                                  getPhoneWidth(context) - 50,
                                                   height: 60,
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
+                                                  padding:
+                                                  const EdgeInsets.symmetric(
                                                       horizontal: 15),
                                                   decoration: BoxDecoration(
-                                                      color: Colors
-                                                          .transparent,
+                                                      color: Colors.transparent,
                                                       borderRadius:
-                                                      BorderRadius
-                                                          .circular(10),
+                                                      BorderRadius.circular(10),
                                                       border: Border.all(
-                                                          color: Colors
-                                                              .grey[200]!)),
+                                                          color:
+                                                          Colors.grey[200]!)),
                                                   child: Row(
                                                     mainAxisAlignment:
                                                     MainAxisAlignment
                                                         .spaceBetween,
                                                     children: [
-                                                      Container(
+                                                      SizedBox(
                                                           width: getPhoneWidth(
                                                               context) -
                                                               133,
                                                           child: Text(
                                                             reasons[index],
                                                             maxLines: 2,
-                                                            overflow:
-                                                            TextOverflow
+                                                            overflow: TextOverflow
                                                                 .ellipsis,
                                                             style: AppStyles
                                                                 .getHeaderNameText(
                                                                 color: Colors
                                                                     .blueGrey,
-                                                                size:
-                                                                16.0),
+                                                                size: 16.0),
                                                           )),
                                                       Container(
                                                         width: 25,
@@ -658,22 +824,22 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                                         decoration: BoxDecoration(
                                                             borderRadius:
                                                             BorderRadius
-                                                                .circular(
-                                                                100),
+                                                                .circular(100),
                                                             border: Border.all(
                                                                 color: Colors
                                                                     .blueGrey)),
-                                                        child: reasonType !=
-                                                            index
+                                                        child: reasonType != index
                                                             ? const SizedBox()
                                                             : Container(
                                                           width: 25,
                                                           height: 25,
-                                                          margin: const EdgeInsets
+                                                          margin:
+                                                          const EdgeInsets
                                                               .all(2),
                                                           decoration: BoxDecoration(
                                                               borderRadius:
-                                                              BorderRadius.circular(
+                                                              BorderRadius
+                                                                  .circular(
                                                                   100),
                                                               color: Colors
                                                                   .blueGrey),
@@ -713,41 +879,32 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                               }
                                             },
                                             controller: _comment,
-                                            decoration:
-                                            InputDecoration(
-                                                border: InputBorder
-                                                    .none,
-                                                hintText:
-                                                "Arsyeja",
+                                            decoration: InputDecoration(
+                                                border: InputBorder.none,
+                                                hintText: "Arsyeja",
                                                 enabledBorder:
                                                 OutlineInputBorder(
                                                   borderRadius:
-                                                  BorderRadius
-                                                      .circular(
+                                                  BorderRadius.circular(
                                                       15),
                                                   borderSide: BorderSide(
-                                                      color: Colors
-                                                          .grey[
-                                                      200]!),
+                                                      color:
+                                                      Colors.grey[200]!),
                                                 ),
                                                 focusedBorder:
                                                 OutlineInputBorder(
                                                   borderRadius:
-                                                  BorderRadius
-                                                      .circular(
+                                                  BorderRadius.circular(
                                                       15),
                                                   borderSide: BorderSide(
-                                                      color: Colors
-                                                          .grey[
-                                                      200]!),
+                                                      color:
+                                                      Colors.grey[200]!),
                                                 ),
                                                 contentPadding:
                                                 const EdgeInsets
                                                     .symmetric(
-                                                    horizontal:
-                                                    15,
-                                                    vertical:
-                                                    10)),
+                                                    horizontal: 15,
+                                                    vertical: 10)),
                                           )
                                         ],
                                       ),
@@ -761,40 +918,32 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                           Container(
                                               height: 40,
                                               width:
-                                              getPhoneWidth(context) /
-                                                  2 -
-                                                  80,
+                                              getPhoneWidth(context) / 2 - 80,
                                               decoration: BoxDecoration(
                                                   color: Colors.grey[400],
                                                   borderRadius:
-                                                  BorderRadius.circular(
-                                                      100)),
+                                                  BorderRadius.circular(100)),
                                               child: TextButton(
                                                   onPressed: () {
                                                     Navigator.pop(context);
                                                   },
                                                   child: Text(
                                                     "Largo",
-                                                    style: AppStyles
-                                                        .getHeaderNameText(
-                                                        color: Colors
-                                                            .white,
+                                                    style:
+                                                    AppStyles.getHeaderNameText(
+                                                        color: Colors.white,
                                                         size: 17),
                                                   ))),
                                           Container(
                                               height: 40,
                                               width:
-                                              getPhoneWidth(context) /
-                                                  2 -
-                                                  80,
+                                              getPhoneWidth(context) / 2 - 80,
                                               decoration: BoxDecoration(
-                                                  color: commented ||
-                                                      hasReason
+                                                  color: commented || hasReason
                                                       ? Colors.blueGrey
                                                       : Colors.grey[400],
                                                   borderRadius:
-                                                  BorderRadius.circular(
-                                                      100)),
+                                                  BorderRadius.circular(100)),
                                               child: TextButton(
                                                   onPressed: () {
                                                     if (!hasReason) {
@@ -802,8 +951,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                                         commented = false;
                                                       });
                                                     } else {
-                                                      Navigator.pop(
-                                                          context);
+                                                      Navigator.pop(context);
                                                       rejectOrder(orderNumber);
                                                       swipeActionController
                                                           .closeAllOpenCell();
@@ -811,270 +959,398 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                                   },
                                                   child: Text(
                                                     "Vazhdo",
-                                                    style: AppStyles
-                                                        .getHeaderNameText(
-                                                        color: Colors
-                                                            .white,
+                                                    style:
+                                                    AppStyles.getHeaderNameText(
+                                                        color: Colors.white,
                                                         size: 17),
                                                   ))),
                                         ],
                                       )
                                     ],
-                                  );
-                                }), 415.0);
-                          }
-                          else if(type == "return"){
-                            showModalOne(context, StatefulBuilder(
-                                builder: (context, setter) {
-                                  _setState = setter;
-                                  return ListView(
-                                    children: [
-                                      ListView.builder(
-                                        physics: const ScrollPhysics(),
-                                        shrinkWrap: true,
-                                        itemBuilder: (context, index) {
-                                          return Column(
-                                            children: [
-                                              GestureDetector(
-                                                onTap: () {
-                                                  _setState!(() {
-                                                    hasReason = true;
-                                                    reasonType = index;
-                                                  });
-                                                },
-                                                child: Container(
-                                                  width: getPhoneWidth(
-                                                      context) -
-                                                      50,
-                                                  height: 60,
-                                                  padding: const EdgeInsets
-                                                      .symmetric(
-                                                      horizontal: 15),
-                                                  decoration: BoxDecoration(
-                                                      color: Colors
-                                                          .transparent,
-                                                      borderRadius:
-                                                      BorderRadius
-                                                          .circular(10),
-                                                      border: Border.all(
-                                                          color: Colors
-                                                              .grey[200]!)),
-                                                  child: Row(
-                                                    mainAxisAlignment:
-                                                    MainAxisAlignment
-                                                        .spaceBetween,
-                                                    children: [
-                                                      Container(
-                                                          width: getPhoneWidth(
-                                                              context) -
-                                                              133,
-                                                          child: Text(
-                                                            reasons[index],
-                                                            maxLines: 2,
-                                                            overflow:
-                                                            TextOverflow
-                                                                .ellipsis,
-                                                            style: AppStyles
-                                                                .getHeaderNameText(
-                                                                color: Colors
-                                                                    .blueGrey,
-                                                                size:
-                                                                16.0),
-                                                          )),
-                                                      Container(
-                                                        width: 25,
-                                                        height: 25,
-                                                        decoration: BoxDecoration(
-                                                            borderRadius:
-                                                            BorderRadius
-                                                                .circular(
-                                                                100),
-                                                            border: Border.all(
-                                                                color: Colors
-                                                                    .blueGrey)),
-                                                        child: reasonType !=
-                                                            index
-                                                            ? const SizedBox()
-                                                            : Container(
-                                                          width: 25,
-                                                          height: 25,
-                                                          margin: const EdgeInsets
-                                                              .all(2),
-                                                          decoration: BoxDecoration(
-                                                              borderRadius:
-                                                              BorderRadius.circular(
-                                                                  100),
-                                                              color: Colors
-                                                                  .blueGrey),
-                                                        ),
-                                                      )
-                                                    ],
-                                                  ),
-                                                ),
-                                              ),
-                                              const SizedBox(
-                                                height: 5,
-                                              ),
-                                            ],
-                                          );
-                                        },
-                                        itemCount: reasons.length,
-                                      ),
-                                      reasonType != reasons.length - 1
-                                          ? const SizedBox()
-                                          : Column(
+                                  ),
+                                );
+                              }), 415.0);
+                            }
+                            else if (type == "return") {
+                              Navigator.of(context).pop();
+                              showModalOne(context,
+                                  StatefulBuilder(builder: (context, setter) {
+                                    _setState = setter;
+                                    return Padding(
+                                      padding: EdgeInsets.only(
+                                          bottom: MediaQuery.of(context).viewInsets.bottom),
+                                      child: ListView(
                                         children: [
+                                          ListView.builder(
+                                            physics: const ScrollPhysics(),
+                                            shrinkWrap: true,
+                                            itemBuilder: (context, index) {
+                                              return Column(
+                                                children: [
+                                                  GestureDetector(
+                                                    onTap: () {
+                                                      _setState!(() {
+                                                        hasReason = true;
+                                                        reasonType = index;
+                                                      });
+                                                    },
+                                                    child: Container(
+                                                      width:
+                                                      getPhoneWidth(context) - 50,
+                                                      height: 60,
+                                                      padding:
+                                                      const EdgeInsets.symmetric(
+                                                          horizontal: 15),
+                                                      decoration: BoxDecoration(
+                                                          color: Colors.transparent,
+                                                          borderRadius:
+                                                          BorderRadius.circular(10),
+                                                          border: Border.all(
+                                                              color:
+                                                              Colors.grey[200]!)),
+                                                      child: Row(
+                                                        mainAxisAlignment:
+                                                        MainAxisAlignment
+                                                            .spaceBetween,
+                                                        children: [
+                                                          SizedBox(
+                                                              width: getPhoneWidth(
+                                                                  context) -
+                                                                  133,
+                                                              child: Text(
+                                                                reasons[index],
+                                                                maxLines: 2,
+                                                                overflow: TextOverflow
+                                                                    .ellipsis,
+                                                                style: AppStyles
+                                                                    .getHeaderNameText(
+                                                                    color: Colors
+                                                                        .blueGrey,
+                                                                    size: 16.0),
+                                                              )),
+                                                          Container(
+                                                            width: 25,
+                                                            height: 25,
+                                                            decoration: BoxDecoration(
+                                                                borderRadius:
+                                                                BorderRadius
+                                                                    .circular(100),
+                                                                border: Border.all(
+                                                                    color: Colors
+                                                                        .blueGrey)),
+                                                            child: reasonType != index
+                                                                ? const SizedBox()
+                                                                : Container(
+                                                              width: 25,
+                                                              height: 25,
+                                                              margin:
+                                                              const EdgeInsets
+                                                                  .all(2),
+                                                              decoration: BoxDecoration(
+                                                                  borderRadius:
+                                                                  BorderRadius
+                                                                      .circular(
+                                                                      100),
+                                                                  color: Colors
+                                                                      .blueGrey),
+                                                            ),
+                                                          )
+                                                        ],
+                                                      ),
+                                                    ),
+                                                  ),
+                                                  const SizedBox(
+                                                    height: 5,
+                                                  ),
+                                                ],
+                                              );
+                                            },
+                                            itemCount: reasons.length,
+                                          ),
+                                          reasonType != reasons.length - 1
+                                              ? const SizedBox()
+                                              : Column(
+                                            children: [
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                              TextField(
+                                                minLines: 4,
+                                                maxLines: 4,
+                                                onChanged: (value) {
+                                                  if (value.isEmpty) {
+                                                    _setState!(() {
+                                                      commented = false;
+                                                    });
+                                                  } else {
+                                                    _setState!(() {
+                                                      commented = true;
+                                                    });
+                                                  }
+                                                },
+                                                controller: _comment,
+                                                decoration: InputDecoration(
+                                                    border: InputBorder.none,
+                                                    hintText: "Arsyeja",
+                                                    enabledBorder:
+                                                    OutlineInputBorder(
+                                                      borderRadius:
+                                                      BorderRadius.circular(
+                                                          15),
+                                                      borderSide: BorderSide(
+                                                          color:
+                                                          Colors.grey[200]!),
+                                                    ),
+                                                    focusedBorder:
+                                                    OutlineInputBorder(
+                                                      borderRadius:
+                                                      BorderRadius.circular(
+                                                          15),
+                                                      borderSide: BorderSide(
+                                                          color:
+                                                          Colors.grey[200]!),
+                                                    ),
+                                                    contentPadding:
+                                                    const EdgeInsets
+                                                        .symmetric(
+                                                        horizontal: 15,
+                                                        vertical: 10)),
+                                              )
+                                            ],
+                                          ),
                                           const SizedBox(
                                             height: 10,
                                           ),
-                                          TextField(
-                                            minLines: 4,
-                                            maxLines: 4,
-                                            onChanged: (value) {
-                                              if (value.isEmpty) {
-                                                _setState!(() {
-                                                  commented = false;
-                                                });
-                                              } else {
-                                                _setState!(() {
-                                                  commented = true;
-                                                });
-                                              }
-                                            },
-                                            controller: _comment,
-                                            decoration:
-                                            InputDecoration(
-                                                border: InputBorder
-                                                    .none,
-                                                hintText:
-                                                "Arsyeja",
-                                                enabledBorder:
-                                                OutlineInputBorder(
-                                                  borderRadius:
-                                                  BorderRadius
-                                                      .circular(
-                                                      15),
-                                                  borderSide: BorderSide(
-                                                      color: Colors
-                                                          .grey[
-                                                      200]!),
-                                                ),
-                                                focusedBorder:
-                                                OutlineInputBorder(
-                                                  borderRadius:
-                                                  BorderRadius
-                                                      .circular(
-                                                      15),
-                                                  borderSide: BorderSide(
-                                                      color: Colors
-                                                          .grey[
-                                                      200]!),
-                                                ),
-                                                contentPadding:
-                                                const EdgeInsets
-                                                    .symmetric(
-                                                    horizontal:
-                                                    15,
-                                                    vertical:
-                                                    10)),
+                                          Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              Container(
+                                                  height: 40,
+                                                  width:
+                                                  getPhoneWidth(context) / 2 - 80,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.grey[400],
+                                                      borderRadius:
+                                                      BorderRadius.circular(100)),
+                                                  child: TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: Text(
+                                                        "Largo",
+                                                        style:
+                                                        AppStyles.getHeaderNameText(
+                                                            color: Colors.white,
+                                                            size: 17),
+                                                      ))),
+                                              Container(
+                                                  height: 40,
+                                                  width:
+                                                  getPhoneWidth(context) / 2 - 80,
+                                                  decoration: BoxDecoration(
+                                                      color: commented || hasReason
+                                                          ? Colors.blueGrey
+                                                          : Colors.grey[400],
+                                                      borderRadius:
+                                                      BorderRadius.circular(100)),
+                                                  child: TextButton(
+                                                      onPressed: () {
+                                                        if (!hasReason) {
+                                                          _setState!(() {
+                                                            commented = false;
+                                                          });
+                                                        } else {
+                                                          Navigator.pop(context);
+                                                          returnOrder(orderNumber);
+                                                          swipeActionController
+                                                              .closeAllOpenCell();
+                                                        }
+                                                      },
+                                                      child: Text(
+                                                        "Vazhdo",
+                                                        style:
+                                                        AppStyles.getHeaderNameText(
+                                                            color: Colors.white,
+                                                            size: 17),
+                                                      ))),
+                                            ],
                                           )
                                         ],
                                       ),
-                                      const SizedBox(
-                                        height: 10,
-                                      ),
-                                      Row(
-                                        mainAxisAlignment:
-                                        MainAxisAlignment.spaceEvenly,
-                                        children: [
-                                          Container(
-                                              height: 40,
-                                              width:
-                                              getPhoneWidth(context) /
-                                                  2 -
-                                                  80,
-                                              decoration: BoxDecoration(
-                                                  color: Colors.grey[400],
-                                                  borderRadius:
-                                                  BorderRadius.circular(
-                                                      100)),
-                                              child: TextButton(
-                                                  onPressed: () {
-                                                    Navigator.pop(context);
-                                                  },
-                                                  child: Text(
-                                                    "Largo",
-                                                    style: AppStyles
-                                                        .getHeaderNameText(
-                                                        color: Colors
-                                                            .white,
-                                                        size: 17),
-                                                  ))),
-                                          Container(
-                                              height: 40,
-                                              width:
-                                              getPhoneWidth(context) /
-                                                  2 -
-                                                  80,
-                                              decoration: BoxDecoration(
-                                                  color: commented ||
-                                                      hasReason
-                                                      ? Colors.blueGrey
-                                                      : Colors.grey[400],
-                                                  borderRadius:
-                                                  BorderRadius.circular(
-                                                      100)),
-                                              child: TextButton(
-                                                  onPressed: () {
-                                                    if (!hasReason) {
-                                                      _setState!(() {
-                                                        commented = false;
-                                                      });
-                                                    } else {
-                                                      Navigator.pop(
-                                                          context);
-                                                      returnOrder(orderNumber);
-                                                      swipeActionController
-                                                          .closeAllOpenCell();
-                                                    }
-                                                  },
-                                                  child: Text(
-                                                    "Vazhdo",
-                                                    style: AppStyles
-                                                        .getHeaderNameText(
-                                                        color: Colors
-                                                            .white,
-                                                        size: 17),
-                                                  ))),
-                                        ],
-                                      )
-                                    ],
-                                  );
-                                }), 415.0);
-                          }
-                        },
-                        child: Text(
-                          "Po",
-                          style: AppStyles
-                              .getHeaderNameText(
-                              color: Colors.white,
-                              size: 17),
-                        ))),
-              ],
-            )
-          ],
-        ),
-        150.0);
+                                    );
+                                  }), 415.0);
+                            }
+                            else if (type == "load") {
+                              // showModalOne(context,
+                              //     StatefulBuilder(builder: (context, setter) {
+                              //   _setState = setter;
+                              //   return ListView(
+                              //     children: [
+                              //       ListView.builder(
+                              //         physics: const ScrollPhysics(),
+                              //         shrinkWrap: true,
+                              //         itemBuilder: (context, index) {
+                              //           return Column(
+                              //             children: [
+                              //               GestureDetector(
+                              //                 onTap: () {
+                              //                   _setState!(() {
+                              //                     zone = user.getUser().areas[index].name;
+                              //                   });
+                              //                 },
+                              //                 child: Container(
+                              //                   width:
+                              //                       getPhoneWidth(context) - 50,
+                              //                   height: 60,
+                              //                   padding:
+                              //                       const EdgeInsets.symmetric(
+                              //                           horizontal: 15),
+                              //                   decoration: BoxDecoration(
+                              //                       color: Colors.transparent,
+                              //                       borderRadius:
+                              //                           BorderRadius.circular(10),
+                              //                       border: Border.all(
+                              //                           color:
+                              //                               Colors.grey[200]!)),
+                              //                   child: Row(
+                              //                     mainAxisAlignment:
+                              //                         MainAxisAlignment
+                              //                             .spaceBetween,
+                              //                     children: [
+                              //                       SizedBox(
+                              //                           width: getPhoneWidth(
+                              //                                   context) -
+                              //                               133,
+                              //                           child: Text(
+                              //                             user.getUser().areas[index].name.toString(),
+                              //                             maxLines: 2,
+                              //                             overflow: TextOverflow
+                              //                                 .ellipsis,
+                              //                             style: AppStyles
+                              //                                 .getHeaderNameText(
+                              //                                     color: Colors
+                              //                                         .blueGrey,
+                              //                                     size: 16.0),
+                              //                           )),
+                              //                       Container(
+                              //                         width: 25,
+                              //                         height: 25,
+                              //                         decoration: BoxDecoration(
+                              //                             borderRadius:
+                              //                                 BorderRadius
+                              //                                     .circular(100),
+                              //                             border: Border.all(
+                              //                                 color: Colors
+                              //                                     .blueGrey)),
+                              //                         child: zone != user.getUser().areas[index].name
+                              //                             ? const SizedBox()
+                              //                             : Container(
+                              //                                 width: 25,
+                              //                                 height: 25,
+                              //                                 margin:
+                              //                                     const EdgeInsets
+                              //                                         .all(2),
+                              //                                 decoration: BoxDecoration(
+                              //                                     borderRadius:
+                              //                                         BorderRadius
+                              //                                             .circular(
+                              //                                                 100),
+                              //                                     color: Colors
+                              //                                         .blueGrey),
+                              //                               ),
+                              //                       )
+                              //                     ],
+                              //                   ),
+                              //                 ),
+                              //               ),
+                              //               const SizedBox(
+                              //                 height: 5,
+                              //               ),
+                              //             ],
+                              //           );
+                              //         },
+                              //         itemCount: user.getUser().areas.length,
+                              //       ),
+                              //
+                              //       const SizedBox(
+                              //         height: 10,
+                              //       ),
+                              //       Row(
+                              //         mainAxisAlignment:
+                              //             MainAxisAlignment.spaceEvenly,
+                              //         children: [
+                              //           Container(
+                              //               height: 40,
+                              //               width:
+                              //                   getPhoneWidth(context) / 2 - 80,
+                              //               decoration: BoxDecoration(
+                              //                   color: Colors.grey[400],
+                              //                   borderRadius:
+                              //                       BorderRadius.circular(100)),
+                              //               child: TextButton(
+                              //                   onPressed: () {
+                              //                     Navigator.pop(context);
+                              //                   },
+                              //                   child: Text(
+                              //                     "Largo",
+                              //                     style:
+                              //                         AppStyles.getHeaderNameText(
+                              //                             color: Colors.white,
+                              //                             size: 17),
+                              //                   ))),
+                              //           Container(
+                              //               height: 40,
+                              //               width:
+                              //                   getPhoneWidth(context) / 2 - 80,
+                              //               decoration: BoxDecoration(
+                              //                   color: zone.isNotEmpty
+                              //                       ? Colors.blueGrey
+                              //                       : Colors.grey[400],
+                              //                   borderRadius:
+                              //                       BorderRadius.circular(100)),
+                              //               child: TextButton(
+                              //                   onPressed: () {
+                              //
+                              //                   },
+                              //                   child: Text(
+                              //                     "Vazhdo",
+                              //                     style:
+                              //                         AppStyles.getHeaderNameText(
+                              //                             color: Colors.white,
+                              //                             size: 17),
+                              //                   ))),
+                              //         ],
+                              //       )
+                              //     ],
+                              //   );
+                              // }), 415.0);
+                              Navigator.pop(context);
+                              loadOrder(orderNumber);
+                            }
+                          },
+                          child: Text(
+                            "Po",
+                            style: AppStyles.getHeaderNameText(
+                                color: Colors.white, size: 17),
+                          ))),
+                ],
+              )
+            ],
+          ),
+          150.0);
+    }
+
   }
 
-  getPostmanZones(){
+  getPostmanZones() {
     ZonesController zonesController = ZonesController();
     zonesController.getZones(context);
   }
 
-  searchByZone(zone){
+  searchByZone(zone) {
     var postmanOrders =
-    Provider.of<PostmanOrderProvider>(context, listen: false);
+        Provider.of<PostmanOrderProvider>(context, listen: false);
     postmanOrders.addZone(zone);
   }
 
@@ -1083,14 +1359,13 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
     _scrollController!.dispose();
     super.dispose();
   }
+
   @override
   Widget build(BuildContext context) {
     var generalProvider = Provider.of<GeneralProvider>(context, listen: true);
     var user = Provider.of<UserProvider>(context, listen: true);
-    var postmanOrders =
-        Provider.of<PostmanOrderProvider>(context, listen: true);
-    var equalizedOrders =
-    Provider.of<EqualizationProvier>(context );
+    var postmanOrders = Provider.of<PostmanOrderProvider>(context, listen: true);
+    var equalizedOrders = Provider.of<EqualizationProvier>(context);
     return Scaffold(
       key: scaffoldKey,
       backgroundColor: AppColors.bottomColorOne,
@@ -1212,7 +1487,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                     primary: false,
                                     expandedHeight: 0,
                                     foregroundColor: Colors.red,
-                                    toolbarHeight: _showAppbarColor ? 65 : 85,
+                                    toolbarHeight: _showAppbarColor ? 65 : 90,
                                     shadowColor: AppColors.bottomColorOne,
                                     surfaceTintColor: Colors.red,
                                     scrolledUnderElevation: 0,
@@ -1239,7 +1514,11 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                                           .getOnDeliveryOrders(
                                                               "delivering")
                                                           .length
-                                                          .toString(),perBarazim: equalizedOrders.getEqualizations().length.toString())),
+                                                          .toString(),
+                                                      perBarazim: equalizedOrders
+                                                          .getEqualizations()
+                                                          .length
+                                                          .toString())),
                                           Container(
                                             width: getPhoneWidth(context) - 20,
                                             decoration: BoxDecoration(
@@ -1247,345 +1526,372 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                                     BorderRadius.circular(20),
                                                 border: Border.all(
                                                     color: Colors.white)),
-                                            child: Row(
-                                              children: [
-                                                search
-                                                    ? Row(
-                                                        children: [
-                                                          Container(
-                                                              decoration: const BoxDecoration(
-                                                                  border: Border(
-                                                                      right: BorderSide(
+                                            child: SingleChildScrollView(
+                                              scrollDirection: Axis.horizontal,
+                                              child: Row(
+                                                children: [
+                                                  search
+                                                      ? Row(
+                                                          children: [
+                                                            Container(
+                                                                decoration: const BoxDecoration(
+                                                                    border: Border(
+                                                                        right: BorderSide(
+                                                                            color: Colors
+                                                                                .white))),
+                                                                width: getPhoneWidth(
+                                                                        context) -
+                                                                    145,
+                                                                child:
+                                                                    TextField(
+                                                                  controller:
+                                                                      _kerkoPorosine,
+                                                                  onChanged:
+                                                                      (value) {
+                                                                    postmanOrders
+                                                                        .filtroNeDergese(
+                                                                            value,
+                                                                            "delivering");
+                                                                  },
+                                                                  decoration: InputDecoration(
+                                                                      hintText:
+                                                                          "Kerko",
+                                                                      hintStyle: AppStyles.getHeaderNameText(
                                                                           color: Colors
-                                                                              .white))),
-                                                              width: getPhoneWidth(
-                                                                      context) -
-                                                                  145,
-                                                              child: TextField(
-                                                                controller: _kerkoPorosine,
-                                                                onChanged: (value){
-                                                                  postmanOrders.filtroNeDergese(value, "delivering");
-                                                                },
-                                                                decoration: InputDecoration(
-                                                                    hintText:
-                                                                        "Kerko",
-                                                                    hintStyle: AppStyles.getHeaderNameText(
-                                                                        color: Colors
-                                                                            .white,
-                                                                        size:
-                                                                            15.0),
-                                                                    border:
-                                                                        InputBorder
-                                                                            .none,
-                                                                    isDense:
-                                                                        true,
-                                                                    contentPadding: const EdgeInsets
-                                                                            .symmetric(
-                                                                        horizontal:
-                                                                            20,
-                                                                        vertical:
-                                                                            7)),
-                                                              )),
-                                                          GestureDetector(
-                                                            onTap: () {
-                                                              if(user.getUser()!.areas != null && user.getUser()!.areas.length > 0){
-                                                                setState(() {
-                                                                  _zones.text = user.getUser()!.areas[0]['name'].toString().trim()+" - "+user.getUser()!.areas[0]['cityName'];
-                                                                });
-                                                              }
-
-                                                              showModalBottomSheet(
-                                                                  context:
-                                                                      context,
-                                                                  builder:
-                                                                      (context) {
-                                                                    return StatefulBuilder(builder: (context,setter){
-                                                                      _setState = setter;
-                                                                      return SizedBox(
-                                                                        width: getPhoneWidth(
-                                                                            context),
-                                                                        height:
-                                                                        300,
-                                                                        child: Column(
-                                                                          children: [
-                                                                            Row(
-                                                                              children: [
-                                                                                Container(
-                                                                                  height: 50,
-                                                                                  width: getPhoneWidth(context) - 100,
-                                                                                  padding: const EdgeInsets.only(left: 15,right: 15,top: 8),
-                                                                                  child: TextField(
-                                                                                    controller: _zones,
-                                                                                    decoration: InputDecoration(
-                                                                                      border: InputBorder.none,
-                                                                                      enabledBorder: OutlineInputBorder(
-                                                                                        borderRadius: BorderRadius.circular(10),
-                                                                                        borderSide: BorderSide(color: Colors.blueGrey[400]!)
-                                                                                      ),
-                                                                                      contentPadding: const EdgeInsets.symmetric(horizontal: 20,vertical: 15),
-                                                                                      isDense: true
-                                                                                    ),
-                                                                                  ),
-                                                                                ),
-                                                                                Container(width: 70,
-                                                                                    height: 35,
-                                                                                    decoration: BoxDecoration(
-                                                                                        color: Colors.blueGrey[300],
-                                                                                      borderRadius: BorderRadius.circular(10),
-                                                                                    ),
-                                                                                    child: TextButton(
-                                                                                        onPressed: (){
-                                                                                          searchByZone(_zones.text);
-                                                                                          Navigator.pop(context);
-                                                                                        },
-                                                                                        child: Text("Kerko",style: AppStyles.getHeaderNameText(color: Colors.white,size: 14.0),)))
-                                                                              ],
-                                                                            ),
-                                                                            Container(
-                                                                              height: 250,
-                                                                              child: CupertinoPicker.builder(itemExtent: 40, onSelectedItemChanged: (value){
-
-                                                                                _setState!((){
-                                                                                  _zones.text = user.getUser()!.areas[value]['name']+" - "+user.getUser()!.areas[value]['cityName'];
-                                                                                });
-                                                                              }, itemBuilder: (context, index){
-                                                                                return SizedBox(     width: getPhoneWidth(context) - 50,
-                                                                                  child: Row(
-                                                                                    mainAxisAlignment: MainAxisAlignment.center,
-                                                                                    children: [
-                                                                                      Text(user.getUser()!.areas[index]['name']+" - "+user.getUser()!.areas[index]['cityName'],
-                                                                                      ),
-                                                                                    ],
-                                                                                  ),
-                                                                                );
-                                                                              },childCount:user.getUser()!.areas == null ? 0: user.getUser()!.areas.length),
-                                                                            ),
-                                                                          ],
-                                                                        ),
-                                                                      );
-                                                                    });
+                                                                              .white,
+                                                                          size:
+                                                                              15.0),
+                                                                      border: InputBorder
+                                                                          .none,
+                                                                      isDense:
+                                                                          true,
+                                                                      contentPadding: const EdgeInsets
+                                                                              .symmetric(
+                                                                          horizontal:
+                                                                              20,
+                                                                          vertical:
+                                                                              7)),
+                                                                )),
+                                                            GestureDetector(
+                                                              onTap: () {
+                                                                if (user.getUser()!.areas !=
+                                                                        null &&
+                                                                    user
+                                                                            .getUser()!
+                                                                            .areas
+                                                                            .length >
+                                                                        0) {
+                                                                  setState(() {
+                                                                    // ignore: prefer_interpolation_to_compose_strings
+                                                                    _zones
+                                                                            .text =
+                                                                        // ignore: prefer_interpolation_to_compose_strings
+                                                                        "${user.getUser()!.areas[0]['name'].toString().trim()} - " +
+                                                                            user.getUser()!.areas[0]['cityName'];
                                                                   });
-                                                            },
-                                                            child: Container(
-                                                              width: getPhoneWidth(
-                                                                          context) /
-                                                                      4 -
-                                                                  30,
-                                                              height: 33,
-                                                              color: Colors
-                                                                  .transparent,
-                                                              child: Padding(
+                                                                }
+
+                                                                showModalBottomSheet(
+                                                                    context:
+                                                                        context,
+                                                                    builder:
+                                                                        (context) {
+                                                                      return StatefulBuilder(builder:
+                                                                          (context,
+                                                                              setter) {
+                                                                        _setState =
+                                                                            setter;
+                                                                        return SizedBox(
+                                                                          width:
+                                                                              getPhoneWidth(context),
+                                                                          height:
+                                                                              300,
+                                                                          child:
+                                                                              Column(
+                                                                            children: [
+                                                                              Row(
+                                                                                children: [
+                                                                                  Container(
+                                                                                    height: 50,
+                                                                                    width: getPhoneWidth(context) - 100,
+                                                                                    padding: const EdgeInsets.only(left: 15, right: 15, top: 8),
+                                                                                    child: TextField(
+                                                                                      controller: _zones,
+                                                                                      decoration: InputDecoration(border: InputBorder.none, enabledBorder: OutlineInputBorder(borderRadius: BorderRadius.circular(10), borderSide: BorderSide(color: Colors.blueGrey[400]!)), contentPadding: const EdgeInsets.symmetric(horizontal: 20, vertical: 15), isDense: true),
+                                                                                    ),
+                                                                                  ),
+                                                                                  Container(
+                                                                                      width: 70,
+                                                                                      height: 40,
+                                                                                      decoration: BoxDecoration(
+                                                                                        color: Colors.blueGrey[300],
+                                                                                        borderRadius: BorderRadius.circular(10),
+                                                                                      ),
+                                                                                      child: TextButton(
+                                                                                          onPressed: () {
+                                                                                            searchByZone(_zones.text);
+                                                                                            Navigator.pop(context);
+                                                                                          },
+                                                                                          child: Text(
+                                                                                            "Kerko",
+                                                                                            style: AppStyles.getHeaderNameText(color: Colors.white, size: 14.0),
+                                                                                          )))
+                                                                                ],
+                                                                              ),
+                                                                              SizedBox(
+                                                                                height: 250,
+                                                                                child: CupertinoPicker.builder(
+                                                                                    itemExtent: 40,
+                                                                                    onSelectedItemChanged: (value) {
+                                                                                      _setState!(() {
+                                                                                        _zones.text = user.getUser()!.areas[value]['name'] + " - " + user.getUser()!.areas[value]['cityName'];
+                                                                                      });
+                                                                                    },
+                                                                                    itemBuilder: (context, index) {
+                                                                                      return SizedBox(
+                                                                                        width: getPhoneWidth(context) - 50,
+                                                                                        child: Row(
+                                                                                          mainAxisAlignment: MainAxisAlignment.center,
+                                                                                          children: [
+                                                                                            Text(
+                                                                                              user.getUser()!.areas[index]['name'] + " - " + user.getUser()!.areas[index]['cityName'],
+                                                                                            ),
+                                                                                          ],
+                                                                                        ),
+                                                                                      );
+                                                                                    },
+                                                                                    childCount: user.getUser()!.areas == null ? 0 : user.getUser()!.areas.length),
+                                                                              ),
+                                                                            ],
+                                                                          ),
+                                                                        );
+                                                                      });
+                                                                    });
+                                                              },
+                                                              child: Container(
+                                                                width: getPhoneWidth(
+                                                                            context) /
+                                                                        4 -
+                                                                    30,
+                                                                height: 33,
+                                                                color: Colors
+                                                                    .transparent,
+                                                                child: Padding(
+                                                                  padding: const EdgeInsets
+                                                                          .symmetric(
+                                                                      horizontal:
+                                                                          0),
+                                                                  child: Center(
+                                                                    child: Text(
+                                                                      "Zona",
+                                                                      style: AppStyles.getHeaderNameText(
+                                                                          color: Colors
+                                                                              .white,
+                                                                          size:
+                                                                              14.0),
+                                                                    ),
+                                                                  ),
+                                                                ),
+                                                              ),
+                                                            ),
+                                                          ],
+                                                        )
+                                                      : Row(
+                                                          children: [
+                                                            GestureDetector(
+                                                              onTap: () {
+                                                                pageController.animateToPage(0,
+                                                                    duration: const Duration(
+                                                                        milliseconds:
+                                                                            400),
+                                                                    curve: Curves
+                                                                        .linear);
+
+                                                                setState(() {
+                                                                  selectedIndex =
+                                                                      0;
+                                                                  deliveringStep =
+                                                                      0;
+                                                                });
+                                                              },
+                                                              child: Container(
+                                                                height: 40,
                                                                 padding: const EdgeInsets
                                                                         .symmetric(
                                                                     horizontal:
-                                                                        0),
+                                                                        10),
                                                                 child: Center(
                                                                   child: Text(
-                                                                    "Zona",
+                                                                    "Ne dergese\n(${postmanOrders
+                                                                        .porosiNeDergese()
+                                                                        .toString()})",textAlign: TextAlign.center,
                                                                     style: AppStyles.getHeaderNameText(
-                                                                        color: Colors
-                                                                            .white,
+                                                                        color: deliveringStep ==
+                                                                                0
+                                                                            ? Colors
+                                                                                .blueGrey
+                                                                            : Colors
+                                                                                .white,
                                                                         size:
                                                                             14.0),
                                                                   ),
                                                                 ),
                                                               ),
                                                             ),
-                                                          ),
-                                                        ],
-                                                      )
-                                                    : Row(
-                                                        children: [
-                                                          GestureDetector(
-                                                            onTap: () {
-                                                              pageController.animateToPage(
-                                                                  0,
-                                                                  duration:
-                                                                      const Duration(
-                                                                          milliseconds:
-                                                                              400),
-                                                                  curve: Curves
-                                                                      .linear);
+                                                            GestureDetector(
+                                                              onTap: () {
+                                                                pageController.animateToPage(1,
+                                                                    duration: const Duration(
+                                                                        milliseconds:
+                                                                            400),
+                                                                    curve: Curves
+                                                                        .linear);
 
-                                                              setState(() {
-                                                                selectedIndex =
-                                                                    0;
-                                                                deliveringStep =
-                                                                    0;
-                                                              });
-                                                            },
-                                                            child: Container(
-                                                              height: 33,
-                                                              padding: const EdgeInsets
-                                                                      .symmetric(
-                                                                  horizontal:
-                                                                      10),
-                                                              child: Center(
-                                                                child: Text(
-                                                                  "Ne dergese",
-                                                                  style: AppStyles.getHeaderNameText(
-                                                                      color: deliveringStep == 0
-                                                                          ? Colors
-                                                                              .blueGrey
-                                                                          : Colors
-                                                                              .white,
-                                                                      size:
-                                                                          14.0),
+                                                                setState(() {
+                                                                  selectedIndex =
+                                                                      1;
+                                                                  deliveringStep =
+                                                                      1;
+                                                                });
+                                                              },
+                                                              child: Container(
+                                                                height: 40,
+                                                                padding: const EdgeInsets
+                                                                        .symmetric(
+                                                                    horizontal:
+                                                                        10),
+                                                                decoration:
+                                                                    const BoxDecoration(
+                                                                        border:
+                                                                            Border(
+                                                                  left: BorderSide(
+                                                                      color: Colors
+                                                                          .white),
+                                                                )),
+                                                                child: Center(
+                                                                  child: Text(
+                                                                    "Me sukses\n(${postmanOrders
+                                                                        .porosiTeSuksesshme()
+                                                                        .toString()})",textAlign: TextAlign.center,
+                                                                    style: AppStyles.getHeaderNameText(
+                                                                        color: deliveringStep ==
+                                                                                1
+                                                                            ? Colors
+                                                                                .blueGrey
+                                                                            : Colors
+                                                                                .white,
+                                                                        size:
+                                                                            14.0),
+                                                                  ),
                                                                 ),
                                                               ),
                                                             ),
-                                                          ),
-                                                          GestureDetector(
-                                                            onTap: () {
-                                                              pageController.animateToPage(
-                                                                  1,
-                                                                  duration:
-                                                                      const Duration(
-                                                                          milliseconds:
-                                                                              400),
-                                                                  curve: Curves
-                                                                      .linear);
+                                                            GestureDetector(
+                                                              onTap: () {
+                                                                pageController.animateToPage(2,
+                                                                    duration: const Duration(
+                                                                        milliseconds:
+                                                                            400),
+                                                                    curve: Curves
+                                                                        .linear);
 
-                                                              setState(() {
-                                                                selectedIndex =
-                                                                    1;
-                                                                deliveringStep =
-                                                                    1;
-                                                              });
-                                                            },
-                                                            child: Container(
-                                                              height: 33,
-                                                              padding: const EdgeInsets
-                                                                      .symmetric(
-                                                                  horizontal:
-                                                                      10),
-                                                              decoration:
-                                                                  const BoxDecoration(
-                                                                      border:
-                                                                          Border(
-                                                                left: BorderSide(
-                                                                    color: Colors
-                                                                        .white),
-                                                              )),
-                                                              child: Center(
-                                                                child: Text(
-                                                                  "Me sukses",
-                                                                  style: AppStyles.getHeaderNameText(
-                                                                      color: deliveringStep == 1
-                                                                          ? Colors
-                                                                              .blueGrey
-                                                                          : Colors
-                                                                              .white,
-                                                                      size:
-                                                                          14.0),
+                                                                setState(() {
+                                                                  selectedIndex =
+                                                                      2;
+                                                                  deliveringStep =
+                                                                      2;
+                                                                });
+                                                              },
+                                                              child: Container(
+                                                                height: 40,
+                                                                padding: const EdgeInsets
+                                                                        .symmetric(
+                                                                    horizontal:
+                                                                        15),
+                                                                decoration: const BoxDecoration(
+                                                                    border: Border(
+                                                                        left: BorderSide(
+                                                                            color: Colors
+                                                                                .white),
+                                                                        right: BorderSide(
+                                                                            color:
+                                                                                Colors.white))),
+                                                                child: Center(
+                                                                  child: Text(
+                                                                    "Anuluara\n(${postmanOrders
+                                                                        .porosiTeAnuluara()
+                                                                        .toString()})",textAlign: TextAlign.center,
+                                                                    style: AppStyles.getHeaderNameText(
+                                                                        color: deliveringStep ==
+                                                                                2
+                                                                            ? Colors
+                                                                                .blueGrey
+                                                                            : Colors
+                                                                                .white,
+                                                                        size:
+                                                                            14.0),
+                                                                  ),
                                                                 ),
                                                               ),
                                                             ),
-                                                          ),
-                                                          GestureDetector(
-                                                            onTap: () {
-                                                              pageController.animateToPage(
-                                                                  2,
-                                                                  duration:
-                                                                      const Duration(
-                                                                          milliseconds:
-                                                                              400),
-                                                                  curve: Curves
-                                                                      .linear);
+                                                            GestureDetector(
+                                                              onTap: () {
+                                                                pageController.animateToPage(3,
+                                                                    duration: const Duration(
+                                                                        milliseconds:
+                                                                            400),
+                                                                    curve: Curves
+                                                                        .linear);
 
-                                                              setState(() {
-                                                                selectedIndex =
-                                                                    2;
-                                                                deliveringStep =
-                                                                    2;
-                                                              });
-                                                            },
-                                                            child: Container(
-                                                              height: 33,
-                                                              padding: const EdgeInsets
-                                                                      .symmetric(
-                                                                  horizontal:
-                                                                      15),
-                                                              decoration: const BoxDecoration(
-                                                                  border: Border(
-                                                                      left: BorderSide(
-                                                                          color: Colors
-                                                                              .white),
-                                                                      right: BorderSide(
-                                                                          color:
-                                                                              Colors.white))),
-                                                              child: Center(
-                                                                child: Text(
-                                                                  "Anuluara",
-                                                                  style: AppStyles.getHeaderNameText(
-                                                                      color: deliveringStep == 2
-                                                                          ? Colors
-                                                                              .blueGrey
-                                                                          : Colors
-                                                                              .white,
-                                                                      size:
-                                                                          14.0),
+                                                                setState(() {
+                                                                  selectedIndex =
+                                                                      3;
+                                                                  deliveringStep =
+                                                                      3;
+                                                                });
+                                                              },
+                                                              child: Container(
+                                                                height: 40,
+                                                                padding: const EdgeInsets
+                                                                        .symmetric(
+                                                                    horizontal:
+                                                                        10),
+                                                                decoration:
+                                                                    const BoxDecoration(
+                                                                        border:
+                                                                            Border(
+                                                                  left: BorderSide(
+                                                                      color: Colors
+                                                                          .white),
+                                                                )),
+                                                                child: Center(
+                                                                  child: Text(
+                                                                    "Rikthyera\n(${postmanOrders
+                                                                        .porosiTeRikthyera()
+                                                                        .toString()})",textAlign: TextAlign.center,
+                                                                    style: AppStyles.getHeaderNameText(
+                                                                        color: deliveringStep ==
+                                                                                3
+                                                                            ? Colors
+                                                                                .blueGrey
+                                                                            : Colors
+                                                                                .white,
+                                                                        size:
+                                                                            14.0),
+                                                                  ),
                                                                 ),
                                                               ),
                                                             ),
-                                                          ),
-                                                          GestureDetector(
-                                                            onTap: () {
-                                                              pageController.animateToPage(
-                                                                  3,
-                                                                  duration:
-                                                                      const Duration(
-                                                                          milliseconds:
-                                                                              400),
-                                                                  curve: Curves
-                                                                      .linear);
-
-                                                              setState(() {
-                                                                selectedIndex =
-                                                                    3;
-                                                                deliveringStep =
-                                                                    3;
-                                                              });
-                                                            },
-                                                            child: Container(
-                                                              height: 33,
-                                                              padding: const EdgeInsets
-                                                                      .symmetric(
-                                                                  horizontal:
-                                                                      10),
-                                                              decoration:
-                                                                  const BoxDecoration(
-                                                                      border:
-                                                                          Border(
-                                                                left: BorderSide(
-                                                                    color: Colors
-                                                                        .white),
-                                                              )),
-                                                              child: Center(
-                                                                child: Text(
-                                                                  "Rikthyera",
-                                                                  style: AppStyles.getHeaderNameText(
-                                                                      color: deliveringStep == 3
-                                                                          ? Colors
-                                                                              .blueGrey
-                                                                          : Colors
-                                                                              .white,
-                                                                      size:
-                                                                          14.0),
-                                                                ),
-                                                              ),
-                                                            ),
-                                                          ),
-                                                        ],
-                                                      ),
-                                              ],
+                                                          ],
+                                                        ),
+                                                ],
+                                              ),
                                             ),
                                           ),
                                         ],
                                       ),
                                     ),
-                                    collapsedHeight:
-                                        _showAppbarColor ? 65 : 105,
+                                    collapsedHeight: _showAppbarColor ? 65 : 105,
                                   ),
                           ];
                         },
@@ -1602,109 +1908,398 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                 children: [
                                   Stack(
                                     children: [
-                                      Delivering(postmanOrders),
+                                      delivering(postmanOrders),
                                       Positioned(
                                           bottom: 20,
                                           right: 30,
                                           child: GestureDetector(
                                             onTap: () async {
-                                              showModalOne(context, Row(
-                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                children: [
-                                                  GestureDetector(
-                                                    onTap: () async {
-                                                      String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-                                                          "#ff6666",
-                                                          "Largo",
-                                                          true,
-                                                          ScanMode.QR).then((value) {
-                                                        return value;
-                                                      });
-                                                      if(barcodeScanRes.isNotEmpty){
-                                                        scanOrder(barcodeScanRes,"reject");
-                                                      }
-                                                    },
-                                                    child: Container(
-                                                      width: getPhoneWidth(context)/3 - 30,
-                                                      height: 80,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius: BorderRadius.circular(15),
-                                                        color: AppColors.bottomColorTwo.withOpacity(0.8)
-                                                      ),
-                                                      child: Center(
-                                                        child: Text("Refuzim",style: AppStyles.getHeaderNameText(color: Colors.white,size: 17),),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  GestureDetector(
-                                                    onTap: () async {
-                                                      String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-                                                          "#ff6666",
-                                                          "Largo",
-                                                          true,
-                                                          ScanMode.QR).then((value) {
-                                                        return value;
-                                                      });
-                                                      if(barcodeScanRes.isNotEmpty){
-                                                        scanOrder(barcodeScanRes,"return");
-                                                      }
-                                                    },
-                                                    child: Container(
-                                                      width: getPhoneWidth(context)/3 - 30,
-                                                      height: 80,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius: BorderRadius.circular(15),
-                                                          color: AppColors.bottomColorTwo.withOpacity(0.8)                                                    ),
-                                                      child: Center(
-                                                        child: Text("Rikthim",style: AppStyles.getHeaderNameText(color: Colors.white,size: 17),),
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  GestureDetector(
-                                                    onTap: () async {
-                                                      String barcodeScanRes = await FlutterBarcodeScanner.scanBarcode(
-                                                          "#ff6666",
-                                                          "Largo",
-                                                          true,
-                                                          ScanMode.QR).then((value) {
-                                                        return value;
-                                                      });
-                                                      if(barcodeScanRes.isNotEmpty){
-                                                        scanOrder(barcodeScanRes,"deliver");
 
-                                                      }
-                                                    },
-                                                    child: Container(
-                                                      width: getPhoneWidth(context)/3 - 30,
-                                                      height: 80,
-                                                      decoration: BoxDecoration(
-                                                        borderRadius: BorderRadius.circular(15),
-                                                          color: AppColors.bottomColorTwo.withOpacity(0.8)                                                    ),
-                                                      child: Center(
-                                                        child: Text("Dorezim",style: AppStyles.getHeaderNameText(color: Colors.white,size: 17),),
+                                              showModalOne(
+                                                  context,
+                                                  Column(
+                                                    children: [
+                                                      GestureDetector(
+                                                        onTap: () async {
+                                                          String barcodeScanRes =
+                                                          await FlutterBarcodeScanner.scanBarcode("#ff6666", "Largo", true,
+                                                              ScanMode.QR).then((value) { return value; });
+                                                          if (barcodeScanRes.isNotEmpty) { scanOrder(barcodeScanRes, "load"); }
+                                                        },
+                                                        child: Container(
+                                                          width: getPhoneWidth(
+                                                              context),
+                                                          color: Colors.transparent,
+                                                          height: 50,
+                                                          padding: const EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal: 10),
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+
+                                                              const Icon(Icons.upload_rounded,color:Colors.blueGrey),
+                                                              Text(
+                                                                "Ngarko per dergese",
+                                                                style: AppStyles
+                                                                    .getHeaderNameText(
+                                                                        color: Colors
+                                                                                .blueGrey[
+                                                                            800],
+                                                                        size:
+                                                                            18.0),
+                                                              ),
+                                                              const Icon(Icons
+                                                                  .qr_code_2),
+                                                            ],
+                                                          ),
+                                                        ),
                                                       ),
-                                                    ),
+                                                      Divider(
+                                                        color: Colors
+                                                            .blueGrey[400],
+                                                      ),
+                                                      GestureDetector(
+                                                        onTap: () async {
+//             String
+                                                          String
+                                                              barcodeScanRes =
+                                                              await FlutterBarcodeScanner.scanBarcode(
+                                                                      "#ff6666",
+                                                                      "Largo",
+                                                                      true,
+                                                                      ScanMode
+                                                                          .QR)
+                                                                  .then(
+                                                                      (value) {
+                                                            return value;
+                                                          });
+                                                          if (barcodeScanRes
+                                                              .isNotEmpty) {
+                                                            scanOrder(
+                                                                barcodeScanRes,
+                                                                "deliver");
+                                                          }
+                                                        },
+                                                        child: Container(
+                                                          width: getPhoneWidth(
+                                                              context),
+                                                          height: 50,
+                                                          color: Colors
+                                                              .transparent,
+                                                          padding: const EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      10),
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              const Icon(Icons.check_circle,color:Colors.green),
+                                                              Text(
+                                                                "Dorezo porosine",
+                                                                style: AppStyles
+                                                                    .getHeaderNameText(
+                                                                        color: Colors.blueGrey[
+                                                                            800],
+                                                                        size:
+                                                                            18.0),
+                                                              ),
+                                                              const Icon(Icons
+                                                                  .qr_code_2),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Divider(
+                                                        color: Colors
+                                                            .blueGrey[400],
+                                                      ),
+                                                      GestureDetector(
+                                                        onTap: () async {
+                                                          String
+                                                              barcodeScanRes =
+                                                              await FlutterBarcodeScanner.scanBarcode(
+                                                                      "#ff6666",
+                                                                      "Largo",
+                                                                      true,
+                                                                      ScanMode
+                                                                          .QR)
+                                                                  .then(
+                                                                      (value) {
+                                                            return value;
+                                                          });
+                                                          if (barcodeScanRes
+                                                              .isNotEmpty) {
+                                                            scanOrder(
+                                                                barcodeScanRes,
+                                                                "return");
+                                                          }
+                                                        },
+                                                        child: Container(
+                                                          width: getPhoneWidth(
+                                                              context),
+                                                          height: 50,
+                                                          color: Colors
+                                                              .transparent,
+                                                          padding: const EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      10),
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              const Icon(Icons.refresh,color:Colors.blue),
+                                                              Text(
+                                                                "Rikthe ne depo",
+                                                                style: AppStyles
+                                                                    .getHeaderNameText(
+                                                                        color: Colors.blueGrey[
+                                                                            800],
+                                                                        size:
+                                                                            18.0),
+                                                              ),
+                                                              const Icon(Icons
+                                                                  .qr_code_2),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Divider(
+                                                        color: Colors
+                                                            .blueGrey[400],
+                                                      ),
+                                                      GestureDetector(
+                                                        onTap: () async {
+                                                                      String
+                                                                          barcodeScanRes =
+                                                                          await FlutterBarcodeScanner.scanBarcode(
+                                                                                  "#ff6666",
+                                                                                  "Largo",
+                                                                                  true,
+                                                                                  ScanMode
+                                                                                      .QR)
+                                                                              .then(
+                                                                                  (value) {
+                                                                        return value;
+                                                                      });
+                                                                      if (barcodeScanRes
+                                                                          .isNotEmpty) {
+                                                                        scanOrder(
+                                                                            barcodeScanRes,
+                                                                            "reject");
+                                                                      }
+                                                        },
+                                                        child: Container(
+                                                          width: getPhoneWidth(
+                                                              context),
+                                                          height: 50,
+                                                          color: Colors
+                                                              .transparent,
+                                                          padding: const EdgeInsets
+                                                              .symmetric(
+                                                                  horizontal:
+                                                                      10),
+                                                          child: Row(
+                                                            mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                            children: [
+                                                              const Icon(Icons.close,color:Colors.red),
+                                                              Text(
+                                                                "Anulo porosine",
+                                                                style: AppStyles
+                                                                    .getHeaderNameText(
+                                                                        color: Colors.blueGrey[
+                                                                            800],
+                                                                        size:
+                                                                            18.0),
+                                                              ),
+                                                              const Icon(Icons
+                                                                  .qr_code_2),
+                                                            ],
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Divider(
+                                                        color: Colors
+                                                            .blueGrey[400],
+                                                      ),
+                                                    ],
                                                   ),
-                                                ],
-                                              ), 100.0,color: Colors.transparent);
+                                                  300.0);
                                             },
                                             child: Container(
-                                              width: 65,
-                                              height: 65,
+                                                width: 65,
+                                                height: 65,
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(
+                                                            100),
+                                                    color:
+                                                        Colors.blueGrey[400]),
+                                                child: const Center(
+                                                  child: Icon(
+                                                    Icons
+                                                        .qr_code_scanner_outlined,
+                                                    size: 28,
+                                                    color: Colors.white,
+                                                  ),
+                                                )),
+                                          )),
+                                      AnimatedPositioned(
+                                          bottom: requesting ? 0 : -65,
+                                          duration: const Duration(milliseconds: 200),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Container(
+                                              width: getPhoneWidth(context) - 20,
+                                              height: 55,
                                               decoration: BoxDecoration(
-                                                  borderRadius:
-                                                      BorderRadius.circular(
-                                                          100),
-                                                  color: Colors.blueGrey[400]),
-                                              child: const Center(
-                                                child: Icon(Icons.qr_code_scanner_outlined,size: 28,color: Colors.white,),)
+                                                  color: Colors.white,
+                                                  borderRadius: BorderRadius.circular(20)),
+                                              padding: const EdgeInsets.symmetric(horizontal: 25),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    "Ju lutem prisni pak...  ",
+                                                    style: AppStyles.getHeaderNameText(
+                                                        color: Colors.blueGrey, size: 16.0),
+                                                  ),
+                                                  const SizedBox(
+                                                      width: 25,
+                                                      height: 25,
+                                                      child: CircularProgressIndicator(
+                                                        color: Colors.blueGrey,
+                                                        strokeWidth: 1.4,
+                                                      )),
+                                                ],
+                                              ),
                                             ),
-                                          ))
+                                          )),
+                                      AnimatedPositioned(
+                                          bottom: loadedOrder ? 0 : -65,
+                                          duration: const Duration(milliseconds: 200),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Container(
+                                              width: getPhoneWidth(context) - 20,
+                                              height: 55,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius: BorderRadius.circular(20)),
+                                              padding: const EdgeInsets.symmetric(horizontal: 25),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    "Porosia u ngarkua me sukses ",
+                                                    style: AppStyles.getHeaderNameText(
+                                                        color: Colors.blueGrey, size: 16.0),
+                                                  ),
+                                                  SizedBox(
+                                                      width: 25,
+                                                      height: 25,
+                                                      child: Icon(Icons.check_circle,color:AppColors.bottomColorTwo)),
+                                                ],
+                                              ),
+                                            ),
+                                          )),
+                                      AnimatedPositioned(
+                                          bottom: deliveredOrder ? 0 : -65,
+                                          duration: const Duration(milliseconds: 200),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Container(
+                                              width: getPhoneWidth(context) - 20,
+                                              height: 55,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius: BorderRadius.circular(20)),
+                                              padding: const EdgeInsets.symmetric(horizontal: 25),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    "Porosia u dorezua me sukses ",
+                                                    style: AppStyles.getHeaderNameText(
+                                                        color: Colors.blueGrey, size: 16.0),
+                                                  ),
+                                                  SizedBox(
+                                                      width: 25,
+                                                      height: 25,
+                                                      child: Icon(Icons.check_circle,color:AppColors.bottomColorTwo)),
+                                                ],
+                                              ),
+                                            ),
+                                          )),
+                                      AnimatedPositioned(
+                                          bottom: rejectedOrder ? 0 : -65,
+                                          duration: const Duration(milliseconds: 200),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Container(
+                                              width: getPhoneWidth(context) - 20,
+                                              height: 55,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius: BorderRadius.circular(20)),
+                                              padding: const EdgeInsets.symmetric(horizontal: 25),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    "Porosia u anulua me sukses ",
+                                                    style: AppStyles.getHeaderNameText(
+                                                        color: Colors.blueGrey, size: 16.0),
+                                                  ),
+                                                  SizedBox(
+                                                      width: 25,
+                                                      height: 25,
+                                                      child: Icon(Icons.check_circle,color:AppColors.bottomColorTwo)),
+                                                ],
+                                              ),
+                                            ),
+                                          )),
+                                      AnimatedPositioned(
+                                          bottom: returnedOrder ? 0 : -65,
+                                          duration: const Duration(milliseconds: 200),
+                                          child: Padding(
+                                            padding: const EdgeInsets.all(8.0),
+                                            child: Container(
+                                              width: getPhoneWidth(context) - 20,
+                                              height: 55,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.white,
+                                                  borderRadius: BorderRadius.circular(20)),
+                                              padding: const EdgeInsets.symmetric(horizontal: 25),
+                                              child: Row(
+                                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                children: [
+                                                  Text(
+                                                    "Porosia u rikthye me sukses ",
+                                                    style: AppStyles.getHeaderNameText(
+                                                        color: Colors.blueGrey, size: 16.0),
+                                                  ),
+                                                  SizedBox(
+                                                      width: 25,
+                                                      height: 25,
+                                                      child: Icon(Icons.check_circle,color:AppColors.bottomColorTwo)),
+                                                ],
+                                              ),
+                                            ),
+                                          )),
                                     ],
                                   ),
-                                  Delivered(postmanOrders),
-                                  Canceled(postmanOrders),
-                                  Returned(postmanOrders),
+                                  delivered(postmanOrders),
+                                  canceled(postmanOrders),
+                                  returned(postmanOrders),
                                 ],
                               )),
                   ),
@@ -1717,7 +2312,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
     );
   }
 
-  Delivering(PostmanOrderProvider postmanOrders) => postmanOrders
+  delivering(PostmanOrderProvider postmanOrders) => postmanOrders
           .isFetchingPendingOrders()
       ? ListView(
           children: const [
@@ -1756,7 +2351,6 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                   var order = postmanOrders
                       .getOnDeliveryOrders("delivering")
                       .elementAt(index);
-                  print( order.id);
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 7),
                     child: Column(
@@ -1808,613 +2402,613 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                             controller: swipeActionController,
                             key: ObjectKey(index),
                             backgroundColor: Colors.transparent,
-                            trailingActions: [
-                              SwipeAction(
-                                  backgroundRadius: 20,
-                                  forceAlignmentToBoundary: false,
-                                  widthSpace: 120,
-                                  closeOnTap: true,
-                                  onTap: (CompletionHandler handler) async {
-                                    showModalOne(
-                                        context,
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Column(
-                                              children: [
-                                                Text(
-                                                  "Konfirmo dorezimin e porosise",
-                                                  style: AppStyles
-                                                      .getHeaderNameText(
-                                                          color: Colors
-                                                              .blueGrey[800],
-                                                          size: 20),
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                                Text(
-                                                  "Numri porosise: ${order.orderNumber}",
-                                                  style: AppStyles
-                                                      .getHeaderNameText(
-                                                          color: Colors
-                                                              .blueGrey[600],
-                                                          size: 17),
-                                                ),
-                                              ],
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                Container(
-                                                    height: 40,
-                                                    width:
-                                                        getPhoneWidth(context) /
-                                                                2 -
-                                                            80,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.blueGrey,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(100)),
-                                                    child: TextButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                        child: Text(
-                                                          "Jo",
-                                                          style: AppStyles
-                                                              .getHeaderNameText(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 17),
-                                                        ))),
-                                                Container(
-                                                    height: 40,
-                                                    width:
-                                                        getPhoneWidth(context) /
-                                                                2 -
-                                                            80,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.blueGrey,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(100)),
-                                                    child: TextButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                          deliverOrder(
-                                                              order.orderNumber);
-                                                          swipeActionController
-                                                              .closeAllOpenCell();
-                                                        },
-                                                        child: Text(
-                                                          "Po",
-                                                          style: AppStyles
-                                                              .getHeaderNameText(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 17),
-                                                        ))),
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                        150.0);
-                                  },
-                                  content: Container(
-                                      height: 120,
-                                      decoration: BoxDecoration(
-                                          borderRadius: const BorderRadius.only(
-                                              topRight: Radius.circular(20),
-                                              bottomRight: Radius.circular(20)),
-                                          color: AppColors.bottomColorTwo),
-                                      child: Center(
-                                          child: Text(
-                                        "Dorezo",
-                                        style: AppStyles.getHeaderNameText(
-                                            color: Colors.white, size: 15.0),
-                                      ))),
-                                  color: Colors.transparent),
-                              SwipeAction(
-                                  backgroundRadius: 20,
-                                  forceAlignmentToBoundary: false,
-                                  widthSpace: 120,
-                                  closeOnTap: true,
-                                  onTap: (CompletionHandler handler) async {
-                                    showModalOne(context, StatefulBuilder(
-                                        builder: (context, setter) {
-                                      _setState = setter;
-                                      return ListView(
-                                        children: [
-                                          ListView.builder(
-                                            physics: const ScrollPhysics(),
-                                            shrinkWrap: true,
-                                            itemBuilder: (context, index) {
-                                              return Column(
-                                                children: [
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      _setState!(() {
-                                                        hasReason = true;
-                                                        reasonType = index;
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                      width: getPhoneWidth(
-                                                              context) -
-                                                          50,
-                                                      height: 60,
-                                                      padding: const EdgeInsets
-                                                              .symmetric(
-                                                          horizontal: 15),
-                                                      decoration: BoxDecoration(
-                                                          color: Colors
-                                                              .transparent,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(10),
-                                                          border: Border.all(
-                                                              color: Colors
-                                                                  .grey[200]!)),
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Container(
-                                                              width: getPhoneWidth(
-                                                                      context) -
-                                                                  133,
-                                                              child: Text(
-                                                                reasons[index],
-                                                                maxLines: 2,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                style: AppStyles
-                                                                    .getHeaderNameText(
-                                                                        color: Colors
-                                                                            .blueGrey,
-                                                                        size:
-                                                                            16.0),
-                                                              )),
-                                                          Container(
-                                                            width: 25,
-                                                            height: 25,
-                                                            decoration: BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            100),
-                                                                border: Border.all(
-                                                                    color: Colors
-                                                                        .blueGrey)),
-                                                            child: reasonType !=
-                                                                    index
-                                                                ? const SizedBox()
-                                                                : Container(
-                                                                    width: 25,
-                                                                    height: 25,
-                                                                    margin: const EdgeInsets
-                                                                        .all(2),
-                                                                    decoration: BoxDecoration(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(
-                                                                                100),
-                                                                        color: Colors
-                                                                            .blueGrey),
-                                                                  ),
-                                                          )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 5,
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                            itemCount: reasons.length,
-                                          ),
-                                          reasonType != reasons.length - 1
-                                              ? const SizedBox()
-                                              : Column(
-                                                  children: [
-                                                    const SizedBox(
-                                                      height: 10,
-                                                    ),
-                                                    TextField(
-                                                      minLines: 4,
-                                                      maxLines: 4,
-                                                      onChanged: (value) {
-                                                        if (value.isEmpty) {
-                                                          _setState!(() {
-                                                            commented = false;
-                                                          });
-                                                        } else {
-                                                          _setState!(() {
-                                                            commented = true;
-                                                          });
-                                                        }
-                                                      },
-                                                      controller: _comment,
-                                                      decoration:
-                                                          InputDecoration(
-                                                              border: InputBorder
-                                                                  .none,
-                                                              hintText:
-                                                                  "Arsyeja",
-                                                              enabledBorder:
-                                                                  OutlineInputBorder(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            15),
-                                                                borderSide: BorderSide(
-                                                                    color: Colors
-                                                                            .grey[
-                                                                        200]!),
-                                                              ),
-                                                              focusedBorder:
-                                                                  OutlineInputBorder(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            15),
-                                                                borderSide: BorderSide(
-                                                                    color: Colors
-                                                                            .grey[
-                                                                        200]!),
-                                                              ),
-                                                              contentPadding:
-                                                                  const EdgeInsets
-                                                                          .symmetric(
-                                                                      horizontal:
-                                                                          15,
-                                                                      vertical:
-                                                                          10)),
-                                                    )
-                                                  ],
-                                                ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              Container(
-                                                  height: 40,
-                                                  width:
-                                                      getPhoneWidth(context) /
-                                                              2 -
-                                                          80,
-                                                  decoration: BoxDecoration(
-                                                      color: Colors.grey[400],
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              100)),
-                                                  child: TextButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      child: Text(
-                                                        "Largo",
-                                                        style: AppStyles
-                                                            .getHeaderNameText(
-                                                                color: Colors
-                                                                    .white,
-                                                                size: 17),
-                                                      ))),
-                                              Container(
-                                                  height: 40,
-                                                  width:
-                                                      getPhoneWidth(context) /
-                                                              2 -
-                                                          80,
-                                                  decoration: BoxDecoration(
-                                                      color: commented ||
-                                                              hasReason
-                                                          ? Colors.blueGrey
-                                                          : Colors.grey[400],
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              100)),
-                                                  child: TextButton(
-                                                      onPressed: () {
-                                                        if (!hasReason) {
-                                                          _setState!(() {
-                                                            commented = false;
-                                                          });
-                                                        } else {
-                                                          Navigator.pop(
-                                                              context);
-                                                          returnOrder(order.orderNumber);
-                                                          swipeActionController
-                                                              .closeAllOpenCell();
-                                                        }
-                                                      },
-                                                      child: Text(
-                                                        "Rikthe",
-                                                        style: AppStyles
-                                                            .getHeaderNameText(
-                                                                color: Colors
-                                                                    .white,
-                                                                size: 17),
-                                                      ))),
-                                            ],
-                                          )
-                                        ],
-                                      );
-                                    }), 415.0);
-                                  },
-                                  content: Container(
-                                      height: 120,
-                                      decoration: BoxDecoration(
-                                          color: AppColors.bottomColorOne),
-                                      child: Center(
-                                          child: Text(
-                                        "E kthyer",
-                                        style: AppStyles.getHeaderNameText(
-                                            color: Colors.white, size: 15.0),
-                                      ))),
-                                  color: Colors.transparent),
-                              SwipeAction(
-                                  backgroundRadius: 20,
-                                  forceAlignmentToBoundary: false,
-                                  widthSpace: 100,
-                                  closeOnTap: true,
-                                  performsFirstActionWithFullSwipe: true,
-                                  onTap: (CompletionHandler handler) async {
-                                    showModalOne(context, StatefulBuilder(
-                                        builder: (context, setter) {
-                                      _setState = setter;
-                                      return ListView(
-                                        children: [
-                                          ListView.builder(
-                                            physics: const ScrollPhysics(),
-                                            shrinkWrap: true,
-                                            itemBuilder: (context, index) {
-                                              return Column(
-                                                children: [
-                                                  GestureDetector(
-                                                    onTap: () {
-                                                      _setState!(() {
-                                                        hasReason = true;
-                                                        reasonType = index;
-                                                      });
-                                                    },
-                                                    child: Container(
-                                                      width: getPhoneWidth(
-                                                              context) -
-                                                          50,
-                                                      height: 60,
-                                                      padding: const EdgeInsets
-                                                              .symmetric(
-                                                          horizontal: 15),
-                                                      decoration: BoxDecoration(
-                                                          color: Colors
-                                                              .transparent,
-                                                          borderRadius:
-                                                              BorderRadius
-                                                                  .circular(10),
-                                                          border: Border.all(
-                                                              color: Colors
-                                                                  .grey[200]!)),
-                                                      child: Row(
-                                                        mainAxisAlignment:
-                                                            MainAxisAlignment
-                                                                .spaceBetween,
-                                                        children: [
-                                                          Container(
-                                                              width: getPhoneWidth(
-                                                                      context) -
-                                                                  133,
-                                                              child: Text(
-                                                                reasons[index],
-                                                                maxLines: 2,
-                                                                overflow:
-                                                                    TextOverflow
-                                                                        .ellipsis,
-                                                                style: AppStyles
-                                                                    .getHeaderNameText(
-                                                                        color: Colors
-                                                                            .blueGrey,
-                                                                        size:
-                                                                            16.0),
-                                                              )),
-                                                          Container(
-                                                            width: 25,
-                                                            height: 25,
-                                                            decoration: BoxDecoration(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            100),
-                                                                border: Border.all(
-                                                                    color: Colors
-                                                                        .blueGrey)),
-                                                            child: reasonType !=
-                                                                    index
-                                                                ? const SizedBox()
-                                                                : Container(
-                                                                    width: 25,
-                                                                    height: 25,
-                                                                    margin: const EdgeInsets
-                                                                        .all(2),
-                                                                    decoration: BoxDecoration(
-                                                                        borderRadius:
-                                                                            BorderRadius.circular(
-                                                                                100),
-                                                                        color: Colors
-                                                                            .blueGrey),
-                                                                  ),
-                                                          )
-                                                        ],
-                                                      ),
-                                                    ),
-                                                  ),
-                                                  const SizedBox(
-                                                    height: 5,
-                                                  ),
-                                                ],
-                                              );
-                                            },
-                                            itemCount: reasons.length,
-                                          ),
-                                          reasonType != reasons.length - 1
-                                              ? const SizedBox()
-                                              : Column(
-                                                  children: [
-                                                    const SizedBox(
-                                                      height: 10,
-                                                    ),
-                                                    TextField(
-                                                      minLines: 4,
-                                                      maxLines: 4,
-                                                      onChanged: (value) {
-                                                        if (value.isEmpty) {
-                                                          _setState!(() {
-                                                            commented = false;
-                                                          });
-                                                        } else {
-                                                          _setState!(() {
-                                                            commented = true;
-                                                          });
-                                                        }
-                                                      },
-                                                      controller: _comment,
-                                                      decoration:
-                                                          InputDecoration(
-                                                              border: InputBorder
-                                                                  .none,
-                                                              hintText:
-                                                                  "Arsyeja",
-                                                              enabledBorder:
-                                                                  OutlineInputBorder(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            15),
-                                                                borderSide: BorderSide(
-                                                                    color: Colors
-                                                                            .grey[
-                                                                        200]!),
-                                                              ),
-                                                              focusedBorder:
-                                                                  OutlineInputBorder(
-                                                                borderRadius:
-                                                                    BorderRadius
-                                                                        .circular(
-                                                                            15),
-                                                                borderSide: BorderSide(
-                                                                    color: Colors
-                                                                            .grey[
-                                                                        200]!),
-                                                              ),
-                                                              contentPadding:
-                                                                  const EdgeInsets
-                                                                          .symmetric(
-                                                                      horizontal:
-                                                                          15,
-                                                                      vertical:
-                                                                          10)),
-                                                    )
-                                                  ],
-                                                ),
-                                          const SizedBox(
-                                            height: 10,
-                                          ),
-                                          Row(
-                                            mainAxisAlignment:
-                                                MainAxisAlignment.spaceEvenly,
-                                            children: [
-                                              Container(
-                                                  height: 40,
-                                                  width:
-                                                      getPhoneWidth(context) /
-                                                              2 -
-                                                          80,
-                                                  decoration: BoxDecoration(
-                                                      color: Colors.grey[400],
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              100)),
-                                                  child: TextButton(
-                                                      onPressed: () {
-                                                        Navigator.pop(context);
-                                                      },
-                                                      child: Text(
-                                                        "Largo",
-                                                        style: AppStyles
-                                                            .getHeaderNameText(
-                                                                color: Colors
-                                                                    .white,
-                                                                size: 17),
-                                                      ))),
-                                              Container(
-                                                  height: 40,
-                                                  width:
-                                                      getPhoneWidth(context) /
-                                                              2 -
-                                                          80,
-                                                  decoration: BoxDecoration(
-                                                      color: commented ||
-                                                              hasReason
-                                                          ? Colors.blueGrey
-                                                          : Colors.grey[400],
-                                                      borderRadius:
-                                                          BorderRadius.circular(
-                                                              100)),
-                                                  child: TextButton(
-                                                      onPressed: () {
-                                                        if (!hasReason) {
-                                                          _setState!(() {
-                                                            commented = false;
-                                                          });
-                                                        } else {
-                                                          Navigator.pop(
-                                                              context);
-                                                          rejectOrder(order.orderNumber);
-                                                          swipeActionController
-                                                              .closeAllOpenCell();
-                                                        }
-                                                      },
-                                                      child: Text(
-                                                        "Refuzo",
-                                                        style: AppStyles
-                                                            .getHeaderNameText(
-                                                                color: Colors
-                                                                    .white,
-                                                                size: 17),
-                                                      ))),
-                                            ],
-                                          )
-                                        ],
-                                      );
-                                    }), 415.0);
-                                  },
-                                  content: Container(
-                                      height: 120,
-                                      decoration: const BoxDecoration(
-                                          borderRadius: BorderRadius.only(
-                                              topLeft: Radius.circular(20),
-                                              bottomLeft: Radius.circular(20)),
-                                          color: Colors.red),
-                                      child: Center(
-                                          child: Text(
-                                        "Refuzo",
-                                        style: AppStyles.getHeaderNameText(
-                                            color: Colors.white, size: 15.0),
-                                      ))),
-                                  color: Colors.transparent),
-                            ],
+                            // trailingActions: [
+                            //   SwipeAction(
+                            //       backgroundRadius: 20,
+                            //       forceAlignmentToBoundary: false,
+                            //       widthSpace: 120,
+                            //       closeOnTap: true,
+                            //       onTap: (CompletionHandler handler) async {
+                            //         showModalOne(
+                            //             context,
+                            //             Column(
+                            //               mainAxisAlignment:
+                            //                   MainAxisAlignment.spaceBetween,
+                            //               children: [
+                            //                 Column(
+                            //                   children: [
+                            //                     Text(
+                            //                       "Konfirmo dorezimin e porosise",
+                            //                       style: AppStyles
+                            //                           .getHeaderNameText(
+                            //                               color: Colors
+                            //                                   .blueGrey[800],
+                            //                               size: 20),
+                            //                     ),
+                            //                     const SizedBox(
+                            //                       height: 10,
+                            //                     ),
+                            //                     Text(
+                            //                       "Numri porosise: ${order.orderNumber}",
+                            //                       style: AppStyles
+                            //                           .getHeaderNameText(
+                            //                               color: Colors
+                            //                                   .blueGrey[600],
+                            //                               size: 17),
+                            //                     ),
+                            //                   ],
+                            //                 ),
+                            //                 Row(
+                            //                   mainAxisAlignment:
+                            //                       MainAxisAlignment.spaceEvenly,
+                            //                   children: [
+                            //                     Container(
+                            //                         height: 40,
+                            //                         width:
+                            //                             getPhoneWidth(context) /
+                            //                                     2 -
+                            //                                 80,
+                            //                         decoration: BoxDecoration(
+                            //                             color: Colors.blueGrey,
+                            //                             borderRadius:
+                            //                                 BorderRadius
+                            //                                     .circular(100)),
+                            //                         child: TextButton(
+                            //                             onPressed: () {
+                            //                               Navigator.pop(
+                            //                                   context);
+                            //                             },
+                            //                             child: Text(
+                            //                               "Jo",
+                            //                               style: AppStyles
+                            //                                   .getHeaderNameText(
+                            //                                       color: Colors
+                            //                                           .white,
+                            //                                       size: 17),
+                            //                             ))),
+                            //                     Container(
+                            //                         height: 40,
+                            //                         width:
+                            //                             getPhoneWidth(context) /
+                            //                                     2 -
+                            //                                 80,
+                            //                         decoration: BoxDecoration(
+                            //                             color: Colors.blueGrey,
+                            //                             borderRadius:
+                            //                                 BorderRadius
+                            //                                     .circular(100)),
+                            //                         child: TextButton(
+                            //                             onPressed: () {
+                            //                               Navigator.pop(
+                            //                                   context);
+                            //                               deliverOrder(
+                            //                                   order.orderNumber);
+                            //                               swipeActionController
+                            //                                   .closeAllOpenCell();
+                            //                             },
+                            //                             child: Text(
+                            //                               "Po",
+                            //                               style: AppStyles
+                            //                                   .getHeaderNameText(
+                            //                                       color: Colors
+                            //                                           .white,
+                            //                                       size: 17),
+                            //                             ))),
+                            //                   ],
+                            //                 )
+                            //               ],
+                            //             ),
+                            //             150.0);
+                            //       },
+                            //       content: Container(
+                            //           height: 120,
+                            //           decoration: BoxDecoration(
+                            //               borderRadius: const BorderRadius.only(
+                            //                   topRight: Radius.circular(20),
+                            //                   bottomRight: Radius.circular(20)),
+                            //               color: AppColors.bottomColorTwo),
+                            //           child: Center(
+                            //               child: Text(
+                            //             "Dorezo",
+                            //             style: AppStyles.getHeaderNameText(
+                            //                 color: Colors.white, size: 15.0),
+                            //           ))),
+                            //       color: Colors.transparent),
+                            //   SwipeAction(
+                            //       backgroundRadius: 20,
+                            //       forceAlignmentToBoundary: false,
+                            //       widthSpace: 120,
+                            //       closeOnTap: true,
+                            //       onTap: (CompletionHandler handler) async {
+                            //         showModalOne(context, StatefulBuilder(
+                            //             builder: (context, setter) {
+                            //           _setState = setter;
+                            //           return ListView(
+                            //             children: [
+                            //               ListView.builder(
+                            //                 physics: const ScrollPhysics(),
+                            //                 shrinkWrap: true,
+                            //                 itemBuilder: (context, index) {
+                            //                   return Column(
+                            //                     children: [
+                            //                       GestureDetector(
+                            //                         onTap: () {
+                            //                           _setState!(() {
+                            //                             hasReason = true;
+                            //                             reasonType = index;
+                            //                           });
+                            //                         },
+                            //                         child: Container(
+                            //                           width: getPhoneWidth(
+                            //                                   context) -
+                            //                               50,
+                            //                           height: 60,
+                            //                           padding: const EdgeInsets
+                            //                                   .symmetric(
+                            //                               horizontal: 15),
+                            //                           decoration: BoxDecoration(
+                            //                               color: Colors
+                            //                                   .transparent,
+                            //                               borderRadius:
+                            //                                   BorderRadius
+                            //                                       .circular(10),
+                            //                               border: Border.all(
+                            //                                   color: Colors
+                            //                                       .grey[200]!)),
+                            //                           child: Row(
+                            //                             mainAxisAlignment:
+                            //                                 MainAxisAlignment
+                            //                                     .spaceBetween,
+                            //                             children: [
+                            //                               SizedBox(
+                            //                                   width: getPhoneWidth(
+                            //                                           context) -
+                            //                                       133,
+                            //                                   child: Text(
+                            //                                     reasons[index],
+                            //                                     maxLines: 2,
+                            //                                     overflow:
+                            //                                         TextOverflow
+                            //                                             .ellipsis,
+                            //                                     style: AppStyles
+                            //                                         .getHeaderNameText(
+                            //                                             color: Colors
+                            //                                                 .blueGrey,
+                            //                                             size:
+                            //                                                 16.0),
+                            //                                   )),
+                            //                               Container(
+                            //                                 width: 25,
+                            //                                 height: 25,
+                            //                                 decoration: BoxDecoration(
+                            //                                     borderRadius:
+                            //                                         BorderRadius
+                            //                                             .circular(
+                            //                                                 100),
+                            //                                     border: Border.all(
+                            //                                         color: Colors
+                            //                                             .blueGrey)),
+                            //                                 child: reasonType !=
+                            //                                         index
+                            //                                     ? const SizedBox()
+                            //                                     : Container(
+                            //                                         width: 25,
+                            //                                         height: 25,
+                            //                                         margin: const EdgeInsets
+                            //                                             .all(2),
+                            //                                         decoration: BoxDecoration(
+                            //                                             borderRadius:
+                            //                                                 BorderRadius.circular(
+                            //                                                     100),
+                            //                                             color: Colors
+                            //                                                 .blueGrey),
+                            //                                       ),
+                            //                               )
+                            //                             ],
+                            //                           ),
+                            //                         ),
+                            //                       ),
+                            //                       const SizedBox(
+                            //                         height: 5,
+                            //                       ),
+                            //                     ],
+                            //                   );
+                            //                 },
+                            //                 itemCount: reasons.length,
+                            //               ),
+                            //               reasonType != reasons.length - 1
+                            //                   ? const SizedBox()
+                            //                   : Column(
+                            //                       children: [
+                            //                         const SizedBox(
+                            //                           height: 10,
+                            //                         ),
+                            //                         TextField(
+                            //                           minLines: 4,
+                            //                           maxLines: 4,
+                            //                           onChanged: (value) {
+                            //                             if (value.isEmpty) {
+                            //                               _setState!(() {
+                            //                                 commented = false;
+                            //                               });
+                            //                             } else {
+                            //                               _setState!(() {
+                            //                                 commented = true;
+                            //                               });
+                            //                             }
+                            //                           },
+                            //                           controller: _comment,
+                            //                           decoration:
+                            //                               InputDecoration(
+                            //                                   border: InputBorder
+                            //                                       .none,
+                            //                                   hintText:
+                            //                                       "Arsyeja",
+                            //                                   enabledBorder:
+                            //                                       OutlineInputBorder(
+                            //                                     borderRadius:
+                            //                                         BorderRadius
+                            //                                             .circular(
+                            //                                                 15),
+                            //                                     borderSide: BorderSide(
+                            //                                         color: Colors
+                            //                                                 .grey[
+                            //                                             200]!),
+                            //                                   ),
+                            //                                   focusedBorder:
+                            //                                       OutlineInputBorder(
+                            //                                     borderRadius:
+                            //                                         BorderRadius
+                            //                                             .circular(
+                            //                                                 15),
+                            //                                     borderSide: BorderSide(
+                            //                                         color: Colors
+                            //                                                 .grey[
+                            //                                             200]!),
+                            //                                   ),
+                            //                                   contentPadding:
+                            //                                       const EdgeInsets
+                            //                                               .symmetric(
+                            //                                           horizontal:
+                            //                                               15,
+                            //                                           vertical:
+                            //                                               10)),
+                            //                         )
+                            //                       ],
+                            //                     ),
+                            //               const SizedBox(
+                            //                 height: 10,
+                            //               ),
+                            //               Row(
+                            //                 mainAxisAlignment:
+                            //                     MainAxisAlignment.spaceEvenly,
+                            //                 children: [
+                            //                   Container(
+                            //                       height: 40,
+                            //                       width:
+                            //                           getPhoneWidth(context) /
+                            //                                   2 -
+                            //                               80,
+                            //                       decoration: BoxDecoration(
+                            //                           color: Colors.grey[400],
+                            //                           borderRadius:
+                            //                               BorderRadius.circular(
+                            //                                   100)),
+                            //                       child: TextButton(
+                            //                           onPressed: () {
+                            //                             Navigator.pop(context);
+                            //                           },
+                            //                           child: Text(
+                            //                             "Largo",
+                            //                             style: AppStyles
+                            //                                 .getHeaderNameText(
+                            //                                     color: Colors
+                            //                                         .white,
+                            //                                     size: 17),
+                            //                           ))),
+                            //                   Container(
+                            //                       height: 40,
+                            //                       width:
+                            //                           getPhoneWidth(context) /
+                            //                                   2 -
+                            //                               80,
+                            //                       decoration: BoxDecoration(
+                            //                           color: commented ||
+                            //                                   hasReason
+                            //                               ? Colors.blueGrey
+                            //                               : Colors.grey[400],
+                            //                           borderRadius:
+                            //                               BorderRadius.circular(
+                            //                                   100)),
+                            //                       child: TextButton(
+                            //                           onPressed: () {
+                            //                             if (!hasReason) {
+                            //                               _setState!(() {
+                            //                                 commented = false;
+                            //                               });
+                            //                             } else {
+                            //                               Navigator.pop(
+                            //                                   context);
+                            //                               returnOrder(order.orderNumber);
+                            //                               swipeActionController
+                            //                                   .closeAllOpenCell();
+                            //                             }
+                            //                           },
+                            //                           child: Text(
+                            //                             "Rikthe",
+                            //                             style: AppStyles
+                            //                                 .getHeaderNameText(
+                            //                                     color: Colors
+                            //                                         .white,
+                            //                                     size: 17),
+                            //                           ))),
+                            //                 ],
+                            //               )
+                            //             ],
+                            //           );
+                            //         }), 415.0);
+                            //       },
+                            //       content: Container(
+                            //           height: 120,
+                            //           decoration: BoxDecoration(
+                            //               color: AppColors.bottomColorOne),
+                            //           child: Center(
+                            //               child: Text(
+                            //             "E kthyer",
+                            //             style: AppStyles.getHeaderNameText(
+                            //                 color: Colors.white, size: 15.0),
+                            //           ))),
+                            //       color: Colors.transparent),
+                            //   SwipeAction(
+                            //       backgroundRadius: 20,
+                            //       forceAlignmentToBoundary: false,
+                            //       widthSpace: 100,
+                            //       closeOnTap: true,
+                            //       performsFirstActionWithFullSwipe: true,
+                            //       onTap: (CompletionHandler handler) async {
+                            //         showModalOne(context, StatefulBuilder(
+                            //             builder: (context, setter) {
+                            //           _setState = setter;
+                            //           return ListView(
+                            //             children: [
+                            //               ListView.builder(
+                            //                 physics: const ScrollPhysics(),
+                            //                 shrinkWrap: true,
+                            //                 itemBuilder: (context, index) {
+                            //                   return Column(
+                            //                     children: [
+                            //                       GestureDetector(
+                            //                         onTap: () {
+                            //                           _setState!(() {
+                            //                             hasReason = true;
+                            //                             reasonType = index;
+                            //                           });
+                            //                         },
+                            //                         child: Container(
+                            //                           width: getPhoneWidth(
+                            //                                   context) -
+                            //                               50,
+                            //                           height: 60,
+                            //                           padding: const EdgeInsets
+                            //                                   .symmetric(
+                            //                               horizontal: 15),
+                            //                           decoration: BoxDecoration(
+                            //                               color: Colors
+                            //                                   .transparent,
+                            //                               borderRadius:
+                            //                                   BorderRadius
+                            //                                       .circular(10),
+                            //                               border: Border.all(
+                            //                                   color: Colors
+                            //                                       .grey[200]!)),
+                            //                           child: Row(
+                            //                             mainAxisAlignment:
+                            //                                 MainAxisAlignment
+                            //                                     .spaceBetween,
+                            //                             children: [
+                            //                               SizedBox(
+                            //                                   width: getPhoneWidth(
+                            //                                           context) -
+                            //                                       133,
+                            //                                   child: Text(
+                            //                                     reasons[index],
+                            //                                     maxLines: 2,
+                            //                                     overflow:
+                            //                                         TextOverflow
+                            //                                             .ellipsis,
+                            //                                     style: AppStyles
+                            //                                         .getHeaderNameText(
+                            //                                             color: Colors
+                            //                                                 .blueGrey,
+                            //                                             size:
+                            //                                                 16.0),
+                            //                                   )),
+                            //                               Container(
+                            //                                 width: 25,
+                            //                                 height: 25,
+                            //                                 decoration: BoxDecoration(
+                            //                                     borderRadius:
+                            //                                         BorderRadius
+                            //                                             .circular(
+                            //                                                 100),
+                            //                                     border: Border.all(
+                            //                                         color: Colors
+                            //                                             .blueGrey)),
+                            //                                 child: reasonType !=
+                            //                                         index
+                            //                                     ? const SizedBox()
+                            //                                     : Container(
+                            //                                         width: 25,
+                            //                                         height: 25,
+                            //                                         margin: const EdgeInsets
+                            //                                             .all(2),
+                            //                                         decoration: BoxDecoration(
+                            //                                             borderRadius:
+                            //                                                 BorderRadius.circular(
+                            //                                                     100),
+                            //                                             color: Colors
+                            //                                                 .blueGrey),
+                            //                                       ),
+                            //                               )
+                            //                             ],
+                            //                           ),
+                            //                         ),
+                            //                       ),
+                            //                       const SizedBox(
+                            //                         height: 5,
+                            //                       ),
+                            //                     ],
+                            //                   );
+                            //                 },
+                            //                 itemCount: reasons.length,
+                            //               ),
+                            //               reasonType != reasons.length - 1
+                            //                   ? const SizedBox()
+                            //                   : Column(
+                            //                       children: [
+                            //                         const SizedBox(
+                            //                           height: 10,
+                            //                         ),
+                            //                         TextField(
+                            //                           minLines: 4,
+                            //                           maxLines: 4,
+                            //                           onChanged: (value) {
+                            //                             if (value.isEmpty) {
+                            //                               _setState!(() {
+                            //                                 commented = false;
+                            //                               });
+                            //                             } else {
+                            //                               _setState!(() {
+                            //                                 commented = true;
+                            //                               });
+                            //                             }
+                            //                           },
+                            //                           controller: _comment,
+                            //                           decoration:
+                            //                               InputDecoration(
+                            //                                   border: InputBorder
+                            //                                       .none,
+                            //                                   hintText:
+                            //                                       "Arsyeja",
+                            //                                   enabledBorder:
+                            //                                       OutlineInputBorder(
+                            //                                     borderRadius:
+                            //                                         BorderRadius
+                            //                                             .circular(
+                            //                                                 15),
+                            //                                     borderSide: BorderSide(
+                            //                                         color: Colors
+                            //                                                 .grey[
+                            //                                             200]!),
+                            //                                   ),
+                            //                                   focusedBorder:
+                            //                                       OutlineInputBorder(
+                            //                                     borderRadius:
+                            //                                         BorderRadius
+                            //                                             .circular(
+                            //                                                 15),
+                            //                                     borderSide: BorderSide(
+                            //                                         color: Colors
+                            //                                                 .grey[
+                            //                                             200]!),
+                            //                                   ),
+                            //                                   contentPadding:
+                            //                                       const EdgeInsets
+                            //                                               .symmetric(
+                            //                                           horizontal:
+                            //                                               15,
+                            //                                           vertical:
+                            //                                               10)),
+                            //                         )
+                            //                       ],
+                            //                     ),
+                            //               const SizedBox(
+                            //                 height: 10,
+                            //               ),
+                            //               Row(
+                            //                 mainAxisAlignment:
+                            //                     MainAxisAlignment.spaceEvenly,
+                            //                 children: [
+                            //                   Container(
+                            //                       height: 40,
+                            //                       width:
+                            //                           getPhoneWidth(context) /
+                            //                                   2 -
+                            //                               80,
+                            //                       decoration: BoxDecoration(
+                            //                           color: Colors.grey[400],
+                            //                           borderRadius:
+                            //                               BorderRadius.circular(
+                            //                                   100)),
+                            //                       child: TextButton(
+                            //                           onPressed: () {
+                            //                             Navigator.pop(context);
+                            //                           },
+                            //                           child: Text(
+                            //                             "Largo",
+                            //                             style: AppStyles
+                            //                                 .getHeaderNameText(
+                            //                                     color: Colors
+                            //                                         .white,
+                            //                                     size: 17),
+                            //                           ))),
+                            //                   Container(
+                            //                       height: 40,
+                            //                       width:
+                            //                           getPhoneWidth(context) /
+                            //                                   2 -
+                            //                               80,
+                            //                       decoration: BoxDecoration(
+                            //                           color: commented ||
+                            //                                   hasReason
+                            //                               ? Colors.blueGrey
+                            //                               : Colors.grey[400],
+                            //                           borderRadius:
+                            //                               BorderRadius.circular(
+                            //                                   100)),
+                            //                       child: TextButton(
+                            //                           onPressed: () {
+                            //                             if (!hasReason) {
+                            //                               _setState!(() {
+                            //                                 commented = false;
+                            //                               });
+                            //                             } else {
+                            //                               Navigator.pop(
+                            //                                   context);
+                            //                               rejectOrder(order.orderNumber);
+                            //                               swipeActionController
+                            //                                   .closeAllOpenCell();
+                            //                             }
+                            //                           },
+                            //                           child: Text(
+                            //                             "Refuzo",
+                            //                             style: AppStyles
+                            //                                 .getHeaderNameText(
+                            //                                     color: Colors
+                            //                                         .white,
+                            //                                     size: 17),
+                            //                           ))),
+                            //                 ],
+                            //               )
+                            //             ],
+                            //           );
+                            //         }), 415.0);
+                            //       },
+                            //       content: Container(
+                            //           height: 120,
+                            //           decoration: const BoxDecoration(
+                            //               borderRadius: BorderRadius.only(
+                            //                   topLeft: Radius.circular(20),
+                            //                   bottomLeft: Radius.circular(20)),
+                            //               color: Colors.red),
+                            //           child: Center(
+                            //               child: Text(
+                            //             "Refuzo",
+                            //             style: AppStyles.getHeaderNameText(
+                            //                 color: Colors.white, size: 15.0),
+                            //           ))),
+                            //       color: Colors.transparent),
+                            // ],
                             child: Container(
                               padding: const EdgeInsets.only(
                                 left: 21,
@@ -2486,7 +3080,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                             color: AppColors.bottomColorTwo),
                                         child: Center(
                                           child: Text(
-                                            "Per\ndergese",
+                                            order.status == "pending" ? "Ne pritje":order.status == "accepted" ? "Per depo": order.status == "in_warehouse" ? "Ne depo": order.status == "delivering" ? "Ne dergese": order.status == "delivered" ? "E derguar": order.status == "rejected" ?"E anuluar": "E refuzuar",
                                             textAlign: TextAlign.center,
                                             style: AppStyles.getHeaderNameText(
                                                 color: Colors.white,
@@ -2520,7 +3114,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
               ),
             );
 
-  Delivered(PostmanOrderProvider postmanOrders) => postmanOrders
+  delivered(PostmanOrderProvider postmanOrders) => postmanOrders
           .isFetchingPendingOrders()
       ? ListView(
           children: const [
@@ -2671,7 +3265,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                           color: AppColors.bottomColorTwo),
                                       child: Center(
                                         child: Text(
-                                          "Per\ndergese",
+                                          order.status == "pending" ? "Ne pritje":order.status == "accepted" ? "Per depo": order.status == "in_warehouse" ? "Ne depo": order.status == "delivering" ? "Ne dergese": order.status == "delivered" ? "E derguar": order.status == "rejected" ?"E anuluar": "E refuzuar",
                                           textAlign: TextAlign.center,
                                           style: AppStyles.getHeaderNameText(
                                               color: Colors.white, size: 15.0),
@@ -2703,7 +3297,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
               ),
             );
 
-  Canceled(PostmanOrderProvider postmanOrders) => postmanOrders
+  canceled(PostmanOrderProvider postmanOrders) => postmanOrders
           .isFetchingPendingOrders()
       ? ListView(
           children: const [
@@ -2741,6 +3335,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                   var order = postmanOrders
                       .getOnDeliveryOrders("rejected")
                       .elementAt(index);
+                  print("sdf");
                   return Padding(
                     padding: const EdgeInsets.only(bottom: 7),
                     child: Column(
@@ -2854,7 +3449,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                           color: AppColors.bottomColorTwo),
                                       child: Center(
                                         child: Text(
-                                          "Per\ndergese",
+                                          order.status == "pending" ? "Ne pritje":order.status == "accepted" ? "Per depo": order.status == "in_warehouse" ? "Ne depo": order.status == "delivering" ? "Ne dergese": order.status == "delivered" ? "E derguar": order.status == "rejected" ?"E anuluar": "E refuzuar",
                                           textAlign: TextAlign.center,
                                           style: AppStyles.getHeaderNameText(
                                               color: Colors.white, size: 15.0),
@@ -2885,7 +3480,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
               ),
             );
 
-  Returned(PostmanOrderProvider postmanOrders) => postmanOrders
+  returned(PostmanOrderProvider postmanOrders) => postmanOrders
           .isFetchingPendingOrders()
       ? ListView(
           children: const [
@@ -3036,7 +3631,7 @@ class _DeliveringOrdersState extends State<DeliveringOrders> {
                                           color: AppColors.bottomColorTwo),
                                       child: Center(
                                         child: Text(
-                                          "Per\ndergese",
+                                          order.status == "pending" ? "Ne pritje":order.status == "accepted" ? "Per depo": order.status == "in_warehouse" ? "Ne depo": order.status == "delivering" ? "Ne dergese": order.status == "delivered" ? "E derguar": order.status == "rejected" ?"E anuluar": "E refuzuar",
                                           textAlign: TextAlign.center,
                                           style: AppStyles.getHeaderNameText(
                                               color: Colors.white, size: 15.0),

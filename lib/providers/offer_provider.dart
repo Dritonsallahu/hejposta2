@@ -1,5 +1,4 @@
 import 'package:flutter/foundation.dart';
-import 'package:hejposta/models/city_model.dart';
 import 'package:hejposta/models/offer_model.dart';
 
 class OfferProvider extends ChangeNotifier{

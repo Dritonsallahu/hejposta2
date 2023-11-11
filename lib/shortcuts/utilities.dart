@@ -1,7 +1,5 @@
 
 
-import 'package:flutter/material.dart';
-
 getOrderStatus(status){
   if(status == "pending"){
     return  "Ne pritje";

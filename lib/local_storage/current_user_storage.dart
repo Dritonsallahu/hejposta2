@@ -1,5 +1,6 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
+import 'package:hejposta/controllers/token_controller.dart';
 import 'package:hejposta/models/client_model.dart';
 import 'package:hejposta/models/postman_model.dart';
 import 'package:hejposta/models/user_model.dart';
@@ -23,7 +24,7 @@ class CurrentUserStorage{
       // Adding super user
       preferences.setString("hejposta_2-user-id", user.user.id.toString());
       preferences.setString("hejposta_2-user-role", user.user.role);
-      preferences.setString("hejposta_2-user-image", user.user.image == null ? "" : user.user.image);
+      preferences.setString("hejposta_2-user-image", user.user.image ?? "");
       preferences.setString("hejposta_2-user-email", user.user.email);
       preferences.setString("hejposta_2-user-username", user.user.username);
       preferences.setString("hejposta_2-user-password", user.user.password);
@@ -63,7 +64,7 @@ class CurrentUserStorage{
       preferences.setString("hejposta_2-id", user.postmanId.toString());
       preferences.setString("hejposta_2-fullName", user.fullName);
       preferences.setInt("hejposta_2-salary", user.salary);
-      preferences.setDouble("hejposta_2-onSuccessDeliveryBonus", user.onSuccessDeliveryBonus);
+      preferences.setDouble("hejposta_2-onSuccessDeliveryBonus", user.onSuccessDeliveryBonus.toDouble());
       preferences.setString("hejposta_2-note", user.note);
       preferences.setString("hejposta_2-phoneNumber", user.phoneNumber);
 
@@ -115,7 +116,7 @@ class CurrentUserStorage{
       var cityId = preferences.getString("hejposta_2-client-cityId");
       var cityName = preferences.getString("hejposta_2-client-cityName");
       var address = preferences.getString("hejposta_2-client-address");
-      var businessName = preferences.getString("hejposta_2-client-businessName");
+      var businessName = preferences.getString("hejposta_2-user-businessName");
       var billAddress = preferences.getString("hejposta_2-client-billAddress");
       var phoneNumber = preferences.getString("hejposta_2-client-phoneNumber");
       var comment = preferences.getString("hejposta_2-client-comment");
@@ -207,6 +208,7 @@ class CurrentUserStorage{
   }
 
   removeUser(context) async {
+    TokenController tokenController  = TokenController();
     var userProvider = Provider.of<UserProvider>(context, listen: false);
     userProvider.removeUser();
 
@@ -261,7 +263,20 @@ class CurrentUserStorage{
       preferences.remove("hejposta_2-note");
       preferences.remove("hejposta_2-phoneNumber");
     }
+    tokenController.removeToken();
+    removeToken();
     Navigator.of(context).pushReplacement(MaterialPageRoute(builder: (_) => const Authentication()));
+  }
+
+  setToken(token) async {
+
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.setString("hejposta_2-fcm-token",token);
+  }
+
+  removeToken() async {
+    SharedPreferences preferences = await SharedPreferences.getInstance();
+    preferences.remove("hejposta_2-fcm-token");
   }
 
 }

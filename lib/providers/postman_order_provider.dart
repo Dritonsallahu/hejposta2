@@ -1,5 +1,6 @@
 import 'package:flutter/foundation.dart';
 import 'package:hejposta/models/order_model.dart';
+// ignore: depend_on_referenced_packages
 import 'package:collection/collection.dart';
 
 class PostmanOrderProvider extends ChangeNotifier {
@@ -25,8 +26,29 @@ class PostmanOrderProvider extends ChangeNotifier {
           .where((order) => order.status == "pending").length;
   }
 
+  int porosiPerDepo() {
+      return ordersBySender.values
+          .expand((orders) => orders)
+          .where((order) => order.status == "accepted").length;
+  }
+
+  int porosiNeDepo() {
+      return ordersBySender.values
+          .expand((orders) => orders)
+          .where((order) => order.status == "in_warehouse").length;
+  }
+
   int porosiNeDergese() => _onDeliveryOrders
       .where((element) => element.status == "delivering")
+      .length;
+  int porosiTeSuksesshme() => _onDeliveryOrders
+      .where((element) => element.status == "delivered")
+      .length;
+  int porosiTeAnuluara() => _onDeliveryOrders
+      .where((element) => element.status == "rejected")
+      .length;
+  int porosiTeRikthyera() => _onDeliveryOrders
+      .where((element) => element.status == "returned")
       .length;
 
   int porosiNPerBarazim() => _onEqualizeOrders
@@ -74,9 +96,11 @@ class PostmanOrderProvider extends ChangeNotifier {
     if(_zone == "all"){
       return _onDeliveryOrders.where((element) => element.status == status);
     }
-
     return _onDeliveryOrders.where((element) {
-      print("${element.zone}-$_zone");
+      print(element);
+      if(status == "rejected" || element.status == "delivered_to_client"){
+        return true && element.zone.toString().trim() == _zone.toString().trim();
+      }
       return element.status == status && element.zone.toString().trim() == _zone.toString().trim();
     });
   }
@@ -126,8 +150,20 @@ class PostmanOrderProvider extends ChangeNotifier {
     notifyListeners();
   }
 
+  void moveOrder(String orderNumber, status) {
+    ordersBySender.forEach((sender, orders) {
+      for (int i = 0; i < orders.length; i++) {
+        print(orders.elementAt(i).status);
+        if (orders[i].orderNumber == orderNumber) {
+          orders.elementAt(i).status = status;
+          return; // Exit the method after removing the order
+        }
+      }
+    });
+    notifyListeners();
+  }
+
   addOrder(OrderModel order) {
-    String senderUsername = order.sender!.username!;
     String senderBusinessName = order.sender!.businessName!;
 
     // Get the sender's list of orders, or create a new list if it doesn't exist yet
@@ -144,10 +180,10 @@ class PostmanOrderProvider extends ChangeNotifier {
   }
 
   setOrderDelivered(orderNumber) {
+    print("order number: $orderNumber");
     for (int i = 0; i < _onDeliveryOrders.length; i++) {
       if (_onDeliveryOrders[i].orderNumber == orderNumber) {
         _onDeliveryOrders[i].status = "delivered";
-        print("order set to delivered");
       }
     }
     notifyListeners();
@@ -166,6 +202,15 @@ class PostmanOrderProvider extends ChangeNotifier {
     for (int i = 0; i < _onDeliveryOrders.length; i++) {
       if (_onDeliveryOrders[i].orderNumber == orderNumber) {
         _onDeliveryOrders[i].status = "returned";
+      }
+    }
+    notifyListeners();
+  }
+  setOrderLoaded(orderNumber) {
+    print("ordernumber: $orderNumber");
+    for (int i = 0; i < _onDeliveryOrders.length; i++) {
+      if (_onDeliveryOrders[i].orderNumber == orderNumber) {
+        _onDeliveryOrders[i].status = "delivering";
       }
     }
     notifyListeners();

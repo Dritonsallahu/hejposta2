@@ -1,12 +1,12 @@
 import 'package:flutter/foundation.dart';
 
 enum ConnectionType{
-  Pending,
-  Connected,
-  Disconnected,
+  pending,
+  connected,
+  disconnected,
 }
 class ConnectionProvider extends ChangeNotifier{
-  ConnectionType connectionType = ConnectionType.Pending;
+  ConnectionType connectionType = ConnectionType.pending;
 
 
   ConnectionType? getConnectionType(){

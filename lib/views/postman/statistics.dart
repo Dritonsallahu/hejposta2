@@ -1,19 +1,14 @@
-import 'dart:ffi';
-
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:hejposta/controllers/finance_controller.dart';
 import 'package:hejposta/my_code.dart';
-import 'package:hejposta/providers/equalization_provider.dart';
 import 'package:hejposta/providers/general_provider.dart';
-import 'package:hejposta/providers/salaries_provider.dart';
 import 'package:hejposta/providers/user_provider.dart';
 import 'package:hejposta/settings/app_colors.dart';
 import 'package:hejposta/settings/app_styles.dart';
 import 'package:hejposta/shortcuts/modals.dart';
 import 'package:hejposta/views/postman/postman_drawer.dart';
 import 'package:provider/provider.dart';
-import 'package:intl/intl.dart';
 
 class Statistics extends StatefulWidget {
   const Statistics({Key? key}) : super(key: key);
@@ -51,15 +46,12 @@ class _StatisticsState extends State<Statistics> {
   }
 
   getStatistikat() {
-    var user = Provider.of<UserProvider>(context, listen: false);
-    var bonusPrice = user.getUser()!.onSuccessDeliveryBonus;
     setState(() {
       fetchingStatistikat = true;
     });
     //{message: success, orderNubers: 1, ordersPrice: 65, expences: 21, totali: 44}
     FinanceController financeController = FinanceController();
     financeController.getStatistikat(context, dateTime).then((value) {
-      print(value);
       if (value == "Connection Refused") {
         showModalOne(
             context,
@@ -135,17 +127,13 @@ class _StatisticsState extends State<Statistics> {
           ),
           Stack(
             children: [
-              AnimatedPositioned(
-                  duration: const Duration(
-                    seconds: 20,
-                  ),
-                  top: !up ? -65 : 65,
-                  left: -165,
+              Positioned(
+                  top:  0,
                   child: SizedBox(
                     height: getPhoneHeight(context),
                     child: Image.asset(
                       "assets/icons/map-icon.png",
-                      color: AppColors.mapColorSecond,
+                      color: AppColors.mapColorSecond,fit: BoxFit.fitHeight,
                       filterQuality: FilterQuality.high,
                     ),
                   )),
@@ -217,7 +205,7 @@ class _StatisticsState extends State<Statistics> {
                                   showModalBottomSheet(
                                       context: context,
                                       builder: (context) {
-                                        return Container(
+                                        return SizedBox(
                                           width: getPhoneWidth(context),
                                           height: 250,
                                           child: CupertinoDatePicker(
@@ -260,7 +248,7 @@ class _StatisticsState extends State<Statistics> {
                                   width: 90,
                                   height: 50,
                                   decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.only(
+                                      borderRadius: const BorderRadius.only(
                                           topRight: Radius.circular(20)),
                                       color: AppColors.bottomColorTwo),
                                   child: Center(
@@ -281,8 +269,8 @@ class _StatisticsState extends State<Statistics> {
                       height: !fetchingStatistikat ? 0 : 20,
                     ),
                     !fetchingStatistikat
-                        ? SizedBox()
-                        : Center(child: CircularProgressIndicator()),
+                        ? const SizedBox()
+                        : const Center(child: CircularProgressIndicator()),
                     const SizedBox(
                       height: 20,
                     ),
@@ -465,7 +453,7 @@ class _StatisticsState extends State<Statistics> {
                                           size: 17.0),
                                     ),
                                     Text(
-                                      "${((bonuset + user.getUser()!.salary) + minuset).toStringAsFixed(2)}€",
+                                      "${((bonuset + user.getUser()!.salary) - minuset).toStringAsFixed(2)}€",
                                       style: AppStyles.getHeaderNameText(
                                           color: Colors.white, size: 23.0),
                                     ),

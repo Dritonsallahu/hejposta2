@@ -1,8 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:hejposta/controllers/rules_controller.dart';
 import 'package:hejposta/my_code.dart';
 import 'package:hejposta/providers/general_provider.dart';
 import 'package:hejposta/settings/app_colors.dart';
 import 'package:hejposta/settings/app_styles.dart';
+import 'package:hejposta/shortcuts/modals.dart';
 import 'package:hejposta/views/postman/postman_drawer.dart';
 import 'package:provider/provider.dart';
 
@@ -14,19 +16,34 @@ class Rules extends StatefulWidget {
 }
 
 class _RulesState extends State<Rules> {
-  PageController pageController = PageController(initialPage: 0);
-  int selectedIndex = 0;
-  GlobalKey key = GlobalKey();
   GlobalKey<ScaffoldState> scaffoldKey = GlobalKey();
 
-  bool filerEqualized = false;
-  int deliveringStep = 0;
+  dynamic rules;
+  bool fetching = false;
 
-  bool up = false;
-  bool left = false;
+  getRules() {
+    setState(() {
+      fetching = true;
+    });
+    RulesController rulesController = RulesController();
+    rulesController.getRules(context, "postier").then((value) {
+      if (value != "failed" && value != null) {
+        setState(() {
+          rules = value;
+        });
+      } else if (value == "failed") {
+        showMessageModal(context, "Ka ndodhur nje problem!", 15.0);
+      }
+    }).whenComplete(() {
+      setState(() {
+        fetching = false;
+      });
+    });
+  }
 
   @override
   void initState() {
+    getRules();
     super.initState();
   }
 
@@ -54,15 +71,15 @@ class _RulesState extends State<Rules> {
             children: [
               Positioned(
                   child: SizedBox(
-                width: getPhoneWidth(context),
-                height: getPhoneHeight(context) - 65,
-                child: Image.asset(
-                  "assets/icons/map-icon.png",
-                  color: AppColors.mapColorSecond,
-                  filterQuality: FilterQuality.high,
-                  fit: BoxFit.cover,
-                ),
-              )),
+                    width: getPhoneWidth(context),
+                    height: getPhoneHeight(context) - 65,
+                    child: Image.asset(
+                      "assets/icons/map-icon.png",
+                      color: AppColors.mapColorSecond,
+                      filterQuality: FilterQuality.high,
+                      fit: BoxFit.cover,
+                    ),
+                  )),
               SizedBox(
                 width: getPhoneWidth(context),
                 height: getPhoneHeight(context) - 66,
@@ -71,7 +88,7 @@ class _RulesState extends State<Rules> {
                   children: [
                     Container(
                       padding:
-                          const EdgeInsets.only(left: 28, right: 20, top: 10),
+                      const EdgeInsets.only(left: 28, right: 20, top: 10),
                       child: Row(
                         mainAxisAlignment: MainAxisAlignment.spaceBetween,
                         children: [
@@ -95,40 +112,70 @@ class _RulesState extends State<Rules> {
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 13),
                             child: Row(
-                              children: [
+                              children: const [
                                 SizedBox(
                                   width: 60,
                                   height: 26,
                                 ),
-
                               ],
                             ),
                           ),
                         ],
                       ),
                     ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Padding(
-                      padding: EdgeInsets.symmetric(horizontal: 25),
-                      child: Container(
-                        width: getPhoneWidth(context),
-                        child: Text(
-                          "Rregullorja e punes, rregullorja e punes rregull lorja e punes"
-                          " rregullorja e punes rregullorja e pun a e punes rregullorja e punes rregullorja e punes"
-                          " rregullorja e punes rregules rregullorja e punes rregullorja e punes rregullorja e punes"
-                          " rregullorja e punes rregullor punes rregullorja e punes rregullorja e punes rregullorja e punes rregullorja e punes rregullorja e punes rregullorja e punes rregullorja e punes rregullorja e punes"
-                          " rregullorja e punes rregullorja e punes rregul s rregullorja e punes rregullorja e punes rregullorja e punes rregullorja e punes"
-                          " rregullorja e punes rregullorja e punes rregullorja e punes"
-                          ""
-                          ""
-                          "",
-                          style: AppStyles.getHeaderNameText(
-                              color: Colors.white, size: 17.0),
+                    fetching
+                        ? const Center(
+                        child: CircularProgressIndicator(
+                          color: Colors.white,
+                          strokeWidth: 1.5,
+                        ))
+                        : rules.toString() == "null"
+                        ? Text(
+                      "Shfaqja e politikave te privatesise deshtoi\nKontaktoni administraten per sqarime shtese.", textAlign: TextAlign.center,
+                      style: AppStyles.getHeaderNameText(
+                        color: Colors.white,
+                        size: 18.0,
+                      ),)
+                        : Column(
+                      children: [
+                        const SizedBox(
+                          height: 10,
                         ),
-                      ),
-                    )
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 25),
+                          child: SizedBox(
+                            width: getPhoneWidth(context),
+                            child: Text(
+                              rules['title'].toString(),
+                              textAlign: TextAlign.center,
+                              style: AppStyles.getHeaderNameText(
+                                color: Colors.white,
+                                size: 18.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                        Padding(
+                          padding: const EdgeInsets.symmetric(
+                              horizontal: 25),
+                          child: SizedBox(
+                            width: getPhoneWidth(context),
+                            child: Text(
+                              rules['body'].toString(),
+                              textAlign: TextAlign.center,
+                              style: AppStyles.getHeaderNameText(
+                                color: Colors.white,
+                                size: 18.0,
+                              ),
+                            ),
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

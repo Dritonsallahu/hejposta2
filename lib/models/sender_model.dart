@@ -22,7 +22,7 @@ class SenderModel {
   factory SenderModel.fromJson(var fromJson){
 
     return SenderModel(
-        id: fromJson['_id'],
+        id: fromJson['user'],
         username: fromJson['username'],
         email: fromJson['email'],
         businessName: fromJson['businessName'],

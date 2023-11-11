@@ -23,7 +23,7 @@ class ExpenceModel {
 
   factory ExpenceModel.fromJson(Map<String, dynamic> fromJson) {
     return ExpenceModel(
-      id: fromJson['id'],
+      id: fromJson['_id'],
       reason: fromJson['reason'],
       postman: fromJson['postman'],
       document: fromJson['document'],

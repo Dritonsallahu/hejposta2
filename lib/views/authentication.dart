@@ -3,7 +3,6 @@ import 'package:hejposta/controllers/login_controller.dart';
 import 'package:hejposta/my_code.dart';
 import 'package:hejposta/settings/app_colors.dart';
 import 'package:hejposta/settings/app_styles.dart';
-import 'package:hejposta/views/business/business_orders.dart';
 import 'package:hejposta/views/registration.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
@@ -17,6 +16,8 @@ class Authentication extends StatefulWidget {
 class _AuthenticationState extends State<Authentication> {
   TextEditingController username = TextEditingController();
   TextEditingController password = TextEditingController();
+
+  bool isPasswordSeen = true;
   bool logging = false;
   authenticate() {
     setState(() {
@@ -180,7 +181,7 @@ class _AuthenticationState extends State<Authentication> {
                       Container(
                         width: getPhoneWidth(context),
                         margin: const EdgeInsets.symmetric(horizontal: 40),
-                        padding: const EdgeInsets.symmetric(horizontal: 20),
+                        padding: const EdgeInsets.only(left: 20,right: 5),
                         decoration: const BoxDecoration(
                           color: Colors.white,
                           borderRadius: BorderRadius.only(
@@ -195,10 +196,10 @@ class _AuthenticationState extends State<Authentication> {
                               style: AppStyles.fontModelTow,
                             ),
                             SizedBox(
-                              width: getPhoneWidth(context) - 200,
+                              width: getPhoneWidth(context) - 210,
                               child: TextField(
                                 controller: password,
-                                obscureText: true,
+                                obscureText: isPasswordSeen,
                                 decoration: InputDecoration(
                                     hintText: "**********",
                                     hintStyle: AppStyles.fontModelThree,
@@ -226,6 +227,19 @@ class _AuthenticationState extends State<Authentication> {
                                     isDense: true),
                               ),
                             ),
+                            GestureDetector(
+                              onTap: (){
+                                setState(() {
+                                  isPasswordSeen = !isPasswordSeen;
+                                });
+                              },
+                              child: Container(
+                                color: Colors.transparent,
+                                width: 30,
+                                height: 40,
+                                child: Icon(isPasswordSeen ? Icons.visibility_off:Icons.visibility),
+                              ),
+                            )
                           ],
                         ),
                       ),
@@ -292,7 +306,7 @@ class _AuthenticationState extends State<Authentication> {
                               ),
                             ),
                             child: Center(
-                                child: logging ? SizedBox(width: 25,height: 25,child: CircularProgressIndicator(strokeWidth: 1.3,color: Colors.black,)) :Text(
+                                child: logging ? const SizedBox(width: 25,height: 25,child: CircularProgressIndicator(strokeWidth: 1.3,color: Colors.black,)) :Text(
                               "Hyr",
                               style: AppStyles.fontModelTow,
                             )),

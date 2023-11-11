@@ -5,6 +5,7 @@ import 'package:hejposta/providers/user_provider.dart';
 import 'package:hejposta/shortcuts/urls.dart';
 import 'package:provider/provider.dart';
 
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 
 class ClientProfileController {
@@ -30,7 +31,6 @@ class ClientProfileController {
     var bodyRes = jsonDecode(response.body);
 
     if (bodyRes['message'] == "success") {
-      print(bodyRes);
       return bodyRes['payload'];
     }
     else{
@@ -58,7 +58,6 @@ class ClientProfileController {
     map['newPassword'] = newPassword;
     var response = await http.put(url, headers: _requestHeaders,body: jsonEncode(map));
     var bodyRes = jsonDecode(response.body);
-    print(bodyRes);
     if (bodyRes['message'] == "success") {
       return "success";
     }

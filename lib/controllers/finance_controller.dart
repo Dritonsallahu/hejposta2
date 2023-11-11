@@ -1,16 +1,10 @@
 import 'dart:convert';
 
 import 'package:flutter_secure_storage/flutter_secure_storage.dart';
-import 'package:hejposta/models/equalization_model.dart';
-import 'package:hejposta/models/order_model.dart';
-import 'package:hejposta/models/postman_salary_model.dart';
-import 'package:hejposta/providers/equalization_provider.dart';
-import 'package:hejposta/providers/postman_order_provider.dart';
-import 'package:hejposta/providers/salaries_provider.dart';
 import 'package:hejposta/providers/user_provider.dart';
 import 'package:hejposta/shortcuts/urls.dart';
 import 'package:provider/provider.dart';
-
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 
 class FinanceController{
@@ -44,7 +38,6 @@ class FinanceController{
   }
   Future<dynamic> getStatistikat(context,date) async {
     var user = Provider.of<UserProvider>(context, listen: false);
-    var equalizationProvider = Provider.of<EqualizationProvier>(context, listen: false);
     await Future.delayed(const Duration(milliseconds: 100));
     AndroidOptions getAndroidOptions() => const AndroidOptions( encryptedSharedPreferences: true);
     final storage = FlutterSecureStorage(aOptions: getAndroidOptions(),);

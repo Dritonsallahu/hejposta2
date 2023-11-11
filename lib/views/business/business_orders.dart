@@ -16,30 +16,34 @@ import 'package:hejposta/my_code.dart';
 import 'package:hejposta/providers/client_order_provider.dart';
 import 'package:hejposta/providers/connection_provider.dart';
 import 'package:hejposta/providers/general_provider.dart';
-import 'package:hejposta/providers/messages_provider.dart';
 import 'package:hejposta/providers/server_provider.dart';
 import 'package:hejposta/settings/app_colors.dart';
 import 'package:hejposta/settings/app_styles.dart';
 import 'package:hejposta/shortcuts/modals.dart';
 import 'package:hejposta/shortcuts/order_form.dart';
-import 'package:hejposta/views/business/business_chat.dart';
 import 'package:hejposta/views/business/business_drawer.dart';
 import 'package:hejposta/views/business/edit_order.dart';
-import 'package:hejposta/views/business/new_order.dart';
 import 'package:hejposta/views/business/order_details.dart';
 import 'package:intl/intl.dart';
 import 'package:provider/provider.dart';
 
-class BusinessStatistics extends StatefulWidget {
-  const BusinessStatistics({super.key});
+// ignore: must_be_immutable
+class BusinessOrders extends StatefulWidget {
+    String? type;
+    String? state;
+    DateTime? from;
+    DateTime? to;
+    BusinessOrders({super.key, required this.type, required this.state,this.from,this.to});
 
   @override
-  State<BusinessStatistics> createState() => _BusinessStatisticsState();
+  State<BusinessOrders> createState() => _BusinessOrdersState();
 }
 
-class _BusinessStatisticsState extends State<BusinessStatistics> {
+class _BusinessOrdersState extends State<BusinessOrders> with SingleTickerProviderStateMixin{
   SwipeActionController swipeActionController = SwipeActionController();
   TextEditingController kerkoPorosine = TextEditingController();
+  TabController? _tabController;
+
   var  connectionStatus = ConnectivityResult.none;
   final Connectivity _connectivity = Connectivity();
   late StreamSubscription<ConnectivityResult> _connectivitySubscription;
@@ -68,7 +72,7 @@ class _BusinessStatisticsState extends State<BusinessStatistics> {
 
   getOrders() {
     ClientOrdersController clientOrdersController = ClientOrdersController();
-    clientOrdersController.getOrders(context);
+    clientOrdersController.getOrders(context).whenComplete(() {});
   }
 
   getOrdersBasedOnStatus(status) {
@@ -93,7 +97,7 @@ class _BusinessStatisticsState extends State<BusinessStatistics> {
         _connectivity.onConnectivityChanged.listen(_updateConnectionStatus);
     _scrollController = ScrollController();
     _scrollController!.addListener(() {
-      if (_scrollController!.offset <= 70) {
+      if (_scrollController!.offset <= 10) {
         setState(() {
           _showAppbarColor = false;
         });
@@ -103,6 +107,7 @@ class _BusinessStatisticsState extends State<BusinessStatistics> {
         });
       }
     });
+    _tabController = TabController(length: 3, vsync: this);
     WidgetsFlutterBinding.ensureInitialized().addPostFrameCallback((timeStamp) {
       var serverProvider = Provider.of<ServerProvider>(context,listen: false);
       serverProvider.initServer(context);
@@ -113,52 +118,6 @@ class _BusinessStatisticsState extends State<BusinessStatistics> {
 
 
 
-
-    FirebaseMessaging.onMessage.listen((RemoteMessage message) async {
-      RemoteNotification notification = message.notification!;
-
-      if (!kIsWeb) {
-        flutterLocalNotificationsPlugin.show(
-            notification.hashCode,
-            notification.title,
-            notification.body,
-            NotificationDetails(
-              android: AndroidNotificationDetails(
-                channel.id,
-                channel.name,
-                importance: Importance.max,
-
-                priority: Priority.max,
-                // TODO add a proper drawable resource to android, for now using
-                //      one that already exists in example app.
-                icon: '@mipmap/ic_launcher',
-              ),
-            ));
-      }
-    });
-
-    FirebaseMessaging.onMessageOpenedApp.listen((RemoteMessage message) {
-      RemoteNotification notification = message.notification!;
-
-     if (!kIsWeb) {
-       flutterLocalNotificationsPlugin.show(
-           notification.hashCode,
-           notification.title,
-           notification.body,
-           NotificationDetails(
-             android: AndroidNotificationDetails(
-               channel.id,
-               channel.name,
-               importance: Importance.max,
-
-               priority: Priority.max,
-               // TODO add a proper drawable resource to android, for now using
-               //      one that already exists in example app.
-               icon: '@mipmap/ic_launcher',
-             ),
-           ));
-     }
-    });
 
 
     super.initState();
@@ -249,7 +208,6 @@ class _BusinessStatisticsState extends State<BusinessStatistics> {
     var orderProvider = Provider.of<ClientOrderProvider>(context, listen: true);
     var conn = Provider.of<ConnectionProvider>(context);
     var generalProvider = Provider.of<GeneralProvider>(context, listen: true);
-    var messagesProvider = Provider.of<MessagesProvider>(context);
 
 
     return Scaffold(
@@ -294,31 +252,7 @@ class _BusinessStatisticsState extends State<BusinessStatistics> {
                         controller: _scrollController,
                         headerSliverBuilder: (BuildContext context, bool innerBoxIsScrolled) {
                           return [
-                            SliverAppBar(
-                              pinned: false,
-                              primary: false,
-                              expandedHeight: 0,
-                              foregroundColor: Colors.red,
-                              toolbarHeight: 44,
-                              shadowColor: AppColors.bottomColorOne,
-                              surfaceTintColor: Colors.red,
-                              scrolledUnderElevation: 0,
-                              backgroundColor: _showAppbarColor
-                                  ? AppColors.bottomColorOne
-                                  : Colors.transparent,
-                              automaticallyImplyLeading: false,
-                              title: Row(
-                                mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                children: [
-                                  IconButton(padding: const EdgeInsets.all(0),onPressed: (){
-                                    Navigator.pop(context);
-                                  }, icon: const Icon(Icons.arrow_back,size: 25,color: Colors.white,)),
-                                  Text("Porosite",style: AppStyles.getHeaderNameText(color:Colors.white,size: 18.0),),
-                                  const SizedBox(width: 50,),
-                                ],
-                              ),
-                              collapsedHeight: 45,
-                            ),
+
                              SliverAppBar(
                                     pinned: true,
                                     primary: false,
@@ -337,215 +271,58 @@ class _BusinessStatisticsState extends State<BusinessStatistics> {
                                           horizontal: 12),
                                       child: Column(
                                         children: [
-                                          Container(
-                                            width: getPhoneWidth(context) - 20,
-                                            decoration: BoxDecoration(
-                                                borderRadius:
-                                                    BorderRadius.circular(20),
-                                                border: Border.all(
-                                                    color: Colors.white)),
-                                            child: Row(
-                                              children: [
-                                                Container(
-                                                    decoration:
-                                                        const BoxDecoration(
-                                                            border: Border(
-                                                                right: BorderSide(
-                                                                    color: Colors
-                                                                        .white))),
-                                                    width:
-                                                        getPhoneWidth(context) -
-                                                            165,
-                                                    child: TextField(
-                                                      controller: kerkoPorosine,
-                                                      onChanged: (value){
-                                                        orderProvider.filtro(kerkoPorosine.text);
-                                                      },
-                                                      decoration: InputDecoration(
-                                                          hintText: "Kerko",
-                                                          hintStyle: AppStyles
+                                          Row(
+                                            children: [
+                                              SizedBox(
+                                                width: 30,
+                                                child: IconButton(padding: const EdgeInsets.all(0),onPressed: (){
+                                                  Navigator.pop(context);
+                                                }, icon: const Icon(Icons.arrow_back,size: 25,color: Colors.white,)),
+                                              ),
+                                              Container(
+                                                width: getPhoneWidth(context) - 88,
+                                                decoration: BoxDecoration(
+                                                    borderRadius:
+                                                        BorderRadius.circular(20),
+                                                    border: Border.all(
+                                                        color: Colors.white)),
+                                                child: Row(
+                                                  children: [
+
+                                                    Container(
+
+                                                        width:
+                                                            getPhoneWidth(context) -
+                                                                95,
+                                                        child: TextField(
+                                                          controller: kerkoPorosine,
+                                                          style: AppStyles
                                                               .getHeaderNameText(
-                                                                  color: Colors.white,
-                                                                  size: 15.0),
-                                                          border:
-                                                              InputBorder.none,
-                                                          isDense: true,
-                                                          contentPadding:
-                                                              const EdgeInsets
-                                                                      .symmetric(
-                                                                  horizontal: 20,
-                                                                  vertical: 7)),
-                                                    )),
-                                                GestureDetector(
-                                                  onTap: () {
-                                                    setState(() {
-                                                      statusText = statuses[0];
-                                                    });
-                                                    showModalBottomSheet(
-                                                        context: context,
-                                                        builder: (context) {
-                                                          return SizedBox(
-                                                            height: 270,
-                                                            child: Column(
-                                                              children: [
-                                                                SizedBox(
-                                                                  height: 200,
-                                                                  child:
-                                                                      CupertinoPicker(
-                                                                          itemExtent:
-                                                                              40,
-                                                                          onSelectedItemChanged:
-                                                                              (value) {
-                                                                            setState(
-                                                                                () {
-                                                                              statusText =
-                                                                                  statuses[value];
-                                                                            });
-                                                                          },
-                                                                          children: [
-                                                                        Container(
-                                                                          color: Colors
-                                                                              .transparent,
-                                                                          child:
-                                                                              Row(
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.center,
-                                                                            children: const [
-                                                                              Text("Ne pritje"),
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                        Container(
-                                                                          color: Colors
-                                                                              .transparent,
-                                                                          child:
-                                                                              Row(
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.center,
-                                                                            children: const [
-                                                                              Text("Te postieri"),
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                        Container(
-                                                                          color: Colors
-                                                                              .transparent,
-                                                                          child:
-                                                                              Row(
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.center,
-                                                                            children: const [
-                                                                              Text("Ne depo"),
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                        Container(
-                                                                          color: Colors
-                                                                              .transparent,
-                                                                          child:
-                                                                              Row(
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.center,
-                                                                            children: const [
-                                                                              Text("Ne dergese"),
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                        Container(
-                                                                          color: Colors
-                                                                              .transparent,
-                                                                          child:
-                                                                              Row(
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.center,
-                                                                            children: const [
-                                                                              Text("Te derguara me sukses"),
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                        Container(
-                                                                          color: Colors
-                                                                              .transparent,
-                                                                          child:
-                                                                              Row(
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.center,
-                                                                            children: const [
-                                                                              Text("Te anuluara"),
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                        Container(
-                                                                          color: Colors
-                                                                              .transparent,
-                                                                          child:
-                                                                              Row(
-                                                                            mainAxisAlignment:
-                                                                                MainAxisAlignment.center,
-                                                                            children: const [
-                                                                              Text("Te rikthyera"),
-                                                                            ],
-                                                                          ),
-                                                                        ),
-                                                                      ]),
-                                                                ),
-                                                                Row(
-                                                                  mainAxisAlignment:
-                                                                      MainAxisAlignment
-                                                                          .center,
-                                                                  children: [
-                                                                    Padding(
-                                                                      padding: const EdgeInsets
-                                                                              .symmetric(
-                                                                          horizontal:
-                                                                              20),
-                                                                      child: Container(
-                                                                          width: getPhoneWidth(context) - 40,
-                                                                          decoration: BoxDecoration(borderRadius: BorderRadius.circular(8), color: AppColors.bottomColorOne),
-                                                                          height: 45,
-                                                                          child: TextButton(
-                                                                              onPressed: () {
-                                                                                setState(() {
-                                                                                  orderStatus = statusText;
-                                                                                });
-                                                                                Navigator.of(context).pop();
-                                                                              },
-                                                                              child: Text(
-                                                                                "Kerko",
-                                                                                style: AppStyles.getHeaderNameText(color: Colors.white, size: 15),
-                                                                              ))),
-                                                                    ),
-                                                                  ],
-                                                                ),
-                                                                const SizedBox(
-                                                                  height: 25,
-                                                                ),
-                                                              ],
-                                                            ),
-                                                          );
-                                                        });
-                                                  },
-                                                  child: Container(
-                                                    width:
-                                                        getPhoneWidth(context) /
-                                                                4 -
-                                                            5,
-                                                    height: 33,
-                                                    color: Colors.transparent,
-                                                    child: Center(
-                                                      child: Text(
-                                                        "Zgjidh",
-                                                        style: AppStyles
-                                                            .getHeaderNameText(
-                                                                color:
-                                                                    Colors.white,
-                                                                size: 14.0),
-                                                      ),
-                                                    ),
-                                                  ),
+                                                              color: Colors.white,
+                                                              size: 15.0),
+                                                          onChanged: (value){
+                                                            orderProvider.filtro(kerkoPorosine.text);
+                                                          },
+                                                          decoration: InputDecoration(
+                                                              hintText: "Kerko",
+                                                              hintStyle: AppStyles
+                                                                  .getHeaderNameText(
+                                                                      color: Colors.white,
+                                                                      size: 15.0),
+                                                              border:
+                                                                  InputBorder.none,
+                                                              isDense: true,
+                                                              contentPadding:
+                                                                  const EdgeInsets
+                                                                          .symmetric(
+                                                                      horizontal: 20,
+                                                                      vertical: 7)),
+                                                        )),
+
+                                                  ],
                                                 ),
-                                              ],
-                                            ),
+                                              ),
+                                            ],
                                           ),
                                         ],
                                       ),
@@ -556,386 +333,373 @@ class _BusinessStatisticsState extends State<BusinessStatistics> {
                           ];
                         },
                         // list of images for scrolling
-                        body:  RefreshIndicator(
-                                onRefresh: () async {
-                                  getOrders();
-                                },
-                                child: orderProvider.isFetchingPendingOrders()
-                                    ? ListView(
-                                      children: const [
-                                        Center(
-                                            child: CircularProgressIndicator(
-                                            color: Colors.white,
-                                            strokeWidth: 1.4,
-                                          )),
-                                      ],
-                                    )
-                                    : orderProvider
-                                            .getOrders(orderStatus)!
-                                            .isEmpty
-                                        ? RefreshIndicator(
+                        body:  SingleChildScrollView(
+                          child: Column(
+                            children: [
+                              SizedBox(
+                                height:  getPhoneHeight(context)  - 160,
+                                child:    RefreshIndicator(
                                   onRefresh: () async {
                                     getOrders();
                                   },
-                                          child: ListView(padding: const EdgeInsets.all(0),
-                                            children: [
-                                              Center(
-                                                  child: Text(
-                                                  "Nuk keni asnje porosi",
-                                                  style: AppStyles.getHeaderNameText(
-                                                      color: Colors.white, size: 17),
-                                                )),
-                                            ],
-                                          ),
-                                        )
-                                        : ListView.builder(
-                                            padding: const EdgeInsets.all(0),
-                                            itemBuilder: (context, index) {
-                                              var order = orderProvider
-                                                  .getOrders(orderStatus)!
-                                                  .elementAt(index);
-                                              return Column(
-                                                children: [
-                                                  index == 0 ? Text(orderProvider
-                                                      .getOrders(orderStatus)!
-                                                      .length.toString()+" porosi",style: AppStyles.getHeaderNameText(color:Colors.white,size: 15.0),):const SizedBox(),
-                                                  Padding(
-                                                    padding: const EdgeInsets.only(
-                                                        left: 21,
-                                                        right: 21,
-                                                        bottom: 7),
-                                                    child:Column(
-                                                      crossAxisAlignment:
-                                                          CrossAxisAlignment.start,
-                                                      children: [
-                                                        SizedBox(
-                                                          width:
-                                                              getPhoneWidth(context),
-                                                          child: Row(
-                                                            crossAxisAlignment:
-                                                                CrossAxisAlignment
-                                                                    .center,
-                                                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                                                            children: [
-                                                              Padding(
-                                                                padding:
-                                                                    const EdgeInsets
-                                                                            .only(
-                                                                        left:10,
-                                                                        bottom: 3),
-                                                                child: SizedBox(
+                                  child: orderProvider.isFetchingPendingOrders()
+                                      ? ListView(
+                                    children: const [
+                                      Center(
+                                          child: CircularProgressIndicator(
+                                            color: Colors.white,
+                                            strokeWidth: 1.4,
+                                          )),
+                                    ],
+                                  )
+                                      :     ListView.builder(
+                                    padding: const EdgeInsets.all(0),
+                                    itemBuilder: (context, index) {
+                                      var order = orderProvider
+                                          .getOrdersByState(widget.state,widget.type,widget.from!,widget.to)!
+                                          .elementAt(index);
+                                      return Column(
+                                        children: [
+                                          Padding(
+                                            padding: const EdgeInsets.only(
+                                                left: 21,
+                                                right: 21,
+                                                bottom: 7),
+                                            child:Column(
+                                              crossAxisAlignment:
+                                              CrossAxisAlignment.start,
+                                              children: [
+                                                SizedBox(
+                                                  width:
+                                                  getPhoneWidth(context),
+                                                  child: Row(
+                                                    crossAxisAlignment:
+                                                    CrossAxisAlignment
+                                                        .center,
+                                                    mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                                                    children: [
+                                                      Padding(
+                                                        padding:
+                                                        const EdgeInsets
+                                                            .only(
+                                                            left:10,
+                                                            bottom: 3),
+                                                        child: SizedBox(
 
+                                                          child: Text(
+                                                            DateFormat("yyyy-MM-dd  HH:mm").format(DateTime.parse(order.createdAt!)).toString(),
+                                                            overflow:
+                                                            TextOverflow
+                                                                .ellipsis,
+                                                            style: AppStyles.getHeaderNameText(
+                                                                color: Colors
+                                                                    .white,
+                                                                size: 14.0,
+                                                                fontWeight:
+                                                                FontWeight
+                                                                    .w600),
+                                                          ),
+                                                        ),
+                                                      ),
+                                                      Container(
+                                                          padding:
+                                                          const EdgeInsets
+                                                              .only(
+                                                              right: 15,
+                                                              bottom: 0),
+                                                          height: 17,
+                                                          child: Text(order.orderNumber!,style: AppStyles.getHeaderNameText(color: Colors.white,size: 15.0),)
+                                                      ),
+                                                    ],
+                                                  ),
+                                                ),
+                                                SwipeActionCell(
+                                                  controller: swipeActionController,
+                                                  key: ObjectKey(index),
+                                                  backgroundColor: Colors.transparent,
+                                                  trailingActions: [
+                                                    SwipeAction(
+                                                        backgroundRadius: 20,
+                                                        forceAlignmentToBoundary: false,
+                                                        widthSpace: 120,
+                                                        closeOnTap: true,
+                                                        onTap: (CompletionHandler handler) async {
+                                                          Navigator.of(context).push(MaterialPageRoute(builder: (_) => EditOrder(orderModel: order))).then((value) {
+                                                            getOrders();
+                                                          });
+                                                        },
+                                                        content: Container(
+                                                            height: 120,
+                                                            decoration: BoxDecoration(
+                                                                borderRadius: const BorderRadius.only(
+                                                                    topRight: Radius.circular(20),
+                                                                    bottomRight: Radius.circular(20)),
+                                                                color: AppColors.bottomColorTwo),
+                                                            child: Center(
+                                                                child: Text(
+                                                                  "Edito",
+                                                                  style: AppStyles.getHeaderNameText(
+                                                                      color: Colors.white, size: 15.0),
+                                                                ))),
+                                                        color: Colors.transparent),
+                                                    SwipeAction(
+                                                        backgroundRadius: 20,
+                                                        forceAlignmentToBoundary: false,
+                                                        widthSpace: order.status != "pending" ? 0: 120,
+                                                        closeOnTap: true,
+                                                        onTap: (CompletionHandler handler) async {
+                                                          showModalOne(
+                                                              context,
+                                                              Column(
+                                                                mainAxisAlignment:
+                                                                MainAxisAlignment.spaceBetween,
+                                                                children: [
+                                                                  Column(
+                                                                    children: [
+                                                                      Text(
+                                                                        "Konfirmo fshirjen e porosise",
+                                                                        style:
+                                                                        AppStyles.getHeaderNameText(
+                                                                            color: Colors
+                                                                                .blueGrey[800],
+                                                                            size: 20),
+                                                                      ),
+
+                                                                    ],
+                                                                  ),
+                                                                  Row(
+                                                                    mainAxisAlignment:
+                                                                    MainAxisAlignment.spaceEvenly,
+                                                                    children: [
+                                                                      Container(
+                                                                          height: 40,
+                                                                          width:
+                                                                          getPhoneWidth(context) /
+                                                                              2 -
+                                                                              80,
+                                                                          decoration: BoxDecoration(
+                                                                              color: Colors.blueGrey,
+                                                                              borderRadius:
+                                                                              BorderRadius.circular(
+                                                                                  100)),
+                                                                          child: TextButton(
+                                                                              onPressed: () {
+                                                                                Navigator.pop(context);
+                                                                                swipeActionController
+                                                                                    .closeAllOpenCell();
+                                                                              },
+                                                                              child: Text(
+                                                                                "Jo",
+                                                                                style: AppStyles
+                                                                                    .getHeaderNameText(
+                                                                                    color: Colors
+                                                                                        .white,
+                                                                                    size: 17),
+                                                                              ))),
+                                                                      Container(
+                                                                          height: 40,
+                                                                          width:
+                                                                          getPhoneWidth(context) /
+                                                                              2 -
+                                                                              80,
+                                                                          decoration: BoxDecoration(
+                                                                              color: Colors.blueGrey,
+                                                                              borderRadius:
+                                                                              BorderRadius.circular(
+                                                                                  100)),
+                                                                          child: TextButton(
+                                                                              onPressed: () {
+                                                                                Navigator.pop(context);
+                                                                                deleteOrder(order.id);
+                                                                                swipeActionController
+                                                                                    .closeAllOpenCell();
+                                                                              },
+                                                                              child: Text(
+                                                                                "Po",
+                                                                                style: AppStyles
+                                                                                    .getHeaderNameText(
+                                                                                    color: Colors
+                                                                                        .white,
+                                                                                    size: 17),
+                                                                              ))),
+                                                                    ],
+                                                                  )
+                                                                ],
+                                                              ),
+                                                              130.0);
+
+
+                                                        },
+                                                        content:order.status != "pending" ? const SizedBox(): Container(
+                                                            height: 120,
+                                                            decoration: const BoxDecoration(
+                                                                borderRadius: BorderRadius.only(
+                                                                    topLeft: Radius.circular(20),
+                                                                    bottomLeft: Radius.circular(20)),
+                                                                color: Colors.red),
+                                                            child: Center(
+                                                                child: Text(
+                                                                  "Fshij",
+                                                                  style: AppStyles.getHeaderNameText(
+                                                                      color: Colors.white, size: 15.0),
+                                                                ))),
+                                                        color: Colors.transparent),
+                                                  ],
+                                                  child: Row(
+                                                    mainAxisAlignment:
+                                                    MainAxisAlignment
+                                                        .spaceBetween,
+                                                    children: [
+                                                      leftSideOrder(
+                                                          context,
+                                                          GestureDetector(
+                                                            onTap: () {
+                                                              Navigator.of(
+                                                                  context)
+                                                                  .push(MaterialPageRoute(
+                                                                  builder: (_) =>
+                                                                      OrderDetails(orderModel: order,)));
+                                                            },
+                                                            child: Container(
+                                                              padding: const EdgeInsets.symmetric(horizontal: 10),
+                                                              decoration: BoxDecoration(
+                                                                  borderRadius: const BorderRadius
+                                                                      .only(
+                                                                      topLeft: Radius
+                                                                          .circular(
+                                                                          17),
+                                                                      bottomLeft:
+                                                                      Radius.circular(
+                                                                          17)),
+                                                                  border: Border.all(
+                                                                      color: AppColors
+                                                                          .bottomColorOne)),
+                                                              child: Column(
+                                                                mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .center,
+                                                                crossAxisAlignment: CrossAxisAlignment.start,
+                                                                children: [
+                                                                  Text(
+                                                                    "Klienti: ${order
+                                                                        .receiver!.fullName} ",maxLines: 1,overflow: TextOverflow.ellipsis,
+                                                                    style: AppStyles.getHeaderNameText(
+                                                                        color: Colors
+                                                                            .grey[
+                                                                        800],
+                                                                        size:
+                                                                        15.0),
+                                                                  ),
+                                                                  Text(
+                                                                    "Produkti: ${order
+                                                                        .orderName!}",maxLines: 1,overflow: TextOverflow.ellipsis,
+                                                                    style: AppStyles.getHeaderNameText(
+                                                                        color: Colors
+                                                                            .grey[
+                                                                        800],
+                                                                        size:
+                                                                        15.0),
+                                                                  ),
+                                                                  Text(
+                                                                    "Adresa: ${order
+                                                                        .receiver!
+                                                                        .address!}",maxLines: 2,overflow: TextOverflow.ellipsis,
+                                                                    style: AppStyles.getHeaderNameText(
+                                                                        color: Colors
+                                                                            .grey[
+                                                                        800],
+                                                                        size:
+                                                                        15.0),
+                                                                  ),
+
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          ),height: 85
+                                                      ),
+                                                      GestureDetector(
+                                                        onTap: () {
+                                                          Navigator.of(context).push(
+                                                              MaterialPageRoute(
+                                                                  builder: (_) =>
+                                                                      OrderDetails(orderModel: order,)));
+                                                        },
+                                                        child: Container(
+                                                          color: Colors
+                                                              .transparent,
+                                                          child: Stack(
+                                                            children: [
+                                                              Container(
+                                                                width: getPhoneWidth(
+                                                                    context) *
+                                                                    0.3 -
+                                                                    25,
+                                                                height: 85,
+                                                                decoration: BoxDecoration(
+                                                                    borderRadius: const BorderRadius
+                                                                        .only(
+                                                                        topRight:
+                                                                        Radius.circular(
+                                                                            20),
+                                                                        bottomRight:
+                                                                        Radius.circular(
+                                                                            20)),
+                                                                    color: AppColors
+                                                                        .bottomColorOne),
+                                                                child: Center(
                                                                   child: Text(
-                                                                    DateFormat("yyyy-MM-dd  HH:mm").format(DateTime.parse(order.createdAt!)).toString(),
-                                                                    overflow:
-                                                                        TextOverflow
-                                                                            .ellipsis,
+                                                                    widget.type == "pending" ? "Ne pritje":widget.type == "accepted" ? "Per depo": widget.type == "in_warehouse" ? "Ne depo": widget.type == "delivering" ? "Ne dergese": widget.type == "delivered" ? "E derguar": widget.type == "rejected" ?"E anuluar": "E refuzuar",
+                                                                    textAlign:
+                                                                    TextAlign
+                                                                        .center,
                                                                     style: AppStyles.getHeaderNameText(
                                                                         color: Colors
                                                                             .white,
-                                                                        size: 14.0,
-                                                                        fontWeight:
-                                                                            FontWeight
-                                                                                .w600),
+                                                                        size:
+                                                                        15.0),
                                                                   ),
                                                                 ),
                                                               ),
-                                                              Container(
-                                                              padding:
-                                                              const EdgeInsets
-                                                                  .only(
-                                                              right: 15,
-                                                              bottom: 0),
-                                                                height: 17,
-                                                                child: Text(order.orderNumber!,style: AppStyles.getHeaderNameText(color: Colors.white,size: 15.0),)
-                                                              ),
+                                                              Positioned(
+                                                                  right: -2,
+                                                                  top: 10,
+                                                                  child: SizedBox(
+                                                                      height: 60,
+                                                                      child: Image.asset(
+                                                                        "assets/icons/8.png",
+                                                                        color: Colors
+                                                                            .white
+                                                                            .withOpacity(0.7),
+                                                                      ))),
                                                             ],
                                                           ),
                                                         ),
-                                                        SwipeActionCell(
-                                                          controller: swipeActionController,
-                                                          key: ObjectKey(index),
-                                                          backgroundColor: Colors.transparent,
-                                                          trailingActions: [
-                                                            SwipeAction(
-                                                                backgroundRadius: 20,
-                                                                forceAlignmentToBoundary: false,
-                                                                widthSpace: 120,
-                                                                closeOnTap: true,
-                                                                onTap: (CompletionHandler handler) async {
-                                                                  Navigator.of(context).push(MaterialPageRoute(builder: (_) => EditOrder(orderModel: order))).then((value) {
-                                                                    getOrders();
-                                                                  });
-                                                                },
-                                                                content: Container(
-                                                                    height: 120,
-                                                                    decoration: BoxDecoration(
-                                                                        borderRadius: const BorderRadius.only(
-                                                                            topRight: Radius.circular(20),
-                                                                            bottomRight: Radius.circular(20)),
-                                                                        color: AppColors.bottomColorTwo),
-                                                                    child: Center(
-                                                                        child: Text(
-                                                                          "Edito",
-                                                                          style: AppStyles.getHeaderNameText(
-                                                                              color: Colors.white, size: 15.0),
-                                                                        ))),
-                                                                color: Colors.transparent),
-                                                            SwipeAction(
-                                                                backgroundRadius: 20,
-                                                                forceAlignmentToBoundary: false,
-                                                                widthSpace: order.status != "pending" ? 0: 120,
-                                                                closeOnTap: true,
-                                                                onTap: (CompletionHandler handler) async {
-                                                                  showModalOne(
-                                                                      context,
-                                                                      Column(
-                                                                        mainAxisAlignment:
-                                                                        MainAxisAlignment.spaceBetween,
-                                                                        children: [
-                                                                          Column(
-                                                                            children: [
-                                                                              Text(
-                                                                                "Konfirmo fshirjen e porosise",
-                                                                                style:
-                                                                                AppStyles.getHeaderNameText(
-                                                                                    color: Colors
-                                                                                        .blueGrey[800],
-                                                                                    size: 20),
-                                                                              ),
-
-                                                                            ],
-                                                                          ),
-                                                                          Row(
-                                                                            mainAxisAlignment:
-                                                                            MainAxisAlignment.spaceEvenly,
-                                                                            children: [
-                                                                              Container(
-                                                                                  height: 40,
-                                                                                  width:
-                                                                                  getPhoneWidth(context) /
-                                                                                      2 -
-                                                                                      80,
-                                                                                  decoration: BoxDecoration(
-                                                                                      color: Colors.blueGrey,
-                                                                                      borderRadius:
-                                                                                      BorderRadius.circular(
-                                                                                          100)),
-                                                                                  child: TextButton(
-                                                                                      onPressed: () {
-                                                                                        Navigator.pop(context);
-                                                                                        swipeActionController
-                                                                                            .closeAllOpenCell();
-                                                                                      },
-                                                                                      child: Text(
-                                                                                        "Jo",
-                                                                                        style: AppStyles
-                                                                                            .getHeaderNameText(
-                                                                                            color: Colors
-                                                                                                .white,
-                                                                                            size: 17),
-                                                                                      ))),
-                                                                              Container(
-                                                                                  height: 40,
-                                                                                  width:
-                                                                                  getPhoneWidth(context) /
-                                                                                      2 -
-                                                                                      80,
-                                                                                  decoration: BoxDecoration(
-                                                                                      color: Colors.blueGrey,
-                                                                                      borderRadius:
-                                                                                      BorderRadius.circular(
-                                                                                          100)),
-                                                                                  child: TextButton(
-                                                                                      onPressed: () {
-                                                                                        Navigator.pop(context);
-                                                                                        deleteOrder(order.id);
-                                                                                        swipeActionController
-                                                                                            .closeAllOpenCell();
-                                                                                      },
-                                                                                      child: Text(
-                                                                                        "Po",
-                                                                                        style: AppStyles
-                                                                                            .getHeaderNameText(
-                                                                                            color: Colors
-                                                                                                .white,
-                                                                                            size: 17),
-                                                                                      ))),
-                                                                            ],
-                                                                          )
-                                                                        ],
-                                                                      ),
-                                                                      130.0);
-
-
-                                                                },
-                                                                content:order.status != "pending" ? const SizedBox(): Container(
-                                                                    height: 120,
-                                                  decoration: const BoxDecoration(
-                                                  borderRadius: BorderRadius.only(
-                                                  topLeft: Radius.circular(20),
-                                                  bottomLeft: Radius.circular(20)),
-                                                  color: Colors.red),
-                                                                    child: Center(
-                                                                        child: Text(
-                                                                          "Fshij",
-                                                                          style: AppStyles.getHeaderNameText(
-                                                                              color: Colors.white, size: 15.0),
-                                                                        ))),
-                                                                color: Colors.transparent),
-                                                          ],
-                                                          child: Container(
-                                                            child: Row(
-                                                              mainAxisAlignment:
-                                                                  MainAxisAlignment
-                                                                      .spaceBetween,
-                                                              children: [
-                                                                leftSideOrder(
-                                                                  context,
-                                                                  GestureDetector(
-                                                                    onTap: () {
-                                                                      Navigator.of(
-                                                                              context)
-                                                                          .push(MaterialPageRoute(
-                                                                              builder: (_) =>
-                                                                                    OrderDetails(orderModel: order,)));
-                                                                    },
-                                                                    child: Container(
-                                                                      padding: const EdgeInsets.symmetric(horizontal: 10),
-                                                                      decoration: BoxDecoration(
-                                                                          borderRadius: const BorderRadius
-                                                                                  .only(
-                                                                              topLeft: Radius
-                                                                                  .circular(
-                                                                                      17),
-                                                                              bottomLeft:
-                                                                                  Radius.circular(
-                                                                                      17)),
-                                                                          border: Border.all(
-                                                                              color: AppColors
-                                                                                  .bottomColorOne)),
-                                                                      child: Column(
-                                                                        mainAxisAlignment:
-                                                                            MainAxisAlignment
-                                                                                .center,
-                                                                        crossAxisAlignment: CrossAxisAlignment.start,
-                                                                        children: [
-                                                                          Text(
-                                                                            "Klienti: ${order
-                                                                                .receiver!.fullName} sdfsdfsdfsdfsdfsdfsdfs",maxLines: 1,overflow: TextOverflow.ellipsis,
-                                                                            style: AppStyles.getHeaderNameText(
-                                                                                color: Colors
-                                                                                        .grey[
-                                                                                    800],
-                                                                                size:
-                                                                                    15.0),
-                                                                          ),
-                                                                          Text(
-                                                                            "Produkti: ${order
-                                                                                .orderName!}",maxLines: 1,overflow: TextOverflow.ellipsis,
-                                                                            style: AppStyles.getHeaderNameText(
-                                                                                color: Colors
-                                                                                        .grey[
-                                                                                    800],
-                                                                                size:
-                                                                                    15.0),
-                                                                          ),
-                                                                          Text(
-                                                                            "Adresa: ${order
-                                                                                .receiver!
-                                                                                .address!}",maxLines: 2,overflow: TextOverflow.ellipsis,
-                                                                            style: AppStyles.getHeaderNameText(
-                                                                                color: Colors
-                                                                                        .grey[
-                                                                                    800],
-                                                                                size:
-                                                                                    15.0),
-                                                                          ),
-
-                                                                        ],
-                                                                      ),
-                                                                    ),
-                                                                  ),height: 85
-                                                                ),
-                                                                GestureDetector(
-                                                                  onTap: () {
-                                                                    Navigator.of(context).push(
-                                                                        MaterialPageRoute(
-                                                                            builder: (_) =>
-                                                                                  OrderDetails(orderModel: order,)));
-                                                                  },
-                                                                  child: Container(
-                                                                    color: Colors
-                                                                        .transparent,
-                                                                    child: Stack(
-                                                                      children: [
-                                                                        Container(
-                                                                          width: getPhoneWidth(
-                                                                                      context) *
-                                                                                  0.3 -
-                                                                              25,
-                                                                          height: 85,
-                                                                          decoration: BoxDecoration(
-                                                                              borderRadius: const BorderRadius
-                                                                                      .only(
-                                                                                  topRight:
-                                                                                      Radius.circular(
-                                                                                          20),
-                                                                                  bottomRight:
-                                                                                      Radius.circular(
-                                                                                          20)),
-                                                                              color: AppColors
-                                                                                  .bottomColorOne),
-                                                                          child: Center(
-                                                                            child: Text(
-                                                                              orderStatus == "pending" ? "Ne pritje":orderStatus == "accepted" ? "Per depo": orderStatus == "in_warehouse" ? "Ne depo": orderStatus == "delivering" ? "Ne dergese": orderStatus == "delivered" ? "E derguar": orderStatus == "rejected" ?"E anuluar": "E refuzuar",
-                                                                              textAlign:
-                                                                                  TextAlign
-                                                                                      .center,
-                                                                              style: AppStyles.getHeaderNameText(
-                                                                                  color: Colors
-                                                                                      .white,
-                                                                                  size:
-                                                                                      15.0),
-                                                                            ),
-                                                                          ),
-                                                                        ),
-                                                                        Positioned(
-                                                                            right: -2,
-                                                                            top: 10,
-                                                                            child: SizedBox(
-                                                                                height: 60,
-                                                                                child: Image.asset(
-                                                                                  "assets/icons/8.png",
-                                                                                  color: Colors
-                                                                                      .white
-                                                                                      .withOpacity(0.7),
-                                                                                ))),
-                                                                      ],
-                                                                    ),
-                                                                  ),
-                                                                )
-                                                              ],
-                                                            ),
-                                                          ),
-                                                        )
-                                                      ],
-                                                    ),
+                                                      )
+                                                    ],
                                                   ),
-                                                ],
-                                              );
-                                            },
-                                            itemCount: orderProvider
-                                                .getOrders(orderStatus)!
-                                                .length,
+                                                )
+                                              ],
+                                            ),
                                           ),
-                              )),
+                                        ],
+                                      );
+                                    },
+                                    itemCount:   orderProvider
+                                        .getOrdersByState(widget.state,widget.type,widget.from!,widget.to)!
+                                        .length,
+                                  ),
+                                ),
+                              )
+                            ],
+                          ),
+                        ))
+                    ,
                   ),
                 ],
               ),
             ),
           ),
-          AnimatedPositioned(
+          AnimatedPositioned(  
               duration: const Duration(milliseconds: 400),
               bottom:
                   conn.connectionType != ConnectionType.disconnected ? -80 : 10,

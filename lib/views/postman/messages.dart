@@ -95,7 +95,7 @@ class _MessagesState extends State<Messages> {
                           Padding(
                             padding: const EdgeInsets.symmetric(vertical: 13),
                             child: Row(
-                              children: [
+                              children: const [
                                 SizedBox(
                                   width: 50,
                                   height: 26,
@@ -115,7 +115,7 @@ class _MessagesState extends State<Messages> {
                       mainAxisAlignment: MainAxisAlignment.center,
                       children: [
                         Text("(Se shpejti)",style: AppStyles.getHeaderNameText(color: Colors.white,size: 17),),
-                        SizedBox(height: 10,),
+                        const SizedBox(height: 10,),
                         Text("(Soon)",style: AppStyles.getHeaderNameText(color: Colors.white,size: 17),),
                       ],
                     ),):ListView.builder(padding: const EdgeInsets.only(bottom: 10),
@@ -140,7 +140,7 @@ class _MessagesState extends State<Messages> {
                                   const SizedBox(
                                     width: 10,
                                   ),
-                                  Container(
+                                  SizedBox(
                                     width: getPhoneWidth(context) - 136,
                                     child: Column(
                                       crossAxisAlignment: CrossAxisAlignment.start,

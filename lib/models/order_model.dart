@@ -1,5 +1,4 @@
 import 'package:hejposta/models/offer_model.dart';
-import 'package:hejposta/models/postman_model.dart';
 import 'package:hejposta/models/receiver_model.dart';
 import 'package:hejposta/models/sender_model.dart';
 
@@ -9,7 +8,7 @@ class OrderModel {
   String? orderNumber;
   SenderModel? sender;
   ReceiverModel? receiver;
-  OfferModel? offer;
+  dynamic offer;
   dynamic price;
   String? status;
   String? returnedReason;
@@ -27,6 +26,7 @@ class OrderModel {
   int? qty;
   String? comment;
   dynamic unit;
+  dynamic product;
   bool? isEqualedWithThanaDev;
   String? deliveringToThanaStatus;
   String? createdAt;
@@ -58,6 +58,7 @@ class OrderModel {
     this.qty,
     this.comment,
     this.unit,
+    this.product,
     this.isEqualedWithThanaDev,
     this.deliveringToThanaStatus,
     this.createdAt,
@@ -66,13 +67,14 @@ class OrderModel {
   });
 
   factory OrderModel.fromJson(Map<String, dynamic> fromJson) {
+
     return OrderModel(
       id: fromJson['_id'],
       orderName: fromJson['orderName'],
       orderNumber: fromJson['order_number'],
       sender: SenderModel.fromJson(fromJson['sender']),
       receiver: ReceiverModel.fromJson(fromJson['receiver']),
-      offer: OfferModel.fromJson(fromJson['offer']),
+      offer: fromJson['offer'].toString().contains("offerId") ? fromJson['offer']: OfferModel.fromJson(fromJson['offer']),
       price: fromJson['price'],
       status: fromJson['status'],
       returnedReason: fromJson['returned_reason'],
@@ -90,6 +92,7 @@ class OrderModel {
       qty: fromJson['qty'],
       comment: fromJson['comment'],
       unit: fromJson['unit'],
+      product: fromJson['product'],
       isEqualedWithThanaDev: fromJson['isEqualedWithThanaDev'],
       deliveringToThanaStatus: fromJson['deliveringToThanaStatus'],
       createdAt: fromJson['createdAt'],

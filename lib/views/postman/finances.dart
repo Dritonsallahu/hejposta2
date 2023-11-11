@@ -60,6 +60,7 @@ class _FinancesState extends State<Finances> {
     //{message: success, orderNubers: 1, ordersPrice: 65, expences: 21, totali: 44}
     FinanceController financeController = FinanceController();
     financeController.getFinances(context,dateTime).then((value) {
+      print(value);
       if(value['message'] == "success"){
         setState(() {
           porosiTeSuksesshme = value['orderNubers'].toString();
@@ -220,7 +221,7 @@ class _FinancesState extends State<Finances> {
                                   showModalBottomSheet(
                                       context: context,
                                       builder: (context) {
-                                        return Container(
+                                        return SizedBox(
                                           width: getPhoneWidth(context),
                                           height: 250,
                                           child: CupertinoDatePicker(
@@ -263,7 +264,7 @@ class _FinancesState extends State<Finances> {
                                   width: 90,
                                   height: 50,
                                   decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.only(topRight: Radius.circular(20)),
+                                    borderRadius: const BorderRadius.only(topRight: Radius.circular(20)),
                                     color: AppColors.bottomColorTwo
                                   ),
                                   child: Center(child: Text("Kerko",style: AppStyles.getHeaderNameText(color: Colors.white,size: 16),),),
@@ -275,7 +276,7 @@ class _FinancesState extends State<Finances> {
                       ),
                     ),
                     SizedBox(height:  !fetchingFinancat ? 0: 20,),
-                    !fetchingFinancat ? SizedBox():Center(child: CircularProgressIndicator()),
+                    !fetchingFinancat ? const SizedBox():const Center(child: CircularProgressIndicator()),
                     const SizedBox(
                       height: 20,
                     ),
@@ -302,14 +303,14 @@ class _FinancesState extends State<Finances> {
                                     Text(
                                       "Numri i porosive\nme sukses",
                                       style: AppStyles.getHeaderNameText(
-                                          color: Color(0xff381e63),
+                                          color: const Color(0xff381e63),
                                           fontWeight: FontWeight.w600,
                                           size: 13.0),
                                     ),
                                     Text(
                                       porosiTeSuksesshme,
                                       style: AppStyles.getHeaderNameText(
-                                          color: Color(0xff381e63), size: 23.0),
+                                          color: const Color(0xff381e63), size: 23.0),
                                     ),
                                   ],
                                 ),
@@ -359,7 +360,7 @@ class _FinancesState extends State<Finances> {
                                           size: 13.0),
                                     ),
                                     Text(
-                                      "$vleraPorosive€",
+                                      "${double.parse(vleraPorosive).toStringAsFixed(2)}€",
                                       style: AppStyles.getHeaderNameText(
                                           color: const Color(0xff381e63),
                                           size: 23.0),
@@ -480,7 +481,7 @@ class _FinancesState extends State<Finances> {
                                           size: 13.0),
                                     ),
                                     Text(
-                                      "${int.parse(vleraPorosive) - int.parse(shpenzime)}€",
+                                      "${(double.parse(vleraPorosive) - double.parse(shpenzime)).toStringAsFixed(2)}€",
                                       style: AppStyles.getHeaderNameText(
                                           color: Colors.white, size: 23.0),
                                     ),
@@ -488,14 +489,14 @@ class _FinancesState extends State<Finances> {
                                 ),
                               ),
                               Positioned(
-                                  right: 0,
+                                  right: -9,
                                   top: 18,
                                   child: SizedBox(
                                       width: 44,
                                       child:
                                       Image.asset("assets/icons/8.png"))),
                               Positioned(
-                                  right: 36,
+                                  right: 25,
                                   top: 18,
                                   child: SizedBox(
                                       width: 44,

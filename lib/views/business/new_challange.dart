@@ -33,7 +33,56 @@ class _NewChallageState extends State<NewChallage> {
     GoalsController goalsController = GoalsController();
     goalsController.addGoal(context, _firstDate, _lastDate, numriPorosive.text).then((value) {
       if(value == "success"){
-
+        Navigator.pop(context);
+      }
+      else if(value == "exist"){
+        showModalOne(
+            context,
+            Column(
+              mainAxisAlignment:
+              MainAxisAlignment.spaceBetween,
+              children: [
+                Column(
+                  children: [
+                    Text(
+                      "Tashme keni nje sfide aktive",
+                      style: AppStyles.getHeaderNameText(
+                          color: Colors.blueGrey[800],
+                          size: 17),
+                    ),
+                    const SizedBox(
+                      height: 10,
+                    ),
+                  ],
+                ),
+                Row(
+                  mainAxisAlignment:
+                  MainAxisAlignment.center,
+                  children: [
+                    Container(
+                        height: 40,
+                        width:
+                        getPhoneWidth(context) / 2 - 80,
+                        decoration: BoxDecoration(
+                            color: Colors.blueGrey,
+                            borderRadius:
+                            BorderRadius.circular(100)),
+                        child: TextButton(
+                            onPressed: () {
+                              Navigator.pop(context);
+                            },
+                            child: Text(
+                              "Largo",
+                              style: AppStyles
+                                  .getHeaderNameText(
+                                  color: Colors.white,
+                                  size: 17),
+                            ))),
+                  ],
+                )
+              ],
+            ),
+            150.0);
       }
       else{
         showModalOne(
@@ -339,6 +388,7 @@ class _NewChallageState extends State<NewChallage> {
                                   color: Colors.white),
                               child: TextField(
                                 controller: numriPorosive,
+                                keyboardType: TextInputType.number,
                                 decoration: InputDecoration(
                                     hintText: "Numri i porosive",
                                     hintStyle: AppStyles.getHeaderNameText(
@@ -379,7 +429,7 @@ class _NewChallageState extends State<NewChallage> {
                                 color: Colors.white),
                             child: Center(
                               child: Text(
-                                "Regjistro produktin",
+                                "Regjistro sfiden",
                                 style: AppStyles.getHeaderNameText(
                                     color: Colors.blueGrey[800], size: 15.0),
                               ),

@@ -1,4 +1,4 @@
-import 'dart:async';
+
 import 'package:flutter/cupertino.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
@@ -58,7 +58,7 @@ class _NewOrderState extends State<NewOrder> {
 
   List<String> qytetet = [];
 
-  bool isOpen = false;
+  bool isOpen = true;
   bool isbrokable = false;
   bool isChange = false;
 
@@ -67,6 +67,9 @@ class _NewOrderState extends State<NewOrder> {
     'Maqedonia',
     'Shqipëri',
   ];
+
+  bool requesting = false;
+  bool requestingClient = false;
 
   bool emriProduktitEmpty = false;
   bool blersiEmpty = false;
@@ -80,26 +83,7 @@ class _NewOrderState extends State<NewOrder> {
   bool ofertaEmpty = false;
   bool unitEmpty = false;
 
-  Timer? _timer;
-
   StateSetter? _setter;
-
-  void _onSearchChanged(type) {
-    // Cancel the previous timer if it's still active
-    if (_timer != null) {
-      _timer!.cancel();
-    }
-
-    // Schedule a new timer to delay the search function
-    _timer = Timer(const Duration(milliseconds: 500), () {
-      // Call the search function here with the input text
-      if (type == "produkt") {
-        searchUProduct(emriProduktit.text);
-      } else {
-        searchUser(blersi.text);
-      }
-    });
-  }
 
   searchUser(text) {}
 
@@ -109,74 +93,96 @@ class _NewOrderState extends State<NewOrder> {
   }
 
   newOrder() {
+    setState(() {
+      requesting = true;
+    });
     var network = Provider.of<ConnectionProvider>(context, listen: false);
     if (emriProduktit.text.isEmpty) {
       setState(() {
         emriProduktitEmpty = true;
+        requesting = false;
+        print("1");
       });
     }
     if (blersi.text.isEmpty) {
       setState(() {
         blersiEmpty = true;
+        requesting = false;
+        print("2");
       });
     }
     if (emriProduktit.text.isEmpty) {
       setState(() {
         emriProduktitEmpty = true;
+        requesting = false;
+        print("3");
       });
     }
     if (blersi.text.isEmpty) {
       setState(() {
         blersiEmpty = true;
+        requesting = false;
+        print("4");
       });
     }
     if (shteti.text.isEmpty) {
       setState(() {
         shtetiEmpty = true;
+        requesting = false;
+        print("5");
       });
     }
     if (qyteti.text.isEmpty) {
       setState(() {
         qytetiEmpty = true;
+        requesting = false;
+        print("6");
       });
     }
     if (qmimi.text.isEmpty) {
       setState(() {
         qmimiEmpty = true;
+        requesting = false;
+        print("7");
       });
     }
     if (sasia.text.isEmpty) {
       setState(() {
         sasiaEmpty = true;
+        requesting = false;
+        print("8");
       });
     }
     if (adresa.text.isEmpty) {
       setState(() {
         adresaEmpty = true;
+        requesting = false;
+        print("9");
       });
     }
     if (nrTel.text.isEmpty) {
       setState(() {
         nrTelEmpty = true;
-      });
-    }
-    if (pershkrimi.text.isEmpty) {
-      setState(() {
-        pershkrimiEmpty = true;
+        requesting = false;
+        print("10");
       });
     }
     if (oferta.text.isEmpty) {
       setState(() {
         ofertaEmpty = true;
+        requesting = false;
+        print("12");
       });
     }
     if (unit.text.isEmpty) {
       setState(() {
         unitEmpty = true;
+        requesting = false;
+        print("13");
       });
     }
 
-    if (network.getConnectionType() == ConnectionType.Disconnected) {
+    if (network.getConnectionType() == ConnectionType.disconnected) {
       showDialog(
           context: context,
           builder: (context) {
@@ -238,7 +244,54 @@ class _NewOrderState extends State<NewOrder> {
                 productId,clientId)
             .then((value) {
           if (value == "success") {
-            Navigator.of(context).pop();
+            showModalOne(
+                context,
+                Column(
+                  mainAxisAlignment:
+                  MainAxisAlignment.spaceBetween,
+                  children: [
+                    Column(
+                      children: [
+                        Text(
+                          "Porosia juaj u regjistrua me sukses",
+                          style: AppStyles.getHeaderNameText(
+                              color: Colors.blueGrey[800],
+                              size: 17),
+                        ),
+                        const SizedBox(
+                          height: 10,
+                        ),
+                      ],
+                    ),
+                    Row(
+                      mainAxisAlignment:
+                      MainAxisAlignment.center,
+                      children: [
+                        Container(
+                            height: 40,
+                            width:
+                            getPhoneWidth(context) / 2 - 80,
+                            decoration: BoxDecoration(
+                                color: Colors.blueGrey,
+                                borderRadius:
+                                BorderRadius.circular(100)),
+                            child: TextButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                  Navigator.pop(context);
+                                },
+                                child: Text(
+                                  "Largo",
+                                  style: AppStyles
+                                      .getHeaderNameText(
+                                      color: Colors.white,
+                                      size: 17),
+                                ))),
+                      ],
+                    )
+                  ],
+                ),
+                150.0);
           } else {
             showDialog(
                 context: context,
@@ -274,7 +327,16 @@ class _NewOrderState extends State<NewOrder> {
                   );
                 });
           }
+        }).whenComplete(() {
+
+          setState(() {
+            requesting = false;
+          });
         });
+      }
+
+      else{
+        showMessageModal(context, "Ju lutem plotesoni te gjitha fushat obligative", 17.0);
       }
     }
   }
@@ -305,6 +367,10 @@ class _NewOrderState extends State<NewOrder> {
   }
 
   addBuyer() {
+
+    setState(() {
+      requesting = true;
+    });
     BuyerController buyerController = BuyerController();
     if (
         clientId.isEmpty &&
@@ -316,7 +382,6 @@ class _NewOrderState extends State<NewOrder> {
       buyerController
           .addBuyer(context, clientId, blersi.text, adresa.text, qyteti.text,
           shteti.text, nrTel.text).then((value) {
-            print(value);
             if(value == "success" && value != null){
               showModalOne(
                   context,
@@ -417,7 +482,12 @@ class _NewOrderState extends State<NewOrder> {
             }
 
       })
-          .whenComplete(() {});
+          .whenComplete(() {
+
+        setState(() {
+          requesting = false;
+        });
+      });
     }
     else{
       showModalOne(
@@ -509,443 +579,433 @@ class _NewOrderState extends State<NewOrder> {
           ),
           Stack(
             children: [
-              Positioned(
-                  child: SizedBox(
+              SizedBox(
                 width: getPhoneWidth(context),
                 height: getPhoneHeight(context) - 65,
                 child: Image.asset(
-                  "assets/icons/map-icon.png",
-                  color: AppColors.mapColorFirst,
-                  filterQuality: FilterQuality.high,
-                  fit: BoxFit.cover,
+              "assets/icons/map-icon.png",
+              color: AppColors.mapColorFirst,
+              filterQuality: FilterQuality.high,
+              fit: BoxFit.cover,
                 ),
-              )),
-              SizedBox(
-                width: getPhoneWidth(context),
-                height: getPhoneHeight(context) - 66,
-                child: ListView(
-                  padding: const EdgeInsets.only(left: 0, right: 0, top: 0),
-                  children: [
-                    Container(
-                      padding:
-                          const EdgeInsets.only(left: 28, right: 20, top: 10),
-                      child: Row(
-                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                        children: [
-                          IconButton(
-                              onPressed: () {
-                                Navigator.pop(context);
-                              },
-                              icon: Icon(
-                                checkIsAndroid(context)
-                                    ? Icons.arrow_back
-                                    : Icons.arrow_back_ios,
-                                color: Colors.white,
-                              )),
-                          Text(
-                            "Porosi e re",
-                            style: AppStyles.getHeaderNameText(
-                                color: Colors.white,
-                                fontWeight: FontWeight.w600,
-                                size: 20.0),
-                          ),
-                          const SizedBox(
-                            width: 40,
-                          ),
-                        ],
+              ),
+              Positioned(child:  GestureDetector(
+                onTap: () {
+                  // call this method here to hide soft keyboard
+                  FocusScope.of(context).requestFocus(new FocusNode());
+                },
+                child: SizedBox(
+                  width: getPhoneWidth(context),
+                  height: getPhoneHeight(context) - 66,
+                  child: ListView(
+                    padding: const EdgeInsets.only(left: 0, right: 0, top: 0),
+                    children: [
+                      Container(
+                        padding:
+                        const EdgeInsets.only(left: 28, right: 20, top: 10),
+                        child: Row(
+                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                          children: [
+                            IconButton(
+                                onPressed: () {
+                                  Navigator.pop(context);
+                                },
+                                icon: Icon(
+                                  checkIsAndroid(context)
+                                      ? Icons.arrow_back
+                                      : Icons.arrow_back_ios,
+                                  color: Colors.white,
+                                )),
+                            Text(
+                              "Porosi e re",
+                              style: AppStyles.getHeaderNameText(
+                                  color: Colors.white,
+                                  fontWeight: FontWeight.w600,
+                                  size: 20.0),
+                            ),
+                            const SizedBox(
+                              width: 40,
+                            ),
+                          ],
+                        ),
                       ),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Container(
-                          width: getPhoneWidth(context),
-                          height: 50,
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(20),
-                                  topLeft: Radius.circular(20)),
-                              color: Colors.white),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: getPhoneWidth(context) - 120,
-                                child: TextField(
-                                  controller: emriProduktit,
-                                  onChanged: (value){
-                                    setState(() {
-                                      productId = "";
-                                    });
-                                  },
-                                  decoration: InputDecoration(
-                                      hintText: "Emri i produktit",
-                                      hintStyle: AppStyles.getHeaderNameText(
-                                          color: emriProduktitEmpty
-                                              ? Colors.red
-                                              : Colors.grey[900],
-                                          size: 15.0),
-                                      border: InputBorder.none,
-                                      enabledBorder: const OutlineInputBorder(
-                                        borderRadius: BorderRadius.only(
-                                            topRight: Radius.circular(20),
-                                            topLeft: Radius.circular(20)),
-                                        borderSide:
-                                            BorderSide(color: Colors.white),
-                                      ),
-                                      focusedBorder: const OutlineInputBorder(
-                                        borderRadius: BorderRadius.only(
-                                            topRight: Radius.circular(20),
-                                            topLeft: Radius.circular(20)),
-                                        borderSide:
-                                            BorderSide(color: Colors.white),
-                                      ),
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 10)),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: Container(
+                            width: getPhoneWidth(context),
+                            height: 50,
+                            decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    topLeft: Radius.circular(20)),
+                                color: Colors.white),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: getPhoneWidth(context) - 120,
+                                  child: TextField(
+                                    controller: emriProduktit,
+                                    onChanged: (value){
+                                      setState(() {
+                                        productId = "";
+                                      });
+                                    },
+                                    decoration: InputDecoration(
+                                        hintText: "Emri i produktit",
+                                        hintStyle: AppStyles.getHeaderNameText(
+                                            color: emriProduktitEmpty
+                                                ? Colors.red
+                                                : Colors.grey[900],
+                                            size: 15.0),
+                                        border: InputBorder.none,
+                                        enabledBorder: const OutlineInputBorder(
+                                          borderRadius: BorderRadius.only(
+                                              topRight: Radius.circular(20),
+                                              topLeft: Radius.circular(20)),
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                        ),
+                                        focusedBorder: const OutlineInputBorder(
+                                          borderRadius: BorderRadius.only(
+                                              topRight: Radius.circular(20),
+                                              topLeft: Radius.circular(20)),
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                        ),
+                                        contentPadding:
+                                        const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 10)),
+                                  ),
                                 ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  showModalBottomSheet(
-                                      context: context,
-                                      builder: (context) {
-                                        return StatefulBuilder(
-                                            builder: (context, setter) {
-                                          _setter = setter;
-                                          return Container(
-                                            width: getPhoneWidth(context),
-                                            color: Colors.white,
-                                            child: ListView(
-                                              children: [
-                                                Container(
-                                                  padding: const EdgeInsets
-                                                          .symmetric(
-                                                      horizontal: 20,
-                                                      vertical: 10),
-                                                  child: TextField(
-                                                    onChanged: (value) {
-                                                      _setter!(() {});
-                                                      products.filtro(value);
-                                                    },
-                                                    decoration: InputDecoration(
-                                                        hintText: "Kerko",
-                                                        border:
-                                                            InputBorder.none,
-                                                        isDense: true,
-                                                        contentPadding:
-                                                            const EdgeInsets.symmetric(
-                                                                horizontal: 20,
-                                                                vertical: 12),
-                                                        enabledBorder: OutlineInputBorder(
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                    8),
-                                                            borderSide: BorderSide(
-                                                                color: Colors.grey[
-                                                                    500]!)),
-                                                        focusedBorder: OutlineInputBorder(
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                    8),
-                                                            borderSide: BorderSide(
-                                                                color: Colors
-                                                                    .grey[500]!))),
-                                                  ),
-                                                ),
-                                                ListView.builder(
-                                                  physics:
-                                                      const ScrollPhysics(),
-                                                  shrinkWrap: true,
-                                                  itemBuilder:
-                                                      (context, index) {
-                                                    return GestureDetector(
-                                                      onTap: () {
-                                                        setState(() {
-                                                          emriProduktit.text =
-                                                              products
-                                                                  .getProducts()[
-                                                                      index]
-                                                                  .productName!;
-                                                          emriProduktitEmpty =
-                                                              false;
-                                                          qmimi.text = products
-                                                              .getProducts()[
-                                                                  index]
-                                                              .price!
-                                                              .toString();
-                                                          qmimiEmpty = false;
-                                                          productId = products.getProducts()[index].id;
-
-                                                        });
-
-                                                        products.setCheck(
-                                                            products
-                                                                .getProducts()[
-                                                                    index]
-                                                                .id,
-                                                            true);
-
-                                                        products.filtro("");
-                                                        Navigator.pop(context);
-                                                      },
-                                                      child: Container(
-                                                        width: getPhoneWidth(
-                                                            context),
-                                                        height: 60,
-                                                        color:
-                                                            Colors.transparent,
-                                                        padding:
-                                                            const EdgeInsets
-                                                                    .symmetric(
-                                                                horizontal: 20,
-                                                                vertical: 5),
-                                                        child: Row(
-                                                          mainAxisAlignment:
-                                                              MainAxisAlignment
-                                                                  .spaceBetween,
-                                                          children: [
-                                                            Row(
-                                                              children: [
-                                                                ClipRRect(
+                                GestureDetector(
+                                  onTap: () {
+                                    showModalBottomSheet(
+                                        context: context,
+                                        builder: (context) {
+                                          return StatefulBuilder(
+                                              builder: (context, setter) {
+                                                _setter = setter;
+                                                return Container(
+                                                  width: getPhoneWidth(context),
+                                                  color: Colors.white,
+                                                  child: ListView(
+                                                    children: [
+                                                      Container(
+                                                        padding: const EdgeInsets
+                                                            .symmetric(
+                                                            horizontal: 20,
+                                                            vertical: 10),
+                                                        child: TextField(
+                                                          onChanged: (value) {
+                                                            _setter!(() {});
+                                                            products.filtro(value);
+                                                          },
+                                                          decoration: InputDecoration(
+                                                              hintText: "Kerko",
+                                                              border:
+                                                              InputBorder.none,
+                                                              isDense: true,
+                                                              contentPadding:
+                                                              const EdgeInsets.symmetric(
+                                                                  horizontal: 20,
+                                                                  vertical: 12),
+                                                              enabledBorder: OutlineInputBorder(
                                                                   borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              10),
-                                                                  child:
-                                                                      Container(
-                                                                    width: 55,
-                                                                    height: 55,
+                                                                  BorderRadius.circular(
+                                                                      8),
+                                                                  borderSide: BorderSide(
+                                                                      color: Colors.grey[
+                                                                      500]!)),
+                                                              focusedBorder: OutlineInputBorder(
+                                                                  borderRadius:
+                                                                  BorderRadius.circular(
+                                                                      8),
+                                                                  borderSide: BorderSide(
+                                                                      color: Colors
+                                                                          .grey[500]!))),
+                                                        ),
+                                                      ),
+                                                      ListView.builder(
+                                                        physics:
+                                                        const ScrollPhysics(),
+                                                        shrinkWrap: true,
+                                                        itemBuilder:
+                                                            (context, index) {
+                                                          return GestureDetector(
+                                                            onTap: () {
+                                                              setState(() {
+                                                                sasia.text = "";
+                                                                emriProduktit.text =
+                                                                products.getProducts()[index].productName!;
+                                                                emriProduktitEmpty = false;
+                                                                qmimi.text = products.getProducts()[index].price!.toString();
+                                                                qmimiEmpty = false;
+                                                                productId = products.getProducts()[index].id;
+                                                              });
+
+                                                              products.setCheck(products.getProducts()[index].id, true);
+
+                                                              products.filtro("");
+                                                              Navigator.pop(context);
+                                                            },
+                                                            child: Container(
+                                                              width: getPhoneWidth(
+                                                                  context),
+                                                              height: 60,
+                                                              color:
+                                                              Colors.transparent,
+                                                              padding:
+                                                              const EdgeInsets
+                                                                  .symmetric(
+                                                                  horizontal: 20,
+                                                                  vertical: 5),
+                                                              child: Row(
+                                                                mainAxisAlignment:
+                                                                MainAxisAlignment
+                                                                    .spaceBetween,
+                                                                children: [
+                                                                  Row(
+                                                                    children: [
+                                                                      ClipRRect(
+                                                                        borderRadius:
+                                                                        BorderRadius
+                                                                            .circular(
+                                                                            10),
+                                                                        child:
+                                                                        Container(
+                                                                          width: 55,
+                                                                          height: 55,
+                                                                          decoration: BoxDecoration(
+                                                                              borderRadius:
+                                                                              BorderRadius.circular(
+                                                                                  9),
+                                                                              color: Colors
+                                                                                  .grey[200]),
+                                                                          child: Image
+                                                                              .network(
+                                                                            "$imgUrl/images/${products.getProducts()[index].image}",
+                                                                            fit: BoxFit
+                                                                                .cover,
+                                                                          ),
+                                                                        ),
+                                                                      ),
+                                                                      const SizedBox(
+                                                                        width: 10,
+                                                                      ),
+                                                                      Column(
+                                                                        crossAxisAlignment:
+                                                                        CrossAxisAlignment
+                                                                            .start,
+                                                                        children: [
+                                                                          Text(
+                                                                            "${products.getProducts()[index].productName}",
+                                                                            style: AppStyles.getHeaderNameText(
+                                                                                color: Colors.blueGrey[
+                                                                                400],
+                                                                                size:
+                                                                                17.0),
+                                                                          ),
+                                                                          const SizedBox(
+                                                                            height: 8,
+                                                                          ),
+                                                                          Text(
+                                                                            "Sasia: ${products.getProducts()[index].qty}",
+                                                                            style: AppStyles.getHeaderNameText(
+                                                                                color: Colors.blueGrey[
+                                                                                400],
+                                                                                size:
+                                                                                15.0),
+                                                                          )
+                                                                        ],
+                                                                      ),
+                                                                    ],
+                                                                  ),
+                                                                  Container(
+                                                                    width: 20,
+                                                                    height: 20,
                                                                     decoration: BoxDecoration(
                                                                         borderRadius:
-                                                                            BorderRadius.circular(
-                                                                                9),
-                                                                        color: Colors
-                                                                            .grey[200]),
-                                                                    child: Image
-                                                                        .network(
-                                                                      "$imgUrl/images/${products.getProducts()[index].image}",
-                                                                      fit: BoxFit
-                                                                          .cover,
-                                                                    ),
-                                                                  ),
-                                                                ),
-                                                                const SizedBox(
-                                                                  width: 10,
-                                                                ),
-                                                                Column(
-                                                                  crossAxisAlignment:
-                                                                      CrossAxisAlignment
-                                                                          .start,
-                                                                  children: [
-                                                                    Text(
-                                                                      "${products.getProducts()[index].productName}",
-                                                                      style: AppStyles.getHeaderNameText(
-                                                                          color: Colors.blueGrey[
-                                                                              400],
-                                                                          size:
-                                                                              17.0),
-                                                                    ),
-                                                                    SizedBox(
-                                                                      height: 8,
-                                                                    ),
-                                                                    Text(
-                                                                      "Sasia: ${products.getProducts()[index].qty}",
-                                                                      style: AppStyles.getHeaderNameText(
-                                                                          color: Colors.blueGrey[
-                                                                              400],
-                                                                          size:
-                                                                              15.0),
-                                                                    )
-                                                                  ],
-                                                                ),
-                                                              ],
-                                                            ),
-                                                            Container(
-                                                              width: 20,
-                                                              height: 20,
-                                                              decoration: BoxDecoration(
-                                                                  borderRadius:
-                                                                      BorderRadius
-                                                                          .circular(
-                                                                              100),
-                                                                  border: Border.all(
-                                                                      color: AppColors
-                                                                          .bottomColorTwo)),
-                                                              padding:
-                                                                  EdgeInsets
-                                                                      .all(2),
-                                                              child: products
-                                                                      .getProducts()[
-                                                                          index]
-                                                                      .checked
-                                                                  ? Container(
+                                                                        BorderRadius
+                                                                            .circular(
+                                                                            100),
+                                                                        border: Border.all(
+                                                                            color: AppColors
+                                                                                .bottomColorTwo)),
+                                                                    padding:
+                                                                    const EdgeInsets
+                                                                        .all(2),
+                                                                    child: products
+                                                                        .getProducts()[
+                                                                    index]
+                                                                        .checked
+                                                                        ? Container(
                                                                       width: 20,
                                                                       height:
-                                                                          20,
+                                                                      20,
                                                                       decoration: BoxDecoration(
                                                                           borderRadius: BorderRadius.circular(
                                                                               100),
                                                                           color:
-                                                                              AppColors.bottomColorTwo),
+                                                                          AppColors.bottomColorTwo),
                                                                     )
-                                                                  : SizedBox(),
-                                                            )
-                                                          ],
-                                                        ),
+                                                                        : const SizedBox(),
+                                                                  )
+                                                                ],
+                                                              ),
+                                                            ),
+                                                          );
+                                                        },
+                                                        itemCount: products
+                                                            .getProducts()
+                                                            .length,
                                                       ),
-                                                    );
-                                                  },
-                                                  itemCount: products
-                                                      .getProducts()
-                                                      .length,
-                                                ),
-                                              ],
-                                            ),
-                                          );
+                                                    ],
+                                                  ),
+                                                );
+                                              });
                                         });
-                                      });
-                                },
-                                child: Container(
-                                  width: 70,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.only(
-                                          topRight: Radius.circular(20)),
-                                      color: AppColors.bottomColorOne),
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.list,
-                                      color: Colors.white,
-                                      size: 35,
+                                  },
+                                  child: Container(
+                                    width: 70,
+                                    height: 60,
+                                    decoration: BoxDecoration(
+                                        borderRadius: const BorderRadius.only(
+                                            topRight: Radius.circular(20)),
+                                        color: AppColors.bottomColorOne),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.list,
+                                        color: Colors.white,
+                                        size: 35,
+                                      ),
                                     ),
                                   ),
+                                )
+                              ],
+                            )),
+                      ),
+                      const SizedBox(
+                        height: 10,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: Container(
+                            width: getPhoneWidth(context),
+                            height: 50,
+                            decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    topLeft: Radius.circular(20)),
+                                color: Colors.white),
+                            child: Row(
+                              children: [
+                                SizedBox(
+                                  width: getPhoneWidth(context) - 120,
+                                  child: TextField(
+                                    controller: blersi,
+                                    onChanged: (value) {
+                                      if (clientId.isNotEmpty) {
+                                        setState(() {
+                                          clientId = "";
+                                        });
+                                      }
+                                    },
+                                    decoration: InputDecoration(
+                                        hintText: "Emri i pranuesit",
+                                        hintStyle: AppStyles.getHeaderNameText(
+                                            color: blersiEmpty
+                                                ? Colors.red
+                                                : Colors.grey[900],
+                                            size: 15.0),
+                                        border: InputBorder.none,
+                                        enabledBorder: const OutlineInputBorder(
+                                          borderRadius: BorderRadius.only(
+                                              topRight: Radius.circular(20),
+                                              topLeft: Radius.circular(20)),
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                        ),
+                                        focusedBorder: const OutlineInputBorder(
+                                          borderRadius: BorderRadius.only(
+                                              topRight: Radius.circular(20),
+                                              topLeft: Radius.circular(20)),
+                                          borderSide:
+                                          BorderSide(color: Colors.white),
+                                        ),
+                                        contentPadding:
+                                        const EdgeInsets.symmetric(
+                                            horizontal: 20, vertical: 10)),
+                                  ),
                                 ),
-                              )
-                            ],
-                          )),
-                    ),
-                    const SizedBox(
-                      height: 10,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Container(
-                          width: getPhoneWidth(context),
-                          height: 50,
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(20),
-                                  topLeft: Radius.circular(20)),
-                              color: Colors.white),
-                          child: Row(
-                            children: [
-                              Container(
-                                width: getPhoneWidth(context) - 120,
-                                child: TextField(
-                                  controller: blersi,
-                                  onChanged: (value) {
-                                    if (clientId.isNotEmpty) {
-                                      setState(() {
-                                        clientId = "";
-                                      });
-                                      print("Klienti u ndryshya");
-                                    }
-                                  },
-                                  decoration: InputDecoration(
-                                      hintText: "Emri i pranuesit",
-                                      hintStyle: AppStyles.getHeaderNameText(
-                                          color: emriProduktitEmpty
-                                              ? Colors.red
-                                              : Colors.grey[900],
-                                          size: 15.0),
-                                      border: InputBorder.none,
-                                      enabledBorder: const OutlineInputBorder(
-                                        borderRadius: BorderRadius.only(
-                                            topRight: Radius.circular(20),
-                                            topLeft: Radius.circular(20)),
-                                        borderSide:
-                                            BorderSide(color: Colors.white),
-                                      ),
-                                      focusedBorder: const OutlineInputBorder(
-                                        borderRadius: BorderRadius.only(
-                                            topRight: Radius.circular(20),
-                                            topLeft: Radius.circular(20)),
-                                        borderSide:
-                                            BorderSide(color: Colors.white),
-                                      ),
-                                      contentPadding:
-                                          const EdgeInsets.symmetric(
-                                              horizontal: 20, vertical: 10)),
-                                ),
-                              ),
-                              GestureDetector(
-                                onTap: () {
-                                  showModalBottomSheet(
-                                      context: context,
-                                      builder: (context) {
-                                        return StatefulBuilder(
-                                            builder: (context, setter) {
-                                          _setter = setter;
-                                          return Container(
-                                            width: getPhoneWidth(context),
-                                            color: Colors.white,
-                                            child: ListView(
-                                              children: [
-                                                Container(
-                                                  padding: const EdgeInsets
-                                                          .symmetric(
-                                                      horizontal: 20,
-                                                      vertical: 10),
-                                                  child: TextField(
-                                                    onChanged: (value) {
-                                                      _setter!(() {});
-                                                      buyers.filtro(value);
-                                                    },
-                                                    decoration: InputDecoration(
-                                                        hintText:
-                                                            "Kerko pranuesin",
-                                                        hintStyle: AppStyles.getHeaderNameText(
-                                                            color: Colors
-                                                                .blueGrey[500],
-                                                            size: 15.0),
-                                                        border:
-                                                            InputBorder.none,
-                                                        isDense: true,
-                                                        contentPadding:
-                                                            const EdgeInsets.symmetric(
-                                                                horizontal: 20,
-                                                                vertical: 12),
-                                                        enabledBorder: OutlineInputBorder(
-                                                            borderRadius:
-                                                                BorderRadius.circular(
-                                                                    8),
-                                                            borderSide: BorderSide(
-                                                                color:
-                                                                    Colors.grey[
-                                                                        500]!)),
-                                                        focusedBorder: OutlineInputBorder(
-                                                            borderRadius:
-                                                                BorderRadius.circular(8),
-                                                            borderSide: BorderSide(color: Colors.grey[500]!))),
-                                                  ),
-                                                ),
-                                                buyers.getBuyers().isEmpty
-                                                    ? Center(
+                                GestureDetector(
+                                  onTap: () {
+                                    showModalBottomSheet(
+                                        context: context,
+                                        builder: (context) {
+                                          return StatefulBuilder(
+                                              builder: (context, setter) {
+                                                _setter = setter;
+                                                return Container(
+                                                  width: getPhoneWidth(context),
+                                                  color: Colors.white,
+                                                  child: ListView(
+                                                    children: [
+                                                      Container(
+                                                        padding: const EdgeInsets
+                                                            .symmetric(
+                                                            horizontal: 20,
+                                                            vertical: 10),
+                                                        child: TextField(
+                                                          onChanged: (value) {
+                                                            _setter!(() {});
+                                                            buyers.filtro(value);
+                                                          },
+                                                          decoration: InputDecoration(
+                                                              hintText:
+                                                              "Kerko pranuesin",
+                                                              hintStyle: AppStyles.getHeaderNameText(
+                                                                  color: Colors
+                                                                      .blueGrey[500],
+                                                                  size: 15.0),
+                                                              border:
+                                                              InputBorder.none,
+                                                              isDense: true,
+                                                              contentPadding:
+                                                              const EdgeInsets.symmetric(
+                                                                  horizontal: 20,
+                                                                  vertical: 12),
+                                                              enabledBorder: OutlineInputBorder(
+                                                                  borderRadius:
+                                                                  BorderRadius.circular(
+                                                                      8),
+                                                                  borderSide: BorderSide(
+                                                                      color:
+                                                                      Colors.grey[
+                                                                      500]!)),
+                                                              focusedBorder: OutlineInputBorder(
+                                                                  borderRadius:
+                                                                  BorderRadius.circular(8),
+                                                                  borderSide: BorderSide(color: Colors.grey[500]!))),
+                                                        ),
+                                                      ),
+                                                      buyers.getBuyers().isEmpty
+                                                          ? Center(
                                                         child: Text(
                                                           "Nuk keni asnje klient!",
                                                           style: AppStyles
                                                               .getHeaderNameText(
-                                                                  color: Colors
-                                                                          .blueGrey[
-                                                                      500],
-                                                                  size: 15.0),
+                                                              color: Colors
+                                                                  .blueGrey[
+                                                              500],
+                                                              size: 15.0),
                                                         ),
                                                       )
-                                                    : ListView.builder(
+                                                          : ListView.builder(
                                                         physics:
-                                                            const ScrollPhysics(),
+                                                        const ScrollPhysics(),
                                                         shrinkWrap: true,
                                                         itemBuilder:
                                                             (context, index) {
@@ -954,52 +1014,51 @@ class _NewOrderState extends State<NewOrder> {
                                                               setState(() {
                                                                 blersi.text = buyers
                                                                     .getBuyers()[
-                                                                        index]
+                                                                index]
                                                                     .fullName!;
                                                                 blersiEmpty =
-                                                                    false;
+                                                                false;
                                                                 adresa.text = buyers
                                                                     .getBuyers()[
-                                                                        index]
+                                                                index]
                                                                     .address!;
                                                                 adresaEmpty =
-                                                                    false;
+                                                                false;
                                                                 nrTel.text = buyers
                                                                     .getBuyers()[
-                                                                        index]
+                                                                index]
                                                                     .phoneNumber!;
                                                                 nrTelEmpty =
-                                                                    false;
+                                                                false;
                                                                 shteti.text = shtetet.firstWhere((element) =>
-                                                                    element ==
+                                                                element ==
                                                                     buyers
                                                                         .getBuyers()[
-                                                                            index]
+                                                                    index]
                                                                         .state!);
                                                                 shtetiEmpty =
-                                                                    false;
+                                                                false;
                                                                 qyteti.text = qytetet
                                                                     .getCitiesByState(shteti
-                                                                        .text)
+                                                                    .text)
                                                                     .firstWhere((element) =>
-                                                                        element
-                                                                            .name ==
-                                                                        buyers
-                                                                            .getBuyers()[index]
-                                                                            .city!)
+                                                                element
+                                                                    .name ==
+                                                                    buyers
+                                                                        .getBuyers()[index]
+                                                                        .city!)
                                                                     .name!;
                                                                 qytetiEmpty =
-                                                                    false;
+                                                                false;
                                                                 clientId = buyers
                                                                     .getBuyers()[
-                                                                        index]
-                                                                    .client!;
+                                                                index]
+                                                                    .id!;
                                                               });
-
                                                               buyers.setCheck(
                                                                   buyers
                                                                       .getBuyers()[
-                                                                          index]
+                                                                  index]
                                                                       .id,
                                                                   true);
 
@@ -1016,64 +1075,68 @@ class _NewOrderState extends State<NewOrder> {
                                                                   color: Colors
                                                                       .transparent,
                                                                   padding: const EdgeInsets
-                                                                          .symmetric(
+                                                                      .symmetric(
                                                                       horizontal:
-                                                                          20,
+                                                                      20,
                                                                       vertical:
-                                                                          5),
-                                                                  child: Row(
-                                                                    mainAxisAlignment:
-                                                                        MainAxisAlignment
-                                                                            .spaceBetween,
-                                                                    children: [
-                                                                      Row(
+                                                                      5),
+                                                                  child: SingleChildScrollView(
+                                                                    scrollDirection: Axis.horizontal,
+                                                                    child: Container(
+                                                                      width: getPhoneWidth(context) - 60,
+                                                                      child: Row(
+                                                                        mainAxisAlignment: MainAxisAlignment.spaceBetween,
                                                                         children: [
-                                                                          Column(
-                                                                            crossAxisAlignment:
-                                                                                CrossAxisAlignment.start,
+                                                                          Row(
                                                                             children: [
-                                                                              Text(
-                                                                                "${buyers.getBuyers()[index].fullName}",
-                                                                                style: AppStyles.getHeaderNameText(color: Colors.blueGrey[400], size: 17.0),
+                                                                              Column(
+                                                                                crossAxisAlignment:
+                                                                                CrossAxisAlignment.start,
+                                                                                children: [
+                                                                                  Text(
+                                                                                    "${buyers.getBuyers()[index].fullName}",
+                                                                                    style: AppStyles.getHeaderNameText(color: Colors.blueGrey[400], size: 17.0),
+                                                                                  ),
+                                                                                  const SizedBox(
+                                                                                    height: 8,
+                                                                                  ),
+                                                                                  Text(
+                                                                                    "Adresa: ${buyers.getBuyers()[index].address}",
+                                                                                    style: AppStyles.getHeaderNameText(color: Colors.blueGrey[400], size: 15.0),
+                                                                                  )
+                                                                                ],
                                                                               ),
-                                                                              SizedBox(
-                                                                                height: 8,
-                                                                              ),
-                                                                              Text(
-                                                                                "Adresa: ${buyers.getBuyers()[index].address}",
-                                                                                style: AppStyles.getHeaderNameText(color: Colors.blueGrey[400], size: 15.0),
-                                                                              )
                                                                             ],
                                                                           ),
+                                                                          Container(
+                                                                            width:
+                                                                            20,
+                                                                            height:
+                                                                            20,
+                                                                            decoration: BoxDecoration(
+                                                                                borderRadius:
+                                                                                BorderRadius.circular(100),
+                                                                                border: Border.all(color: AppColors.bottomColorTwo)),
+                                                                            padding:
+                                                                            const EdgeInsets.all(2),
+                                                                            child: buyers.getBuyers()[index].checked
+                                                                                ? Container(
+                                                                              width: 20,
+                                                                              height: 20,
+                                                                              decoration: BoxDecoration(borderRadius: BorderRadius.circular(100), color: AppColors.bottomColorTwo),
+                                                                            )
+                                                                                : const SizedBox(),
+                                                                          )
                                                                         ],
                                                                       ),
-                                                                      Container(
-                                                                        width:
-                                                                            20,
-                                                                        height:
-                                                                            20,
-                                                                        decoration: BoxDecoration(
-                                                                            borderRadius:
-                                                                                BorderRadius.circular(100),
-                                                                            border: Border.all(color: AppColors.bottomColorTwo)),
-                                                                        padding:
-                                                                            EdgeInsets.all(2),
-                                                                        child: buyers.getBuyers()[index].checked
-                                                                            ? Container(
-                                                                                width: 20,
-                                                                                height: 20,
-                                                                                decoration: BoxDecoration(borderRadius: BorderRadius.circular(100), color: AppColors.bottomColorTwo),
-                                                                              )
-                                                                            : SizedBox(),
-                                                                      )
-                                                                    ],
+                                                                    ),
                                                                   ),
                                                                 ),
                                                                 Divider(
                                                                   height: 3,
                                                                   color: Colors
-                                                                          .blueGrey[
-                                                                      100],
+                                                                      .blueGrey[
+                                                                  100],
                                                                 ),
                                                               ],
                                                             ),
@@ -1083,1055 +1146,1138 @@ class _NewOrderState extends State<NewOrder> {
                                                             .getBuyers()
                                                             .length,
                                                       ),
-                                              ],
-                                            ),
-                                          );
+                                                    ],
+                                                  ),
+                                                );
+                                              });
                                         });
-                                      });
-                                },
-                                child: Container(
-                                  width: 70,
-                                  height: 60,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.only(
-                                          topRight: Radius.circular(20)),
-                                      color: AppColors.bottomColorOne),
-                                  child: Center(
-                                    child: Icon(
-                                      Icons.list,
-                                      color: Colors.white,
-                                      size: 35,
-                                    ),
-                                  ),
-                                ),
-                              )
-                            ],
-                          )),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: GestureDetector(
-                        onTap: () {
-                          if (shteti.text.isEmpty && shtetet.isNotEmpty) {
-                            setState(() {
-                              qyteti.text = "";
-                              oferta.text = "";
-                              shteti.text = shtetet[0];
-                              unit.text = njesite.getUnits().isEmpty
-                                  ? ""
-                                  : njesite.getUnits()[0].unitName!;
-                              unitId.text = njesite.getUnits().isEmpty
-                                  ? ""
-                                  : njesite.getUnits()[0].id!;
-                            });
-                          }
-                          setState(() {
-                            shtetiEmpty = false;
-                          });
-
-                          showModalBottomSheet(
-                              context: context,
-                              builder: (context) {
-                                return SizedBox(
-                                  width: getPhoneWidth(context),
-                                  height: 200,
-                                  child: CupertinoPicker.builder(
-                                      itemExtent: 40,
-                                      scrollController: fixedScrollController,
-                                      onSelectedItemChanged: (value) {
-                                        setState(() {
-                                          shteti.text = shtetet[value];
-                                          qyteti.text = qytetet
-                                                  .getCitiesByState(shteti.text)
-                                                  .isEmpty
-                                              ? ""
-                                              : qytetet
-                                                  .getCitiesByState(shteti.text)
-                                                  .elementAt(0)
-                                                  .name!;
-                                          oferta.text = ofertat
-                                                  .getOfferByState(shteti.text)
-                                                  .isEmpty
-                                              ? ""
-                                              : ofertat
-                                                  .getOfferByState(shteti.text)
-                                                  .elementAt(0)
-                                                  .offerName!;
-                                          offerId.text = ofertat
-                                                  .getOfferByState(shteti.text)
-                                                  .isEmpty
-                                              ? ""
-                                              : ofertat
-                                                  .getOfferByState(shteti.text)
-                                                  .elementAt(0)
-                                                  .id!;
-                                          unit.text = njesite.getUnits().isEmpty
-                                              ? ""
-                                              : njesite.getUnits()[0].unitName!;
-                                          unitId.text =
-                                              njesite.getUnits().isEmpty
-                                                  ? ""
-                                                  : njesite.getUnits()[0].id!;
-                                        });
-                                      },
-                                      itemBuilder: (context, index) {
-                                        return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(shtetet[index]),
-                                          ],
-                                        );
-                                      },
-                                      childCount: shtetet.length),
-                                );
-                              });
-                        },
-                        child: Container(
-                          width: getPhoneWidth(context),
-                          height: 50,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(20),
-                                  topLeft: Radius.circular(20)),
-                              color: Colors.white),
-                          child: Row(
-                            children: [
-                              Text(
-                                shteti.text.isEmpty ? "Shteti" : shteti.text,
-                                style: AppStyles.getHeaderNameText(
-                                    color: shtetiEmpty
-                                        ? Colors.red
-                                        : Colors.grey[900],
-                                    size: 15.0),
-                              )
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: GestureDetector(
-                        onTap: () {
-                          if (unit.text.isEmpty &&
-                              njesite.getUnits().isNotEmpty) {
-                            setState(() {
-                              unit.text = njesite.getUnits()[0].unitName!;
-                              unitId.text = njesite.getUnits()[0].id!;
-                            });
-                          }
-                          setState(() {
-                            unitEmpty = false;
-                          });
-                          showModalBottomSheet(
-                              context: context,
-                              builder: (context) {
-                                return SizedBox(
-                                  width: getPhoneWidth(context),
-                                  height: 200,
-                                  child: CupertinoPicker.builder(
-                                    itemExtent: 40,
-                                    onSelectedItemChanged: (value) {
-                                      setState(() {
-                                        unit.text =
-                                            njesite.getUnits()[value].unitName!;
-                                        unitId.text =
-                                            njesite.getUnits()[value].id!;
-                                      });
-                                    },
-                                    itemBuilder: (context, index) {
-                                      return Row(
-                                        mainAxisAlignment:
-                                            MainAxisAlignment.center,
-                                        children: [
-                                          Text(njesite
-                                              .getUnits()[index]
-                                              .unitName!),
-                                        ],
-                                      );
-                                    },
-                                    childCount: njesite.getUnits().length,
-                                  ),
-                                );
-                              });
-                        },
-                        child: Container(
-                          width: getPhoneWidth(context),
-                          height: 50,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(20),
-                                  topLeft: Radius.circular(20)),
-                              color: Colors.white),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                unit.text.isEmpty ? "Njesia" : unit.text,
-                                style: AppStyles.getHeaderNameText(
-                                    color: unitEmpty
-                                        ? Colors.red
-                                        : Colors.grey[900],
-                                    size: 15.0),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: GestureDetector(
-                        onTap: () {
-                          if (qyteti.text.isEmpty &&
-                              qytetet
-                                  .getCitiesByState(shteti.text)
-                                  .isNotEmpty) {
-                            setState(() {
-                              qyteti.text = qytetet
-                                  .getCitiesByState(shteti.text)
-                                  .elementAt(0)
-                                  .name!;
-                            });
-                            setState(() {
-                              qytetiEmpty = false;
-                            });
-                            showModalBottomSheet(
-                                context: context,
-                                builder: (context) {
-                                  return SizedBox(
-                                    width: getPhoneWidth(context),
-                                    height: 200,
-                                    child: CupertinoPicker.builder(
-                                      itemExtent: 40,
-                                      onSelectedItemChanged: (value) {
-                                        setState(() {
-                                          qyteti.text = qytetet
-                                              .getCitiesByState(shteti.text)
-                                              .elementAt(value)
-                                              .name!;
-                                        });
-                                      },
-                                      itemBuilder: (context, index) {
-                                        return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(qytetet
-                                                .getCitiesByState(shteti.text)
-                                                .elementAt(index)
-                                                .name!),
-                                          ],
-                                        );
-                                      },
-                                      childCount: qytetet
-                                          .getCitiesByState(shteti.text)
-                                          .length,
-                                    ),
-                                  );
-                                });
-                          } else {
-                            showModalOne(
-                                context,
-                                Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Column(
-                                      children: [
-                                        Text(
-                                          "Nuk keni zgjedhur shtetin!",
-                                          style: AppStyles.getHeaderNameText(
-                                              color: Colors.blueGrey[800],
-                                              size: 20),
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                            height: 40,
-                                            width:
-                                                getPhoneWidth(context) / 2 - 80,
-                                            decoration: BoxDecoration(
-                                                color: Colors.blueGrey,
-                                                borderRadius:
-                                                    BorderRadius.circular(100)),
-                                            child: TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text(
-                                                  "Largo",
-                                                  style: AppStyles
-                                                      .getHeaderNameText(
-                                                          color: Colors.white,
-                                                          size: 17),
-                                                ))),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                                150.0);
-                          }
-                        },
-                        child: Container(
-                          width: getPhoneWidth(context),
-                          height: 50,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(20),
-                                  topLeft: Radius.circular(20)),
-                              color: Colors.white),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                qyteti.text.isEmpty ? "Qyteti" : qyteti.text,
-                                style: AppStyles.getHeaderNameText(
-                                    color: qytetiEmpty
-                                        ? Colors.red
-                                        : Colors.grey[900],
-                                    size: 15.0),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Container(
-                          width: getPhoneWidth(context),
-                          height: 50,
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(20),
-                                  topLeft: Radius.circular(20)),
-                              color: Colors.white),
-                          child: TextField(
-                            controller: qmimi,
-                            keyboardType: const TextInputType.numberWithOptions(
-                                decimal: true),
-                            inputFormatters: [
-                              FilteringTextInputFormatter.allow(
-                                  RegExp(r'^\d+\.?\d{0,2}'))
-                            ],
-                            onChanged: (value) {
-                              setState(() {
-                                qmimiEmpty = false;
-                              });
-                            },
-                            decoration: InputDecoration(
-                                hintText: "Cmimi",
-                                hintStyle: AppStyles.getHeaderNameText(
-                                    color: qmimiEmpty
-                                        ? Colors.red
-                                        : Colors.grey[900],
-                                    size: 15.0),
-                                border: InputBorder.none,
-                                enabledBorder: const OutlineInputBorder(
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      topLeft: Radius.circular(20)),
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                focusedBorder: const OutlineInputBorder(
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      topLeft: Radius.circular(20)),
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10)),
-                          )),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Container(
-                          width: getPhoneWidth(context),
-                          height: 50,
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(20),
-                                  topLeft: Radius.circular(20)),
-                              color: Colors.white),
-                          child: TextField(
-                            controller: sasia,
-                            keyboardType:   TextInputType.number ,
-
-                            onChanged: (value) {
-                              setState(() {
-                                sasiaEmpty = false;
-                              });
-                            },
-                            decoration: InputDecoration(
-                                hintText: "Sasia",
-                                hintStyle: AppStyles.getHeaderNameText(
-                                    color: sasiaEmpty
-                                        ? Colors.red
-                                        : Colors.grey[900],
-                                    size: 15.0),
-                                border: InputBorder.none,
-                                enabledBorder: const OutlineInputBorder(
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      topLeft: Radius.circular(20)),
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                focusedBorder: const OutlineInputBorder(
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      topLeft: Radius.circular(20)),
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10)),
-                          )),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: GestureDetector(
-                        onTap: () {
-                          if (oferta.text.isEmpty &&
-                              ofertat.getOfferByState(shteti.text).isNotEmpty) {
-                            setState(() {
-                              oferta.text = ofertat
-                                  .getOfferByState(shteti.text)
-                                  .elementAt(0)
-                                  .offerName!;
-                              offerId.text = ofertat
-                                  .getOfferByState(shteti.text)
-                                  .elementAt(0)
-                                  .id!;
-                            });
-                            setState(() {
-                              ofertaEmpty = false;
-                            });
-                            showModalBottomSheet(
-                                context: context,
-                                builder: (context) {
-                                  return SizedBox(
-                                    width: getPhoneWidth(context),
-                                    height: 200,
-                                    child: CupertinoPicker.builder(
-                                      itemExtent: 40,
-                                      onSelectedItemChanged: (value) {
-                                        setState(() {
-                                          oferta.text = ofertat
-                                              .getOfferByState(shteti.text)
-                                              .elementAt(value)
-                                              .offerName!;
-                                          offerId.text = ofertat
-                                              .getOfferByState(shteti.text)
-                                              .elementAt(value)
-                                              .id!;
-                                        });
-                                      },
-                                      itemBuilder: (context, index) {
-                                        return Row(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.center,
-                                          children: [
-                                            Text(ofertat
-                                                .getOfferByState(shteti.text)
-                                                .elementAt(index)
-                                                .offerName!),
-                                          ],
-                                        );
-                                      },
-                                      childCount: ofertat
-                                          .getOfferByState(shteti.text)
-                                          .length,
-                                    ),
-                                  );
-                                });
-                          } else {
-                            showModalOne(
-                                context,
-                                Column(
-                                  mainAxisAlignment:
-                                      MainAxisAlignment.spaceBetween,
-                                  children: [
-                                    Column(
-                                      children: [
-                                        Text(
-                                          "Nuk keni zgjedhur shtetin!",
-                                          style: AppStyles.getHeaderNameText(
-                                              color: Colors.blueGrey[800],
-                                              size: 20),
-                                        ),
-                                        const SizedBox(
-                                          height: 10,
-                                        ),
-                                      ],
-                                    ),
-                                    Row(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.center,
-                                      children: [
-                                        Container(
-                                            height: 40,
-                                            width:
-                                                getPhoneWidth(context) / 2 - 80,
-                                            decoration: BoxDecoration(
-                                                color: Colors.blueGrey,
-                                                borderRadius:
-                                                    BorderRadius.circular(100)),
-                                            child: TextButton(
-                                                onPressed: () {
-                                                  Navigator.pop(context);
-                                                },
-                                                child: Text(
-                                                  "Largo",
-                                                  style: AppStyles
-                                                      .getHeaderNameText(
-                                                          color: Colors.white,
-                                                          size: 17),
-                                                ))),
-                                      ],
-                                    )
-                                  ],
-                                ),
-                                150.0);
-                          }
-                        },
-                        child: Container(
-                          width: getPhoneWidth(context),
-                          height: 50,
-                          padding: const EdgeInsets.symmetric(
-                              horizontal: 20, vertical: 10),
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(20),
-                                  topLeft: Radius.circular(20)),
-                              color: Colors.white),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.start,
-                            children: [
-                              Text(
-                                oferta.text.isEmpty ? "Oferta" : oferta.text,
-                                style: AppStyles.getHeaderNameText(
-                                    color: ofertaEmpty
-                                        ? Colors.red
-                                        : Colors.grey[900],
-                                    size: 15.0),
-                              ),
-                            ],
-                          ),
-                        ),
-                      ),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Container(
-                          width: getPhoneWidth(context),
-                          height: 50,
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(20),
-                                  topLeft: Radius.circular(20)),
-                              color: Colors.white),
-                          child: TextField(
-                            controller: adresa,
-                            onChanged: (value) {
-                              setState(() {
-                                adresaEmpty = false;
-                              });
-                            },
-                            decoration: InputDecoration(
-                                hintText: "Adresa",
-                                hintStyle: AppStyles.getHeaderNameText(
-                                    color: adresaEmpty
-                                        ? Colors.red
-                                        : Colors.grey[900],
-                                    size: 15.0),
-                                border: InputBorder.none,
-                                enabledBorder: const OutlineInputBorder(
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      topLeft: Radius.circular(20)),
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                focusedBorder: const OutlineInputBorder(
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      topLeft: Radius.circular(20)),
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10)),
-                          )),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Container(
-                          width: getPhoneWidth(context),
-                          height: 50,
-                          decoration: const BoxDecoration(
-                              borderRadius: BorderRadius.only(
-                                  topRight: Radius.circular(20),
-                                  topLeft: Radius.circular(20)),
-                              color: Colors.white),
-                          child: TextField(
-                            controller: nrTel,
-                            keyboardType: TextInputType.number,
-                            onChanged: (value) {
-                              setState(() {
-                                nrTelEmpty = false;
-                              });
-                            },
-                            decoration: InputDecoration(
-                                hintText: "Numri tel.",
-                                hintStyle: AppStyles.getHeaderNameText(
-                                    color: nrTelEmpty
-                                        ? Colors.red
-                                        : Colors.grey[900],
-                                    size: 15.0),
-                                border: InputBorder.none,
-                                enabledBorder: const OutlineInputBorder(
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      topLeft: Radius.circular(20)),
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                focusedBorder: const OutlineInputBorder(
-                                  borderRadius: BorderRadius.only(
-                                      topRight: Radius.circular(20),
-                                      topLeft: Radius.circular(20)),
-                                  borderSide: BorderSide(color: Colors.white),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10)),
-                          )),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    Padding(
-                      padding: const EdgeInsets.symmetric(horizontal: 25),
-                      child: Container(
-                          width: getPhoneWidth(context),
-                          decoration: BoxDecoration(
-                              borderRadius: BorderRadius.circular(20),
-                              color: Colors.white),
-                          child: TextField(
-                            controller: pershkrimi,
-                            minLines: 3,
-                            maxLines: 9,
-                            decoration: InputDecoration(
-                                hintText: "Pershkrimi",
-                                hintStyle: AppStyles.getHeaderNameText(
-                                    color: Colors.grey[900], size: 15.0),
-                                border: InputBorder.none,
-                                enabledBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                  borderSide:
-                                      const BorderSide(color: Colors.white),
-                                ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderRadius: BorderRadius.circular(20),
-                                  borderSide:
-                                      const BorderSide(color: Colors.white),
-                                ),
-                                contentPadding: const EdgeInsets.symmetric(
-                                    horizontal: 20, vertical: 10)),
-                          )),
-                    ),
-                    const SizedBox(
-                      height: 15,
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isOpen = !isOpen;
-                        });
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 25),
-                        width: getPhoneWidth(context),
-                        color: Colors.transparent,
-                        height: 50,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Te hapet",
-                              style: AppStyles.getHeaderNameText(
-                                  color: Colors.white, size: 18.0),
-                            ),
-                            Stack(
-                              children: [
-                                Container(
-                                  width: 60,
-                                  height: 30,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(100),
-                                      border: Border.all(color: Colors.white)),
-                                ),
-                                AnimatedPositioned(
-                                    duration: const Duration(milliseconds: 150),
-                                    top: 2.3,
-                                    right: !isOpen ? 32 : 3, // 32
-                                    child: Container(
-                                      width: 25,
-                                      height: 25,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(100),
-                                          color: !isOpen
-                                              ? Colors.grey[400]
-                                              : Colors.white),
-                                    ))
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isbrokable = !isbrokable;
-                        });
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 25),
-                        width: getPhoneWidth(context),
-                        color: Colors.transparent,
-                        height: 50,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "E thyeshme",
-                              style: AppStyles.getHeaderNameText(
-                                  color: Colors.white, size: 18.0),
-                            ),
-                            Stack(
-                              children: [
-                                Container(
-                                  width: 60,
-                                  height: 30,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(100),
-                                      border: Border.all(color: Colors.white)),
-                                ),
-                                AnimatedPositioned(
-                                    duration: const Duration(milliseconds: 150),
-                                    top: 2.3,
-                                    right: !isbrokable ? 32 : 3, // 32
-                                    child: Container(
-                                      width: 25,
-                                      height: 25,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(100),
-                                          color: !isbrokable
-                                              ? Colors.grey[400]
-                                              : Colors.white),
-                                    ))
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    GestureDetector(
-                      onTap: () {
-                        setState(() {
-                          isChange = !isChange;
-                        });
-                      },
-                      child: Container(
-                        padding: const EdgeInsets.symmetric(horizontal: 25),
-                        width: getPhoneWidth(context),
-                        color: Colors.transparent,
-                        height: 50,
-                        child: Row(
-                          mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                          children: [
-                            Text(
-                              "Nderrim",
-                              style: AppStyles.getHeaderNameText(
-                                  color: Colors.white, size: 18.0),
-                            ),
-                            Stack(
-                              children: [
-                                Container(
-                                  width: 60,
-                                  height: 30,
-                                  decoration: BoxDecoration(
-                                      borderRadius: BorderRadius.circular(100),
-                                      border: Border.all(color: Colors.white)),
-                                ),
-                                AnimatedPositioned(
-                                    duration: const Duration(milliseconds: 150),
-                                    top: 2.3,
-                                    right: !isChange ? 32 : 3, // 32
-                                    child: Container(
-                                      width: 25,
-                                      height: 25,
-                                      decoration: BoxDecoration(
-                                          borderRadius:
-                                              BorderRadius.circular(100),
-                                          color: !isChange
-                                              ? Colors.grey[400]
-                                              : Colors.white),
-                                    ))
-                              ],
-                            )
-                          ],
-                        ),
-                      ),
-                    ),
-                    Row(
-                      mainAxisAlignment:clientId.isEmpty ?  MainAxisAlignment.spaceEvenly:MainAxisAlignment.center,
-                      children: [
-                        clientId.isNotEmpty
-                            ? SizedBox()
-                            : Padding(
-                                padding: const EdgeInsets.symmetric(
-                                    horizontal: 0, vertical: 10),
-                                child: GestureDetector(
-                                  onTap: () {
-                                    showModalOne(
-                                        context,
-                                        Column(
-                                          mainAxisAlignment:
-                                              MainAxisAlignment.spaceBetween,
-                                          children: [
-                                            Column(
-                                              children: [
-                                                Text(
-                                                  "Deshironi te regjistroni bleresin e ri ?",
-                                                  style: AppStyles
-                                                      .getHeaderNameText(
-                                                          color: Colors
-                                                              .blueGrey[800],
-                                                          size: 17),
-                                                ),
-                                                const SizedBox(
-                                                  height: 10,
-                                                ),
-                                              ],
-                                            ),
-                                            Row(
-                                              mainAxisAlignment:
-                                                  MainAxisAlignment.spaceEvenly,
-                                              children: [
-                                                Container(
-                                                    height: 40,
-                                                    width:
-                                                        getPhoneWidth(context) /
-                                                                2 -
-                                                            80,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.blueGrey,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(100)),
-                                                    child: TextButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                        },
-                                                        child: Text(
-                                                          "Jo",
-                                                          style: AppStyles
-                                                              .getHeaderNameText(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 17),
-                                                        ))),
-                                                Container(
-                                                    height: 40,
-                                                    width:
-                                                        getPhoneWidth(context) /
-                                                                2 -
-                                                            80,
-                                                    decoration: BoxDecoration(
-                                                        color: Colors.blueGrey,
-                                                        borderRadius:
-                                                            BorderRadius
-                                                                .circular(100)),
-                                                    child: TextButton(
-                                                        onPressed: () {
-                                                          Navigator.pop(
-                                                              context);
-                                                          addBuyer();
-                                                        },
-                                                        child: Text(
-                                                          "Po",
-                                                          style: AppStyles
-                                                              .getHeaderNameText(
-                                                                  color: Colors
-                                                                      .white,
-                                                                  size: 17),
-                                                        ))),
-                                              ],
-                                            )
-                                          ],
-                                        ),
-                                        150.0);
                                   },
                                   child: Container(
-                                    width: getPhoneWidth(context) / 2 - 30,
-                                    height: 45,
+                                    width: 70,
+                                    height: 60,
                                     decoration: BoxDecoration(
-                                        borderRadius: BorderRadius.circular(20),
-                                        color: Colors.white),
-                                    child: Center(
-                                      child: Text(
-                                        "Klient i ri",
-                                        style: AppStyles.getHeaderNameText(
-                                            color: Colors.black, size: 15.0),
+                                        borderRadius: const BorderRadius.only(
+                                            topRight: Radius.circular(20)),
+                                        color: AppColors.bottomColorOne),
+                                    child: const Center(
+                                      child: Icon(
+                                        Icons.list,
+                                        color: Colors.white,
+                                        size: 35,
                                       ),
                                     ),
                                   ),
-                                )),
-                        Padding(
-                            padding: EdgeInsets.symmetric(
-                                horizontal: clientId.isEmpty ? 0 : 0),
-                            child: GestureDetector(
-                              onTap: () {
-                                showModalOne(
-                                    context,
-                                    Column(
-                                      mainAxisAlignment:
-                                          MainAxisAlignment.spaceBetween,
-                                      children: [
-                                        Column(
-                                          children: [
-                                            Text(
-                                              "Deshironi te vazhdoni ?",
-                                              style:
-                                                  AppStyles.getHeaderNameText(
-                                                      color:
-                                                          Colors.blueGrey[800],
-                                                      size: 17),
-                                            ),
-                                            const SizedBox(
-                                              height: 10,
-                                            ),
-                                          ],
-                                        ),
-                                        Row(
+                                )
+                              ],
+                            )),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: GestureDetector(
+                          onTap: () {
+                            if (shteti.text.isEmpty && shtetet.isNotEmpty) {
+                              setState(() {
+                                qyteti.text = "";
+                                oferta.text = "";
+                                shteti.text = shtetet[0];
+                                unit.text = njesite.getUnits().isEmpty
+                                    ? ""
+                                    : njesite.getUnits()[0].unitName!;
+                                unitId.text = njesite.getUnits().isEmpty
+                                    ? ""
+                                    : njesite.getUnits()[0].id!;
+                              });
+                            }
+                            setState(() {
+                              shtetiEmpty = false;
+                            });
+
+                            showModalBottomSheet(
+                                context: context,
+                                builder: (context) {
+                                  return SizedBox(
+                                    width: getPhoneWidth(context),
+                                    height: 200,
+                                    child: CupertinoPicker.builder(
+                                        itemExtent: 40,
+                                        scrollController: fixedScrollController,
+                                        onSelectedItemChanged: (value) {
+                                          setState(() {
+                                            shteti.text = shtetet[value];
+                                            qyteti.text = qytetet
+                                                .getCitiesByState(shteti.text)
+                                                .isEmpty
+                                                ? ""
+                                                : qytetet
+                                                .getCitiesByState(shteti.text)
+                                                .elementAt(0)
+                                                .name!;
+                                            oferta.text = ofertat
+                                                .getOfferByState(shteti.text)
+                                                .isEmpty
+                                                ? ""
+                                                : ofertat
+                                                .getOfferByState(shteti.text)
+                                                .elementAt(0)
+                                                .offerName!;
+                                            offerId.text = ofertat
+                                                .getOfferByState(shteti.text)
+                                                .isEmpty
+                                                ? ""
+                                                : ofertat
+                                                .getOfferByState(shteti.text)
+                                                .elementAt(0)
+                                                .id!;
+                                            unit.text = njesite.getUnits().isEmpty
+                                                ? ""
+                                                : njesite.getUnits()[0].unitName!;
+                                            unitId.text =
+                                            njesite.getUnits().isEmpty
+                                                ? ""
+                                                : njesite.getUnits()[0].id!;
+                                          });
+                                        },
+                                        itemBuilder: (context, index) {
+                                          return Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                            children: [
+                                              Text(shtetet[index]),
+                                            ],
+                                          );
+                                        },
+                                        childCount: shtetet.length),
+                                  );
+                                });
+                          },
+                          child: Container(
+                            width: getPhoneWidth(context),
+                            height: 50,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    topLeft: Radius.circular(20)),
+                                color: Colors.white),
+                            child: Row(
+                              children: [
+                                Text(
+                                  shteti.text.isEmpty ? "Shteti" : shteti.text,
+                                  style: AppStyles.getHeaderNameText(
+                                      color: shtetiEmpty
+                                          ? Colors.red
+                                          : Colors.grey[900],
+                                      size: 15.0),
+                                )
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: GestureDetector(
+                          onTap: () {
+                            if (unit.text.isEmpty &&
+                                njesite.getUnits().isNotEmpty) {
+                              setState(() {
+                                unit.text = njesite.getUnits()[0].unitName!;
+                                unitId.text = njesite.getUnits()[0].id!;
+                              });
+                            }
+                            setState(() {
+                              unitEmpty = false;
+                            });
+                            showModalBottomSheet(
+                                context: context,
+                                builder: (context) {
+                                  return SizedBox(
+                                    width: getPhoneWidth(context),
+                                    height: 200,
+                                    child: CupertinoPicker.builder(
+                                      itemExtent: 40,
+                                      onSelectedItemChanged: (value) {
+                                        setState(() {
+                                          unit.text =
+                                          njesite.getUnits()[value].unitName!;
+                                          unitId.text =
+                                          njesite.getUnits()[value].id!;
+                                        });
+                                      },
+                                      itemBuilder: (context, index) {
+                                        return Row(
                                           mainAxisAlignment:
-                                              MainAxisAlignment.spaceEvenly,
+                                          MainAxisAlignment.center,
                                           children: [
-                                            Container(
-                                                height: 40,
-                                                width:
-                                                    getPhoneWidth(context) / 2 -
-                                                        80,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.blueGrey,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            100)),
-                                                child: TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                    },
-                                                    child: Text(
-                                                      "Jo",
-                                                      style: AppStyles
-                                                          .getHeaderNameText(
-                                                              color:
-                                                                  Colors.white,
-                                                              size: 17),
-                                                    ))),
-                                            Container(
-                                                height: 40,
-                                                width:
-                                                    getPhoneWidth(context) / 2 -
-                                                        80,
-                                                decoration: BoxDecoration(
-                                                    color: Colors.blueGrey,
-                                                    borderRadius:
-                                                        BorderRadius.circular(
-                                                            100)),
-                                                child: TextButton(
-                                                    onPressed: () {
-                                                      Navigator.pop(context);
-                                                      newOrder();
-                                                    },
-                                                    child: Text(
-                                                      "Po",
-                                                      style: AppStyles
-                                                          .getHeaderNameText(
-                                                              color:
-                                                                  Colors.white,
-                                                              size: 17),
-                                                    ))),
+                                            Text(njesite
+                                                .getUnits()[index]
+                                                .unitName!),
                                           ],
-                                        )
-                                      ],
+                                        );
+                                      },
+                                      childCount: njesite.getUnits().length,
                                     ),
-                                    150.0);
-                              },
-                              child: Container(
-                                width: clientId.isNotEmpty
-                                    ? getPhoneWidth(context) - 50
-                                    : getPhoneWidth(context) / 2 - 30,
-                                height: 45,
-                                decoration: BoxDecoration(
-                                    borderRadius: BorderRadius.circular(20),
+                                  );
+                                });
+                          },
+                          child: Container(
+                            width: getPhoneWidth(context),
+                            height: 50,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    topLeft: Radius.circular(20)),
+                                color: Colors.white),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  unit.text.isEmpty ? "Njesia" : unit.text,
+                                  style: AppStyles.getHeaderNameText(
+                                      color: unitEmpty
+                                          ? Colors.red
+                                          : Colors.grey[900],
+                                      size: 15.0),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: GestureDetector(
+                          onTap: () {
+                            if (shteti.text.isNotEmpty &&
+                                qytetet
+                                    .getCitiesByState(shteti.text)
+                                    .isNotEmpty) {
+                              setState(() {
+                                qyteti.text = qytetet
+                                    .getCitiesByState(shteti.text)
+                                    .elementAt(0)
+                                    .name!;
+                              });
+                              setState(() {
+                                qytetiEmpty = false;
+                              });
+                              showModalBottomSheet(
+                                  context: context, isScrollControlled: true,
+                                  builder: (context) {
+                                    return StatefulBuilder(
+                                      builder: (context, setter){
+                                        _setter = setter;
+                                        return Padding(
+                                          padding: EdgeInsets.only(
+                                              bottom: MediaQuery.of(context).viewInsets.bottom),
+                                          child: Container(
+                                            width: getPhoneWidth(context),
+                                            height: 255,
+                                            child: SingleChildScrollView(
+                                              child: Column(
+                                                children: [
+                                                  Padding(
+                                                    padding: const EdgeInsets.symmetric(horizontal: 10,vertical: 4),
+                                                    child: SizedBox(
+                                                      width: getPhoneWidth(context),
+                                                      height: 45,
+                                                      child: TextField(
+                                                        onChanged: (value){
+                                                          var findIndex = 0;
+
+                                                          for(int i=0;i<qytetet.getCitiesByState(shteti.text).length;i++){
+                                                            if(qytetet.getCitiesByState(shteti.text).elementAt(i).name!.toLowerCase().contains(value.toLowerCase())){
+                                                              print("fined ${i}");
+                                                              _setter!((){
+                                                                fixedScrollController.jumpToItem(i);
+                                                              });
+                                                            }
+                                                          }
+
+                                                        },
+                                                        decoration: InputDecoration(
+                                                            border: InputBorder.none,
+                                                            enabledBorder: OutlineInputBorder(
+                                                                borderRadius: BorderRadius.circular(10),
+                                                                borderSide: BorderSide(color: Colors.grey[300]!)
+                                                            ),
+                                                            focusedBorder: OutlineInputBorder(
+                                                                borderRadius: BorderRadius.circular(10),
+                                                                borderSide: BorderSide(color: Colors.grey[300]!)
+                                                            ),
+                                                            contentPadding: EdgeInsets.symmetric(vertical: 3,horizontal: 15)
+                                                        ),
+                                                      ),),
+                                                  ),
+                                                  SizedBox(
+                                                    width: getPhoneWidth(context),
+                                                    height: 200,
+                                                    child: CupertinoPicker.builder(
+                                                      itemExtent: 40,scrollController: fixedScrollController,
+                                                      onSelectedItemChanged: (value) {
+                                                        setState(() {
+                                                          qyteti.text = qytetet
+                                                              .getCitiesByState(shteti.text)
+                                                              .elementAt(value)
+                                                              .name!;
+                                                        });
+                                                      },
+                                                      itemBuilder: (context, index) {
+                                                        return Row(
+                                                          mainAxisAlignment:
+                                                          MainAxisAlignment.center,
+                                                          children: [
+                                                            Text(qytetet
+                                                                .getCitiesByState(shteti.text)
+                                                                .elementAt(index)
+                                                                .name!),
+                                                          ],
+                                                        );
+                                                      },
+                                                      childCount: qytetet
+                                                          .getCitiesByState(shteti.text)
+                                                          .length,
+                                                    ),
+                                                  ),
+                                                ],
+                                              ),
+                                            ),
+                                          ),
+                                        );
+                                      },
+                                    );
+                                  });
+                            } else {
+                              showModalOne(
+                                  context,
+                                  Column(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          Text(
+                                            "Nuk keni zgjedhur shtetin!",
+                                            style: AppStyles.getHeaderNameText(
+                                                color: Colors.blueGrey[800],
+                                                size: 20),
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                              height: 40,
+                                              width:
+                                              getPhoneWidth(context) / 2 - 80,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.blueGrey,
+                                                  borderRadius:
+                                                  BorderRadius.circular(100)),
+                                              child: TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Text(
+                                                    "Largo",
+                                                    style: AppStyles
+                                                        .getHeaderNameText(
+                                                        color: Colors.white,
+                                                        size: 17),
+                                                  ))),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  150.0);
+                            }
+                          },
+                          child: Container(
+                            width: getPhoneWidth(context),
+                            height: 50,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    topLeft: Radius.circular(20)),
+                                color: Colors.white),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  qyteti.text.isEmpty ? "Qyteti" : qyteti.text,
+                                  style: AppStyles.getHeaderNameText(
+                                      color: qytetiEmpty
+                                          ? Colors.red
+                                          : Colors.grey[900],
+                                      size: 15.0),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: Column(
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Container(
+                                width: getPhoneWidth(context),
+                                height: 50,
+                                decoration: const BoxDecoration(
+                                    borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(20),
+                                        topLeft: Radius.circular(20)),
                                     color: Colors.white),
-                                child: Center(
-                                  child: Text(
-                                    "Regjistro porosine",
-                                    style: AppStyles.getHeaderNameText(
-                                        color: Colors.black, size: 15.0),
+                                child: TextField(
+                                  controller: qmimi,
+                                  keyboardType: const TextInputType.numberWithOptions(
+                                      decimal: true),
+                                  inputFormatters: [
+                                    FilteringTextInputFormatter.allow(
+                                        RegExp(r'^\d+\.?\d{0,2}'))
+                                  ],
+                                  onChanged: (value) {
+                                    setState(() {
+                                      if(sasia.text.isEmpty){
+                                        sasia.text = "1";
+                                      }
+                                      qmimiEmpty = false;
+                                    });
+                                  },
+                                  decoration: InputDecoration(
+                                      hintText: "Cmimi",
+                                      hintStyle: AppStyles.getHeaderNameText(
+                                          color: qmimiEmpty
+                                              ? Colors.red
+                                              : Colors.grey[900],
+                                          size: 15.0),
+                                      border: InputBorder.none,
+                                      enabledBorder: const OutlineInputBorder(
+                                        borderRadius: BorderRadius.only(
+                                            topRight: Radius.circular(20),
+                                            topLeft: Radius.circular(20)),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                      focusedBorder: const OutlineInputBorder(
+                                        borderRadius: BorderRadius.only(
+                                            topRight: Radius.circular(20),
+                                            topLeft: Radius.circular(20)),
+                                        borderSide: BorderSide(color: Colors.white),
+                                      ),
+                                      contentPadding: const EdgeInsets.symmetric(
+                                          horizontal: 20, vertical: 10)),
+                                )),
+                            Text("  Qmimi kalkulohet sipas sasise, por mund edhe te ndrrohet.",style: AppStyles.getHeaderNameText(color:Colors.white,size: 12.0),)
+                          ],
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 11,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: Container(
+                            width: getPhoneWidth(context),
+                            height: 50,
+                            decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    topLeft: Radius.circular(20)),
+                                color: Colors.white),
+                            child: TextField(
+                              controller: sasia,
+                              keyboardType: TextInputType.numberWithOptions(signed: true,decimal: true),
+                              inputFormatters: <TextInputFormatter>[
+                                FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                              ],
+                              onChanged: (value) {
+                                if(value.isNotEmpty){
+                                  setState(() {
+                                    products.getProducts().forEach((element) {
+
+                                      if(element.id == productId){
+                                        if(element.qty < int.parse(value)){
+                                          sasia.text = element.qty.toString();
+                                        }
+                                        else{
+                                          sasia.text = value;
+                                        }
+                                      }
+                                    });
+                                    sasia.selection = TextSelection.fromPosition(TextPosition(offset: sasia.text.length));
+
+
+                                  });
+                                }
+
+                              },
+                              decoration: InputDecoration(
+                                  hintText: "Sasia",
+                                  hintStyle: AppStyles.getHeaderNameText(
+                                      color: sasiaEmpty
+                                          ? Colors.red
+                                          : Colors.grey[900],
+                                      size: 15.0),
+                                  border: InputBorder.none,
+                                  enabledBorder: const OutlineInputBorder(
+                                    borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(20),
+                                        topLeft: Radius.circular(20)),
+                                    borderSide: BorderSide(color: Colors.white),
+                                  ),
+                                  focusedBorder: const OutlineInputBorder(
+                                    borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(20),
+                                        topLeft: Radius.circular(20)),
+                                    borderSide: BorderSide(color: Colors.white),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 10)),
+                            )),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: GestureDetector(
+                          onTap: () {
+                            print(ofertat.getOffers().length);
+                            if (shteti.text.isNotEmpty &&
+                                ofertat.getOfferByState(shteti.text).isNotEmpty) {
+                              setState(() {
+                                oferta.text = ofertat
+                                    .getOfferByState(shteti.text)
+                                    .elementAt(0)
+                                    .offerName!;
+                                offerId.text = ofertat
+                                    .getOfferByState(shteti.text)
+                                    .elementAt(0)
+                                    .id!;
+                              });
+                              setState(() {
+                                ofertaEmpty = false;
+                              });
+                              showModalBottomSheet(
+                                  context: context,
+                                  builder: (context) {
+                                    return SizedBox(
+                                      width: getPhoneWidth(context),
+                                      height: 200,
+                                      child: CupertinoPicker.builder(
+                                        itemExtent: 40,
+                                        onSelectedItemChanged: (value) {
+                                          setState(() {
+                                            oferta.text = ofertat
+                                                .getOfferByState(shteti.text)
+                                                .elementAt(value)
+                                                .offerName!;
+                                            offerId.text = ofertat
+                                                .getOfferByState(shteti.text)
+                                                .elementAt(value)
+                                                .id!;
+                                          });
+                                        },
+                                        itemBuilder: (context, index) {
+                                          return Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.center,
+                                            children: [
+                                              Text(ofertat
+                                                  .getOfferByState(shteti.text)
+                                                  .elementAt(index)
+                                                  .offerName!),
+                                            ],
+                                          );
+                                        },
+                                        childCount: ofertat
+                                            .getOfferByState(shteti.text)
+                                            .length,
+                                      ),
+                                    );
+                                  });
+                            }
+                            else {
+                              showModalOne(
+                                  context,
+                                  Column(
+                                    mainAxisAlignment:
+                                    MainAxisAlignment.spaceBetween,
+                                    children: [
+                                      Column(
+                                        children: [
+                                          Text(
+                                            "Nuk keni zgjedhur shtetin!",
+                                            style: AppStyles.getHeaderNameText(
+                                                color: Colors.blueGrey[800],
+                                                size: 20),
+                                          ),
+                                          const SizedBox(
+                                            height: 10,
+                                          ),
+                                        ],
+                                      ),
+                                      Row(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.center,
+                                        children: [
+                                          Container(
+                                              height: 40,
+                                              width:
+                                              getPhoneWidth(context) / 2 - 80,
+                                              decoration: BoxDecoration(
+                                                  color: Colors.blueGrey,
+                                                  borderRadius:
+                                                  BorderRadius.circular(100)),
+                                              child: TextButton(
+                                                  onPressed: () {
+                                                    Navigator.pop(context);
+                                                  },
+                                                  child: Text(
+                                                    "Largo",
+                                                    style: AppStyles
+                                                        .getHeaderNameText(
+                                                        color: Colors.white,
+                                                        size: 17),
+                                                  ))),
+                                        ],
+                                      )
+                                    ],
+                                  ),
+                                  150.0);
+                            }
+                          },
+                          child: Container(
+                            width: getPhoneWidth(context),
+                            height: 50,
+                            padding: const EdgeInsets.symmetric(
+                                horizontal: 20, vertical: 10),
+                            decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    topLeft: Radius.circular(20)),
+                                color: Colors.white),
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.start,
+                              children: [
+                                Text(
+                                  oferta.text.isEmpty ? "Oferta" : oferta.text,
+                                  style: AppStyles.getHeaderNameText(
+                                      color: ofertaEmpty
+                                          ? Colors.red
+                                          : Colors.grey[900],
+                                      size: 15.0),
+                                ),
+                              ],
+                            ),
+                          ),
+                        ),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: Container(
+                            width: getPhoneWidth(context),
+                            height: 50,
+                            decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    topLeft: Radius.circular(20)),
+                                color: Colors.white),
+                            child: TextField(
+                              controller: adresa,
+                              onChanged: (value) {
+                                setState(() {
+                                  adresaEmpty = false;
+                                });
+                              },
+                              decoration: InputDecoration(
+                                  hintText: "Adresa",
+                                  hintStyle: AppStyles.getHeaderNameText(
+                                      color: adresaEmpty
+                                          ? Colors.red
+                                          : Colors.grey[900],
+                                      size: 15.0),
+                                  border: InputBorder.none,
+                                  enabledBorder: const OutlineInputBorder(
+                                    borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(20),
+                                        topLeft: Radius.circular(20)),
+                                    borderSide: BorderSide(color: Colors.white),
+                                  ),
+                                  focusedBorder: const OutlineInputBorder(
+                                    borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(20),
+                                        topLeft: Radius.circular(20)),
+                                    borderSide: BorderSide(color: Colors.white),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 10)),
+                            )),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: Container(
+                            width: getPhoneWidth(context),
+                            height: 50,
+                            decoration: const BoxDecoration(
+                                borderRadius: BorderRadius.only(
+                                    topRight: Radius.circular(20),
+                                    topLeft: Radius.circular(20)),
+                                color: Colors.white),
+                            child: TextField(
+                              controller: nrTel,
+                              keyboardType: TextInputType.numberWithOptions(signed: true,decimal: true),
+                              inputFormatters: <TextInputFormatter>[
+                                FilteringTextInputFormatter.allow(RegExp(r'[0-9]')),
+                              ],
+                              onChanged: (value) {
+                                setState(() {
+                                  nrTelEmpty = false;
+                                });
+                              },
+                              decoration: InputDecoration(
+                                  hintText: "Numri tel.",
+                                  hintStyle: AppStyles.getHeaderNameText(
+                                      color: nrTelEmpty
+                                          ? Colors.red
+                                          : Colors.grey[900],
+                                      size: 15.0),
+                                  border: InputBorder.none,
+                                  enabledBorder: const OutlineInputBorder(
+                                    borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(20),
+                                        topLeft: Radius.circular(20)),
+                                    borderSide: BorderSide(color: Colors.white),
+                                  ),
+                                  focusedBorder: const OutlineInputBorder(
+                                    borderRadius: BorderRadius.only(
+                                        topRight: Radius.circular(20),
+                                        topLeft: Radius.circular(20)),
+                                    borderSide: BorderSide(color: Colors.white),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 10)),
+                            )),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      Padding(
+                        padding: const EdgeInsets.symmetric(horizontal: 25),
+                        child: Container(
+                            width: getPhoneWidth(context),
+                            decoration: BoxDecoration(
+                                borderRadius: BorderRadius.circular(20),
+                                color: Colors.white),
+                            child: TextField(
+                              controller: pershkrimi,
+                              decoration: InputDecoration(
+                                  hintText: "Pershkrimi",
+                                  hintStyle: AppStyles.getHeaderNameText(
+                                      color: Colors.grey[900], size: 15.0),
+                                  border: InputBorder.none,
+                                  enabledBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                    borderSide:
+                                    const BorderSide(color: Colors.white),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderRadius: BorderRadius.circular(20),
+                                    borderSide:
+                                    const BorderSide(color: Colors.white),
+                                  ),
+                                  contentPadding: const EdgeInsets.symmetric(
+                                      horizontal: 20, vertical: 10)),
+                            )),
+                      ),
+                      const SizedBox(
+                        height: 15,
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isOpen = !isOpen;
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 25),
+                          width: getPhoneWidth(context),
+                          color: Colors.transparent,
+                          height: 50,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Te hapet",
+                                style: AppStyles.getHeaderNameText(
+                                    color: Colors.white, size: 18.0),
+                              ),
+                              Stack(
+                                children: [
+                                  Container(
+                                    width: 60,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(100),
+                                        border: Border.all(color: Colors.white)),
+                                  ),
+                                  AnimatedPositioned(
+                                      duration: const Duration(milliseconds: 150),
+                                      top: 2.3,
+                                      right: !isOpen ? 32 : 3, // 32
+                                      child: Container(
+                                        width: 25,
+                                        height: 25,
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                            BorderRadius.circular(100),
+                                            color: !isOpen
+                                                ? Colors.grey[400]
+                                                : Colors.white),
+                                      ))
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isbrokable = !isbrokable;
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 25),
+                          width: getPhoneWidth(context),
+                          color: Colors.transparent,
+                          height: 50,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "E thyeshme",
+                                style: AppStyles.getHeaderNameText(
+                                    color: Colors.white, size: 18.0),
+                              ),
+                              Stack(
+                                children: [
+                                  Container(
+                                    width: 60,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(100),
+                                        border: Border.all(color: Colors.white)),
+                                  ),
+                                  AnimatedPositioned(
+                                      duration: const Duration(milliseconds: 150),
+                                      top: 2.3,
+                                      right: !isbrokable ? 32 : 3, // 32
+                                      child: Container(
+                                        width: 25,
+                                        height: 25,
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                            BorderRadius.circular(100),
+                                            color: !isbrokable
+                                                ? Colors.grey[400]
+                                                : Colors.white),
+                                      ))
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      GestureDetector(
+                        onTap: () {
+                          setState(() {
+                            isChange = !isChange;
+                          });
+                        },
+                        child: Container(
+                          padding: const EdgeInsets.symmetric(horizontal: 25),
+                          width: getPhoneWidth(context),
+                          color: Colors.transparent,
+                          height: 50,
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              Text(
+                                "Nderrim",
+                                style: AppStyles.getHeaderNameText(
+                                    color: Colors.white, size: 18.0),
+                              ),
+                              Stack(
+                                children: [
+                                  Container(
+                                    width: 60,
+                                    height: 30,
+                                    decoration: BoxDecoration(
+                                        borderRadius: BorderRadius.circular(100),
+                                        border: Border.all(color: Colors.white)),
+                                  ),
+                                  AnimatedPositioned(
+                                      duration: const Duration(milliseconds: 150),
+                                      top: 2.3,
+                                      right: !isChange ? 32 : 3, // 32
+                                      child: Container(
+                                        width: 25,
+                                        height: 25,
+                                        decoration: BoxDecoration(
+                                            borderRadius:
+                                            BorderRadius.circular(100),
+                                            color: !isChange
+                                                ? Colors.grey[400]
+                                                : Colors.white),
+                                      ))
+                                ],
+                              )
+                            ],
+                          ),
+                        ),
+                      ),
+                      Row(
+                        mainAxisAlignment:clientId.isEmpty ?  MainAxisAlignment.spaceEvenly:MainAxisAlignment.center,
+                        children: [
+                          clientId.isNotEmpty
+                              ? const SizedBox()
+                              : Padding(
+                              padding: const EdgeInsets.symmetric(
+                                  horizontal: 0, vertical: 10),
+                              child: GestureDetector(
+                                onTap: () {
+                                  showModalOne(
+                                      context,
+                                      Column(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Column(
+                                            children: [
+                                              Text(
+                                                "Deshironi te regjistroni bleresin e ri ?",
+                                                style: AppStyles
+                                                    .getHeaderNameText(
+                                                    color: Colors
+                                                        .blueGrey[800],
+                                                    size: 17),
+                                              ),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              Container(
+                                                  height: 40,
+                                                  width:
+                                                  getPhoneWidth(context) /
+                                                      2 -
+                                                      80,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.blueGrey,
+                                                      borderRadius:
+                                                      BorderRadius
+                                                          .circular(100)),
+                                                  child: TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(
+                                                            context);
+                                                      },
+                                                      child: Text(
+                                                        "Jo",
+                                                        style: AppStyles
+                                                            .getHeaderNameText(
+                                                            color: Colors
+                                                                .white,
+                                                            size: 17),
+                                                      ))),
+                                              Container(
+                                                  height: 40,
+                                                  width:
+                                                  getPhoneWidth(context) /
+                                                      2 -
+                                                      80,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.blueGrey,
+                                                      borderRadius:
+                                                      BorderRadius
+                                                          .circular(100)),
+                                                  child: TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(
+                                                            context);
+                                                        addBuyer();
+                                                      },
+                                                      child: Text(
+                                                        "Po",
+                                                        style: AppStyles
+                                                            .getHeaderNameText(
+                                                            color: Colors
+                                                                .white,
+                                                            size: 17),
+                                                      ))),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                      150.0);
+                                },
+                                child: Container(
+                                  width: getPhoneWidth(context) / 2 - 30,
+                                  height: 45,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: Colors.white),
+                                  child: requestingClient ? Center(child: SizedBox(width: 25,height: 25,child: CircularProgressIndicator(strokeWidth: 1.4,))):Center(
+                                    child: Text(
+                                      "Klient i ri",
+                                      style: AppStyles.getHeaderNameText(
+                                          color: Colors.black, size: 15.0),
+                                    ),
                                   ),
                                 ),
-                              ),
-                            )),
-                      ],
-                    ),
-                    SizedBox(
-                      height: 50,
-                    ),
-                  ],
+                              )),
+                          Padding(
+                              padding: EdgeInsets.symmetric(
+                                  horizontal: clientId.isEmpty ? 0 : 0),
+                              child: GestureDetector(
+                                onTap: () {
+                                  showModalOne(
+                                      context,
+                                      Column(
+                                        mainAxisAlignment:
+                                        MainAxisAlignment.spaceBetween,
+                                        children: [
+                                          Column(
+                                            children: [
+                                              Text(
+                                                "Deshironi te vazhdoni ?",
+                                                style:
+                                                AppStyles.getHeaderNameText(
+                                                    color:
+                                                    Colors.blueGrey[800],
+                                                    size: 17),
+                                              ),
+                                              const SizedBox(
+                                                height: 10,
+                                              ),
+                                            ],
+                                          ),
+                                          Row(
+                                            mainAxisAlignment:
+                                            MainAxisAlignment.spaceEvenly,
+                                            children: [
+                                              Container(
+                                                  height: 40,
+                                                  width:
+                                                  getPhoneWidth(context) / 2 -
+                                                      80,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.blueGrey,
+                                                      borderRadius:
+                                                      BorderRadius.circular(
+                                                          100)),
+                                                  child: TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                      },
+                                                      child: Text(
+                                                        "Jo",
+                                                        style: AppStyles
+                                                            .getHeaderNameText(
+                                                            color:
+                                                            Colors.white,
+                                                            size: 17),
+                                                      ))),
+                                              Container(
+                                                  height: 40,
+                                                  width:
+                                                  getPhoneWidth(context) / 2 -
+                                                      80,
+                                                  decoration: BoxDecoration(
+                                                      color: Colors.blueGrey,
+                                                      borderRadius:
+                                                      BorderRadius.circular(
+                                                          100)),
+                                                  child: TextButton(
+                                                      onPressed: () {
+                                                        Navigator.pop(context);
+                                                        newOrder();
+                                                      },
+                                                      child: Text(
+                                                        "Po",
+                                                        style: AppStyles
+                                                            .getHeaderNameText(
+                                                            color:
+                                                            Colors.white,
+                                                            size: 17),
+                                                      ))),
+                                            ],
+                                          )
+                                        ],
+                                      ),
+                                      150.0);
+                                },
+                                child: Container(
+                                  width: clientId.isNotEmpty
+                                      ? getPhoneWidth(context) - 50
+                                      : getPhoneWidth(context) / 2 - 30,
+                                  height: 45,
+                                  decoration: BoxDecoration(
+                                      borderRadius: BorderRadius.circular(20),
+                                      color: Colors.white),
+                                  child: requesting ? Center(child: SizedBox(width: 25,height: 25,child: CircularProgressIndicator(strokeWidth: 1.4,))):Center(
+                                    child: Text(
+                                      "Regjistro porosine",
+                                      style: AppStyles.getHeaderNameText(
+                                          color: Colors.black, size: 15.0),
+                                    ),
+                                  ),
+                                ),
+                              )),
+                        ],
+                      ),
+                      const SizedBox(
+                        height:50,
+                      ),
+                    ],
+                  ),
                 ),
-              ),
+              ),)
             ],
           ),
         ],

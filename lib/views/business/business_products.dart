@@ -1,4 +1,4 @@
-import 'package:flutter/cupertino.dart';
+
 import 'package:flutter/material.dart';
 import 'package:hejposta/controllers/product_controller.dart';
 import 'package:hejposta/my_code.dart';
@@ -24,9 +24,7 @@ class _BusinessProductsState extends State<BusinessProducts> {
 
   getProducts() {
     ProductController productController = ProductController();
-    productController.getProducts(context).then((value) {
-      print(value);
-    });
+    productController.getProducts(context);
   }
 
   @override
@@ -61,7 +59,7 @@ class _BusinessProductsState extends State<BusinessProducts> {
               Positioned(
                   child: SizedBox(
                 width: getPhoneWidth(context),
-                height: getPhoneHeight(context) - 65,
+                height: getPhoneHeight(context) -  MediaQuery.of(context).viewPadding.top,
                 child: Image.asset(
                   "assets/icons/map-icon.png",
                   color: AppColors.mapColorFirst,
@@ -71,7 +69,7 @@ class _BusinessProductsState extends State<BusinessProducts> {
               )),
               SizedBox(
                 width: getPhoneWidth(context),
-                height: getPhoneHeight(context) - 66,
+                height: getPhoneHeight(context) -  MediaQuery.of(context).viewPadding.top,
                 child: Column(
                   children: [
                     Container(
@@ -112,7 +110,9 @@ class _BusinessProductsState extends State<BusinessProducts> {
                       child: GestureDetector(
                         onTap: () {
                           Navigator.of(context).push(MaterialPageRoute(
-                              builder: (_) => const ProductRegister()));
+                              builder: (_) => const ProductRegister())).then((value){
+                                getProducts();
+                          });
                         },
                         child: Container(
                           width: getPhoneWidth(context),
@@ -134,7 +134,7 @@ class _BusinessProductsState extends State<BusinessProducts> {
                     const SizedBox(
                       height: 10,
                     ),
-                    Container(
+                    SizedBox(
                       height: getPhoneHeight(context) -
                           MediaQuery.of(context).viewPadding.top -
                           130,
@@ -159,28 +159,26 @@ class _BusinessProductsState extends State<BusinessProducts> {
                                       padding: const EdgeInsets.all(4.0),
                                       child: GestureDetector(
                                         onTap: (){
-                                          Navigator.of(context).push(MaterialPageRoute(builder: (_) => SingleProduct(productModel: products.getProducts()[index],)));
+                                          Navigator.of(context).push(MaterialPageRoute(builder: (_) => SingleProduct(productModel: products.getProducts()[index],))).then((value){
+                                            getProducts();
+                                          });
                                         },
                                         child: Container(
                                           width: getPhoneWidth(context) / 3 - 20,
                                           height: getPhoneWidth(context) / 3 - 20,
                                           decoration: BoxDecoration(
                                             color: Colors.white,
-                                            borderRadius:
-                                                BorderRadius.circular(10),
+                                            borderRadius: BorderRadius.circular(10),
                                           ),
                                           padding: const EdgeInsets.all(2.4),
                                           child: Container(
-                                            width:
-                                                getPhoneWidth(context) / 3 - 20,
-                                            height:
-                                                getPhoneWidth(context) / 3 - 20,
+                                            width: getPhoneWidth(context) / 3 - 20,
+                                            height: getPhoneWidth(context) / 3 - 20,
                                             decoration: BoxDecoration(
-                                              image: DecorationImage(
+                                              image: DecorationImage(fit: BoxFit.cover,
                                                   image: NetworkImage(
-                                                      "${imgUrl}/images/${product.image}")),
-                                              borderRadius:
-                                                  BorderRadius.circular(10),
+                                                      "$imgUrl/images/${product.image}")),
+                                              borderRadius: BorderRadius.circular(10),
                                             ),
                                           ),
                                         ),

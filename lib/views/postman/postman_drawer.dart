@@ -3,14 +3,11 @@ import 'package:flutter/material.dart';
 import 'package:hejposta/local_storage/current_user_storage.dart';
 import 'package:hejposta/my_code.dart';
 import 'package:hejposta/providers/general_provider.dart';
-import 'package:hejposta/settings/app_colors.dart';
 import 'package:hejposta/settings/app_styles.dart';
-import 'package:hejposta/shortcuts/modals.dart';
 import 'package:hejposta/views/postman/expences.dart';
 import 'package:hejposta/views/postman/finances.dart';
 import 'package:hejposta/views/postman/postman_profile.dart';
 import 'package:hejposta/views/postman/statistics.dart';
-import 'package:hejposta/views/postman/messages.dart';
 import 'package:hejposta/views/postman/rules.dart';
 import 'package:hejposta/views/postman/zones.dart';
 import 'package:provider/provider.dart';
@@ -25,7 +22,6 @@ class PostmanDrawer extends StatefulWidget {
 class _PostmanDrawerState extends State<PostmanDrawer> {
   @override
   Widget build(BuildContext context) {
-    var generalProvider = Provider.of<GeneralProvider>(context, listen: true);
     return Container(
       color: Colors.transparent,
       width: getPhoneWidth(context),
@@ -63,7 +59,7 @@ class _PostmanDrawerState extends State<PostmanDrawer> {
                     child: Container(
                       color: Colors.transparent,
                       width: getPhoneWidth(context)/2 - 22,
-                      padding: const EdgeInsets.only(left: 10),
+                      padding: const EdgeInsets.only(left: 4),
                       child: Row(
                         children: [
                           SizedBox(width: 45,child: Image.asset("assets/icons/1.png")),
@@ -100,7 +96,7 @@ class _PostmanDrawerState extends State<PostmanDrawer> {
                       Navigator.of(context).push(MaterialPageRoute(builder: (_) => const Expences()));
                     },
                     child: Container(
-                      padding: const EdgeInsets.only(left: 10),
+                      padding: const EdgeInsets.only(left: 4),
                       color: Colors.transparent,
                       width: getPhoneWidth(context)/2 - 22,
                       child: Row(
@@ -140,7 +136,7 @@ class _PostmanDrawerState extends State<PostmanDrawer> {
                       Navigator.of(context).push(MaterialPageRoute(builder: (_) => const Rules()));
                     },
                     child: Container(
-                      padding: const EdgeInsets.only(left: 10),
+                      padding: const EdgeInsets.only(left: 4),
                       color: Colors.transparent,
                       width: getPhoneWidth(context)/2 - 22,
                       child: Row(
@@ -244,7 +240,7 @@ class _PostmanDrawerState extends State<PostmanDrawer> {
                       currentUserStorage.removeUser(context);
                     },
                     child: Container(
-                      padding: const EdgeInsets.only(left: 10),
+                      padding: const EdgeInsets.only(left: 4),
                       color: Colors.transparent,
                       width: getPhoneWidth(context)/2 - 22,
                       child: Row(
@@ -259,10 +255,7 @@ class _PostmanDrawerState extends State<PostmanDrawer> {
                 ],
               ),
               const SizedBox(height: 25,),
-              Row(
-                children: [
-                ],
-              ),
+
             ],
           ),
 

@@ -4,6 +4,7 @@ import 'package:flutter_secure_storage/flutter_secure_storage.dart';
 import 'package:hejposta/models/order_model.dart';
 import 'package:hejposta/providers/postman_order_provider.dart';
 import 'package:hejposta/providers/user_provider.dart';
+// ignore: depend_on_referenced_packages
 import 'package:http/http.dart' as http;
 import 'package:hejposta/shortcuts/urls.dart';
 import 'package:provider/provider.dart';
@@ -37,7 +38,6 @@ class PostmanOrdersController{
         orderProvider.addOrders([]);
       }
     }catch(e){
-      print(e);
       orderProvider.addOrders([]);
 
     }
@@ -66,7 +66,7 @@ class PostmanOrdersController{
       }
     }
     catch(e){
-      print(e);
+      return ;
     }
 
     orderProvider.addZone("all");
@@ -100,7 +100,7 @@ class PostmanOrdersController{
     var user = Provider.of<UserProvider>(context, listen: false);
     var orderProvider = Provider.of<PostmanOrderProvider>(context, listen: false);
     await Future.delayed(const Duration(milliseconds: 100));
-    orderProvider.startFetchingPendingOrders();
+
     AndroidOptions getAndroidOptions() => const AndroidOptions( encryptedSharedPreferences: true);
     final storage = FlutterSecureStorage(aOptions: getAndroidOptions(),);
     var token = await storage.read(key: "hejposta_2-token");
@@ -126,7 +126,7 @@ class PostmanOrdersController{
       return "NotValid";
     }
     else{
-      return "failed";
+      return body['message'];
     }
   }
 
@@ -134,7 +134,7 @@ class PostmanOrdersController{
     var user = Provider.of<UserProvider>(context, listen: false);
     var orderProvider = Provider.of<PostmanOrderProvider>(context, listen: false);
     await Future.delayed(const Duration(milliseconds: 100));
-    orderProvider.startFetchingPendingOrders();
+
     AndroidOptions getAndroidOptions() => const AndroidOptions( encryptedSharedPreferences: true);
     final storage = FlutterSecureStorage(aOptions: getAndroidOptions(),);
     var token = await storage.read(key: "hejposta_2-token");
@@ -152,8 +152,11 @@ class PostmanOrdersController{
     if(body['message'] == "success"){
       return "success";
     }
+    else if(body['message'] == "Not Found"){
+      return "NotFound";
+    }
     else{
-      return "failed";
+      return body['message'];
     }
   }
 
@@ -161,7 +164,7 @@ class PostmanOrdersController{
     var user = Provider.of<UserProvider>(context, listen: false);
     var orderProvider = Provider.of<PostmanOrderProvider>(context, listen: false);
     await Future.delayed(const Duration(milliseconds: 100));
-    orderProvider.startFetchingPendingOrders();
+
     AndroidOptions getAndroidOptions() => const AndroidOptions( encryptedSharedPreferences: true);
     final storage = FlutterSecureStorage(aOptions: getAndroidOptions(),);
     var token = await storage.read(key: "hejposta_2-token");
@@ -209,11 +212,9 @@ class PostmanOrdersController{
 
     var response = await http.put(url,headers: _requestHeaders,body: jsonEncode(map));
     var body = jsonDecode(response.body);
-    print(body);
-    print(body['message']);
-    print(body['message'].toString() == "success");
-    print("============");
+
     if(body['message'] == "success"){
+
       orderProvider.setOrderDelivered(id);
       return "success";
     }
@@ -224,7 +225,7 @@ class PostmanOrdersController{
       return "NotValid";
     }
     else{
-      return "failed";
+      return body['message'];
     }
   }
 
@@ -246,11 +247,9 @@ class PostmanOrdersController{
     map['postman'] = user.getUser().fullName;
     map['arsyeja'] = reason;
     map['comment'] = comment.toString().isEmpty ? "": comment.toString();
-    print(reason);
-    print(comment);
     var response = await http.put(url,headers: _requestHeaders,body: jsonEncode(map));
     var body = jsonDecode(response.body);
-    print(body);
+  print(body);
     if(body['message'] == "success"){
       orderProvider.setOrderRejected(id);
       return "success";
@@ -262,7 +261,7 @@ class PostmanOrdersController{
       return "NotValid";
     }
     else{
-      return "failed";
+      return body['message'];
     }
   }
 
@@ -284,11 +283,8 @@ class PostmanOrdersController{
     map['postman'] = user.getUser().fullName;
     map['arsyeja'] = reason;
     map['comment'] = comment.toString().isEmpty ? "": comment.toString();
-    print(reason);
-    print(comment);
     var response = await http.put(url,headers: _requestHeaders,body: jsonEncode(map));
     var body = jsonDecode(response.body);
-    print(body);
     if(body['message'] == "success"){
       orderProvider.setOrderReturned(id);
       return "success";
@@ -300,14 +296,48 @@ class PostmanOrdersController{
       return "NotValid";
     }
     else{
-      return "failed";
+      return body['message'];
+    }
+  }
+
+  Future<String> ngarkoPorosinePerDergese(context,id,zone) async {
+    var user = Provider.of<UserProvider>(context, listen: false);
+    var orderProvider = Provider.of<PostmanOrderProvider>(context, listen: false);
+    await Future.delayed(const Duration(milliseconds: 100));
+
+    AndroidOptions getAndroidOptions() => const AndroidOptions( encryptedSharedPreferences: true);
+    final storage = FlutterSecureStorage(aOptions: getAndroidOptions(),);
+    var token = await storage.read(key: "hejposta_2-token");
+
+    var url = Uri.parse(ngarkoPerDergeseUrl);
+    _requestHeaders['Authorization'] = "Bearer $token";
+    _requestHeaders['User-ID'] = user.getUser().postmanId;
+
+    var map = <String, dynamic>{};
+    map['order_number'] = id;
+    map['postman'] = user.getUser().fullName;
+    // map['zone'] = zone;
+    var response = await http.put(url,headers: _requestHeaders,body: jsonEncode(map));
+    var body = jsonDecode(response.body);
+    print(body);
+    if(body['status'] == "success"){
+      orderProvider.setOrderLoaded(id);
+      return "success";
+    }
+    else if(body['status'] == "NotFound"){
+      return "NotFound";
+    }
+    else if(body['status'] == "NotValid"){
+      return "NotValid";
+    }
+    else{
+      return body['status'];
     }
   }
 
 
   Future<String> filterByZone(context,zone) async {
     var user = Provider.of<UserProvider>(context, listen: false);
-    var orderProvider = Provider.of<PostmanOrderProvider>(context, listen: false);
     await Future.delayed(const Duration(milliseconds: 100));
 
     AndroidOptions getAndroidOptions() => const AndroidOptions( encryptedSharedPreferences: true);
